@@ -1,0 +1,15 @@
+{
+  "name" : "exelonbackendbotapi",
+  "version" : "1.0",
+  "description" : "API to call exelon services",
+  "main" : "exelonbackendbotapi.js",
+  "oracleMobile" : {
+    "dependencies" : {
+      "apis" : {"/mobile/custom/exelonbackendbotapi": "1.0"  },
+      "connectors" : { }
+    },
+    "configuration" : {
+      "node" : "6.10"
+    }
+  }
+}
