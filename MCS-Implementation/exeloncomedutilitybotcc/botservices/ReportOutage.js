@@ -20,7 +20,7 @@ module.exports = {
 
     invoke: function invoke(conversation, done) {
       var PhoneNumber = conversation.properties().PhoneNumber;
-	  var accountNumber = = conversation.properties().AccountNumber;
+	  var accountNumber = conversation.properties().AccountNumber;
 	  console.log("in report outage custom component account number is :" + accountNumber);
 	  var mobileSdk = conversation.oracleMobile;
       var getOutageStatus = ExelonService.getOutageStatus(mobileSdk, accountNumber, PhoneNumber);
