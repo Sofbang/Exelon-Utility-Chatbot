@@ -1,0 +1,727 @@
+{
+  "name" : "BGEUtility",
+  "description" : "BG&E Chatbot",
+  "type" : "USER",
+  "intents" : [ {
+    "name" : "OutageStatus",
+    "paramsList" : [ {
+      "entity" : {
+        "name" : "PHONE_NUMBER",
+        "type" : "SYSTEM",
+        "enumValues" : null,
+        "ruleParameters" : null,
+        "parentEntity" : null,
+        "patternExpression" : null
+      },
+      "name" : "PHONE_NUMBER",
+      "isRequired" : true,
+      "required" : true
+    } ],
+    "type" : "NLPIntent"
+  }, {
+    "name" : "End",
+    "paramsList" : [ ],
+    "type" : "NLPIntent"
+  }, {
+    "name" : "ReportOutage",
+    "paramsList" : [ {
+      "entity" : {
+        "name" : "PHONE_NUMBER",
+        "type" : "SYSTEM",
+        "enumValues" : null,
+        "ruleParameters" : null,
+        "parentEntity" : null,
+        "patternExpression" : null
+      },
+      "name" : "PHONE_NUMBER",
+      "isRequired" : true,
+      "required" : true
+    } ],
+    "type" : "NLPIntent"
+  }, {
+    "name" : "StartBot",
+    "paramsList" : [ ],
+    "type" : "NLPIntent"
+  } ],
+  "entities" : [ {
+    "name" : "OutageType",
+    "type" : "ENUMVALUES",
+    "enumValues" : "Full{full:all out:everything gone},Partial{partial:not all}",
+    "ruleParameters" : null,
+    "parentEntity" : null,
+    "patternExpression" : null
+  }, {
+    "name" : "AccountType",
+    "type" : "ENUMVALUES",
+    "enumValues" : "Phone Number{contact number:phone:cell number:number},Account Number{account:account number}",
+    "ruleParameters" : null,
+    "parentEntity" : null,
+    "patternExpression" : null
+  }, {
+    "name" : "OutageOptions",
+    "type" : "ENUMVALUES",
+    "enumValues" : "Check Outage Status{check outage:outage status:check status for outage},Report An Outage{report outage:report status for outage:report for outage}",
+    "ruleParameters" : null,
+    "parentEntity" : null,
+    "patternExpression" : null
+  } ],
+  "dialog" : [ {
+    "metadata" : {
+      "platformVersion" : "1.0"
+    },
+    "main" : true,
+    "name" : "BGEUtility",
+    "context" : {
+      "variables" : {
+        "greeting" : "string",
+        "name" : "string",
+        "outageOptions" : "OutageOptions",
+        "phoneNumber" : "PHONE_NUMBER",
+        "accountNumber" : "NUMBER",
+        "outageType" : "OutageType",
+        "outageStatus" : "string",
+        "selectionType" : "string",
+        "outageStatusMessage" : "string",
+        "selectionAccountType" : "string",
+        "verifiedAddressResult" : "string",
+        "accountType" : "AccountType",
+        "ifAddressExist" : "string",
+        "choices" : "string",
+        "accounts" : "string",
+        "counter" : "string",
+        "testResult" : "string",
+        "iResult" : "nlpresult"
+      }
+    },
+    "states" : {
+      "intent" : {
+        "component" : "System.Intent",
+        "properties" : {
+          "variable" : "iResult",
+          "confidenceThreshold" : 0.4
+        },
+        "transitions" : {
+          "actions" : {
+            "StartBot" : "startBot",
+            "OutageStatus" : "outageStatus",
+            "ReportOutage" : "reportOutage",
+            "End" : "end",
+            "unresolvedIntent" : "unresolved"
+          }
+        }
+      },
+      "startBot" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${outageOptions.type.enumValues}",
+          "prompt" : "Hello, how may I help you today?\nYou can Check Outage Status or Report an Outage. Please pick one option.",
+          "variable" : "outageOptions"
+        },
+        "transitions" : {
+          "next" : "switchOutageOptions"
+        }
+      },
+      "switchOutageOptions" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "outageOptions",
+          "values" : [ "Check Outage Status", "Report An Outage" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "Check Outage Status" : "outageStatus",
+            "Report An Outage" : "reportOutage"
+          }
+        }
+      },
+      "outageStatus" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.phoneNumber",
+          "value" : "null"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "askPhoneNumber1",
+            "notequal" : "printOutage1"
+          }
+        }
+      },
+      "askPhoneNumber1" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "Let's see what's going on with your service.  What is the primary phone number associated with your account?",
+          "variable" : "phoneNumber"
+        },
+        "transitions" : {
+          "next" : "printOutage"
+        }
+      },
+      "printOutage" : {
+        "component" : "OutageStatus",
+        "properties" : {
+          "PhoneNumber" : "${phoneNumber.value.completeNumber}"
+        },
+        "transitions" : {
+          "next" : "checkAddressExistence"
+        }
+      },
+      "printOutage1" : {
+        "component" : "OutageStatus",
+        "properties" : {
+          "PhoneNumber" : "${user.phoneNumber.value}"
+        },
+        "transitions" : {
+          "next" : "checkAddressExistence"
+        }
+      },
+      "checkAddressExistence" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "ifAddressExist",
+          "values" : [ "yes", "no" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "yes" : "showAssociatedAccounts",
+            "no" : "noAddressFound"
+          }
+        }
+      },
+      "showAssociatedAccounts" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "addressType",
+          "values" : [ "Single", "Multiple" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "Single" : "singleAddressAccount",
+            "Multiple" : "multipleAddressAccount"
+          }
+        }
+      },
+      "noAddressFound" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${accountType.type.enumValues}",
+          "prompt" : "I’m sorry, but I don't find an account associated with that phone number. Do you have another phone number or the account number available?",
+          "variable" : "selectedAccountType"
+        },
+        "transitions" : {
+          "next" : "selectedAccount"
+        }
+      },
+      "selectedAccount" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "selectedAccountType",
+          "values" : [ "Phone Number", "Account Number" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "Phone Number" : "linkedViaPhoneNumber",
+            "Account Number" : "linkedViaAccountNumber"
+          }
+        }
+      },
+      "linkedViaPhoneNumber" : {
+        "component" : "OutageStatus",
+        "properties" : {
+          "prompt" : "Great. What is the primary phone number?",
+          "PhoneNumber" : "${phoneNumber.value.completeNumber}"
+        },
+        "transitions" : {
+          "next" : "checkAddressExistence"
+        }
+      },
+      "linkedViaAccountNumber" : {
+        "component" : "OutageStatus",
+        "properties" : {
+          "prompt" : "Great. What is the account number?",
+          "AccountNumber" : "${accountNumber.value}"
+        },
+        "transitions" : {
+          "next" : "checkAddressExistence"
+        }
+      },
+      "singleAddressAccount" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${choices}",
+          "prompt" : "${singleAddressInfo}",
+          "variable" : "verifiedAddressResult"
+        },
+        "transitions" : {
+          "next" : "selectionAccountForSingleAddress"
+        }
+      },
+      "selectionAccountForSingleAddress" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "verifiedAddressResult",
+          "value" : "yes"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "test",
+            "notequal" : "end"
+          }
+        }
+      },
+      "multipleAddressAccount" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${accounts}",
+          "prompt" : "My records indicate that there are multiple addresses associated with the phone number provided. Please select the correct address:",
+          "variable" : "selectionAccountType"
+        },
+        "transitions" : {
+          "next" : "selectionAccountForMultiAddress"
+        }
+      },
+      "selectionAccountForMultiAddress" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "selectionAccountType",
+          "value" : "null"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "end",
+            "notequal" : "test"
+          }
+        }
+      },
+      "test" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "outageStatus",
+          "values" : [ "true", "false" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "true" : "alreadyReportedOutage",
+            "false" : "reportOutage"
+          }
+        }
+      },
+      "alreadyReportedOutage" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : " ${outageStatusMessage}"
+        },
+        "transitions" : {
+          "return" : "alreadyReportedOutage"
+        }
+      },
+      "reportOutage" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.phoneNumber",
+          "value" : "null"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "printReport1",
+            "notequal" : "askOutageType"
+          }
+        }
+      },
+      "printReport1" : {
+        "component" : "ReportOutage",
+        "properties" : {
+          "PhoneNumber" : "${user.phoneNumber.value}",
+          "AccNumber" : "${user.accountNumber.value}"
+        },
+        "transitions" : {
+          "return" : "printReport1"
+        }
+      },
+      "askOutageType" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${outageType.type.enumValues}",
+          "prompt" : "Great, let's get that reported. Is it a full outage or partial outage?",
+          "variable" : "outageType"
+        },
+        "transitions" : {
+          "next" : "printReportOutage"
+        }
+      },
+      "printReportOutage" : {
+        "component" : "ReportOutage",
+        "properties" : {
+          "PhoneNumber" : "${user.phoneNumber.value}",
+          "AccNumber" : "${accountNumber.value}"
+        },
+        "transitions" : {
+          "return" : "printReportOutage"
+        }
+      },
+      "resolvePhone" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "phoneNumber",
+          "value" : "${iResult.value.entityMatches['PHONE_NUMBER'][0]}"
+        },
+        "transitions" : { }
+      },
+      "clearPhone" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "Come back anytime!"
+        },
+        "transitions" : {
+          "return" : "clearPhone"
+        }
+      },
+      "end" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "Come back anytime!"
+        },
+        "transitions" : {
+          "return" : "end"
+        }
+      },
+      "unresolved" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "counter",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "unresolvedIntentOutput"
+          }
+        }
+      },
+      "callCustCare" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : " Please visit us at bge.com/contactus or you can call us at 1-800-685-0123 for further support."
+        },
+        "transitions" : {
+          "return" : "callCustCare"
+        }
+      },
+      "unresolvedIntentOutput" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${outageOptions.type.enumValues}",
+          "prompt" : "I’m sorry, but I’m unavailable to assist you at this time. You can Check Outage Status or Report an Outage.\nPlease pick one option.",
+          "variable" : "outageOptions"
+        },
+        "transitions" : {
+          "next" : "switchOutageOptions"
+        }
+      }
+    }
+  } ],
+  "trainingDataList" : [ {
+    "sentence" : "Is there an outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Is there an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My electricity is out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Check my outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Check my Outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Do we have an Outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Do we have an outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Do we have an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will my power be back?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will my power be back",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "outage status",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will my power be restored?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you tell me outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the outage status?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "OUT",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "It’s dark in here",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Out lights are out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Black out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No Power",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no power",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no lights",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Lights out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power on",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power back on",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power on now",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "close",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I am all done for now",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "not right now",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I am done for now",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "not right now",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "thank you",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "thanks",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "thats it",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "thats it for now",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "end",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "nothing",
+    "intent" : "End",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I have an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I would like to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I don’t have electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I don’t have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I do not have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My power is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage for 9176789111",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage for phone number 4904861189",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My power is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No electricity in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello BG&E",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "BG&E App",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "BG&E app",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey ",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey you there ?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Bot",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  } ],
+  "channels" : [ {
+    "name" : "System_Bot_Test",
+    "description" : "Used by the BOT test feature. If it is disabled, the test UI will not work for this BOT.",
+    "enabled" : true,
+    "config" : {
+      "type" : "test"
+    }
+  } ],
+  "settings" : {
+    "createdOn" : "2017-11-03T05:51:56.999Z",
+    "updatedOn" : "2017-11-03T05:51:56.999Z",
+    "links" : null,
+    "settings" : {
+      "Multistage_Pipeline" : true,
+      "Verbose_Output" : false,
+      "Result_Size" : 10,
+      "Pipeline_Output_Size" : 100
+    }
+  }
+}
