@@ -14,8 +14,10 @@ module.exports = function(service) {
 	service.get('/mobile/custom/exelonbackendbotapi/outage/query', function(req,res) {
 		var PhoneNumber = req.query["PhoneNumber"];
 		var AccountNumber = req.query["AccountNumber"];
+		var opco = req.query["opco"];
 		var pdata = {}
 		console.log("account number :" +AccountNumber);
+		console.log("opco: "+opco);
 		if(AccountNumber != undefined && AccountNumber !="${accountNumber.value.number}" ){
 			pdata = {
 			"account_number": AccountNumber
@@ -44,7 +46,7 @@ module.exports = function(service) {
 		require("./node_modules/request-debug")(request);
 
 		request({
-			url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon/comed/outage/query',
+			url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon/'+opco+'/outage/query',
 			method: "POST",
 			json: true,
 			timeout: 200000,
@@ -61,19 +63,22 @@ module.exports = function(service) {
 		
 		var PhoneNumber = req.query["PhoneNumber"];
 		var AccountNumber = req.query["AccountNumber"];
+		var outageType = req.query["OutageType"];
+		var opco = req.query["opco"];
 		console.log("PhoneNumber: "+PhoneNumber);
 		console.log("account_number: "+AccountNumber);
+		console.log("opco: "+opco);
 		var pdata = {}
 		
-		if(AccountNumber){
+		if(AccountNumber != undefined && AccountNumber !="${accountNumber.value.number}" ){
 			pdata = {
 			"account_number": AccountNumber,
-			"outage_issue": "allOut"
+			"outage_issue": outageType
 			};
 		}else{
 			pdata = {
 			"phone": PhoneNumber,
-			"outage_issue": "allOut"
+			"outage_issue": outageType
 			};
 		}
 
@@ -93,7 +98,7 @@ module.exports = function(service) {
 		require("./node_modules/request-debug")(request);
 
 		request({
-			url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon/comed/outage',
+			url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon/'+opco+'/outage',
 			method: "POST",
 			json: true,
 			timeout: 200000,

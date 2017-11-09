@@ -7,12 +7,13 @@ var logger = log4js.getLogger();
 
 var moment = require('moment');
 var Promise = require('bluebird');
+var opco = 'comed';
 
 module.exports = {
     getOutageStatus: function getOutageStatus(mobileSdk, accountNumber, PhoneNumber) {
 		console.log("getoutageStatus :"+ PhoneNumber);
 		console.log("getoutageStatus11 :"+ accountNumber);
-			return mobileSdk.custom.exelonbackendbotapi.get('outage/query?PhoneNumber='+ PhoneNumber+'&AccountNumber='+ accountNumber, null, null).then(
+			return mobileSdk.custom.exelonbackendbotapi.get('outage/query?PhoneNumber='+ PhoneNumber+'&AccountNumber='+ accountNumber+'&opco='+ opco, null, null).then(
 			function (result) {
 				var response = JSON.parse(result.result);
 				console.log('response:::::: '+JSON.stringify(response));
@@ -25,8 +26,9 @@ module.exports = {
 				return error;
 			});		
     },
-    reportOutage: function reportOutage(mobileSdk, accountNumber, PhoneNumber) {
-        return mobileSdk.custom.exelonbackendbotapi.get('outage?PhoneNumber='+ PhoneNumber+'&AccountNumber='+ accountNumber, null, null).then(
+    reportOutage: function reportOutage(mobileSdk, accountNumber, PhoneNumber, OutageType) {
+		console.log("getoutageStatus11 in report outage :"+ accountNumber);
+        return mobileSdk.custom.exelonbackendbotapi.get('outage?PhoneNumber='+ PhoneNumber+'&AccountNumber='+ accountNumber+'&OutageType='+ OutageType+'&opco='+ opco, null, null).then(
 		function (result) {
 			var response = JSON.parse(result.result);
 			console.log('GET Report Outage Success: ' + JSON.stringify(response));

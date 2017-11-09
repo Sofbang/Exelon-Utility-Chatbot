@@ -42,7 +42,7 @@ module.exports = {
 				conversation.variable("user.phoneNumber" , PhoneNumber);
 				conversation.variable("user.accountNumber" , AccountNumber);
 				var accountAddressArr = [];
-				console.info('data.maskedAddress' + data.maskedAddress);
+				console.info('data.maskedAddress' + data[0].maskedAddress);
 					
 				if(data[0].maskedAddress)
 					{
