@@ -15,19 +15,25 @@ module.exports = function (service) {
         var PhoneNumber = req.query["PhoneNumber"];
         var AccountNumber = req.query["AccountNumber"];
         var opco = req.query["opco"];
+        var newAccountNumber = req.query["newAccountNumber"];
         var pdata = {}
-        console.log("account number :" + AccountNumber);
-        console.log("opco: " + opco);
-        if (AccountNumber != undefined && AccountNumber != "${accountNumber.value.number}") {
+
+        if (newAccountNumber != "undefined") {
             pdata = {
-                "account_number": AccountNumber
-            };
-        } else {
-            pdata = {
-                "phone": PhoneNumber
+                "account_number": newAccountNumber
             };
         }
-
+        else {
+            if (AccountNumber != undefined && AccountNumber != "${accountNumber.value.number}") {
+                pdata = {
+                    "account_number": AccountNumber
+                };
+            } else {
+                pdata = {
+                    "phone": PhoneNumber
+                };
+            }
+        }
 
         console.log("pdata = " + JSON.stringify(pdata));
 
