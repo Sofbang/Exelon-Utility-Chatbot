@@ -11,34 +11,34 @@ var opco = 'comed';
 
 module.exports = {
     getOutageStatus: function getOutageStatus(mobileSdk, accountNumber, PhoneNumber) {
-		console.log("getoutageStatus :"+ PhoneNumber);
-		console.log("getoutageStatus11 :"+ accountNumber);
-			return mobileSdk.custom.exelonbackendbotapi.get('outage/query?PhoneNumber='+ PhoneNumber+'&AccountNumber='+ accountNumber+'&opco='+ opco, null, null).then(
-			function (result) {
-				var response = JSON.parse(result.result);
-				console.log('response:::::: '+JSON.stringify(response));
-				logger.debug('GET OutageStatus Success: ' + JSON.stringify(response));
-				return response;
-			},function(error) {
-				var error = JSON.parse(error.error);
-				console.log('error:::::: '+JSON.stringify(error));
-				logger.debug('GET OutageStatus Error: ' + JSON.stringify(error));
-				return error;
-			});		
+        console.log("getoutageStatus :" + PhoneNumber);
+        console.log("getoutageStatus11 :" + accountNumber);
+        return mobileSdk.custom.exelonbackendbotapi.get('outage/query?PhoneNumber=' + PhoneNumber + '&AccountNumber=' + accountNumber + '&opco=' + opco, null, null).then(
+        function (result) {
+            var response = JSON.parse(result.result);
+            console.log('response:::::: ' + JSON.stringify(response));
+            logger.debug('GET OutageStatus Success: ' + JSON.stringify(response));
+            return response;
+        }, function (error) {
+            var error = JSON.parse(error.error);
+            console.log('error:::::: ' + JSON.stringify(error));
+            logger.debug('GET OutageStatus Error: ' + JSON.stringify(error));
+            return error;
+        });
     },
     reportOutage: function reportOutage(mobileSdk, accountNumber, PhoneNumber, OutageType) {
-		console.log("getoutageStatus11 in report outage :"+ accountNumber);
-        return mobileSdk.custom.exelonbackendbotapi.get('outage?PhoneNumber='+ PhoneNumber+'&AccountNumber='+ accountNumber+'&OutageType='+ OutageType+'&opco='+ opco, null, null).then(
+        console.log("getoutageStatus11 in report outage :" + accountNumber);
+        return mobileSdk.custom.exelonbackendbotapi.get('outage?PhoneNumber=' + PhoneNumber + '&AccountNumber=' + accountNumber + '&OutageType=' + OutageType + '&opco=' + opco, null, null).then(
 		function (result) {
-			var response = JSON.parse(result.result);
-			console.log('GET Report Outage Success: ' + JSON.stringify(response));
-			logger.debug('GET Report Outage Success: ' + JSON.stringify(response));
-			return response;
-		},function(error) {
-			var error = JSON.parse(error.error);
-			console.log('GET Report Outage Error: ' + JSON.stringify(error));
-			logger.debug('GET Report Outage Error: ' + JSON.stringify(error));
-			return error;
+		    var response = JSON.parse(result.result);
+		    console.log('GET Report Outage Success: ' + JSON.stringify(response));
+		    logger.debug('GET Report Outage Success: ' + JSON.stringify(response));
+		    return response;
+		}, function (error) {
+		    var error = JSON.parse(error.error);
+		    console.log('GET Report Outage Error: ' + JSON.stringify(error));
+		    logger.debug('GET Report Outage Error: ' + JSON.stringify(error));
+		    return error;
 		});
     }
 };
