@@ -31,6 +31,7 @@ module.exports = {
             OutageType = 'partOut';
         }
 
+        console.log("in report outage custom component phone number is :" + PhoneNumber);
         console.log("in report outage custom component account number is :" + AccountNumber);
         console.log("in report outage custom componentoutage typer is :" + OutageType);
         var mobileSdk = conversation.oracleMobile;

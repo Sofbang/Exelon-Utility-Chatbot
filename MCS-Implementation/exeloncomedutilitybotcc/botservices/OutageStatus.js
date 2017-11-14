@@ -2,6 +2,7 @@
 
 var log4js = require('log4js');
 var logger = log4js.getLogger();
+var Promise = require('bluebird');
 
 var ExelonService = require('./ExelonService');
 
@@ -31,32 +32,42 @@ module.exports = {
             console.log(response);
             if (response.success) {
                 console.log("after if success: " + JSON.stringify(response));
-                conversation.variable("addressFound", "yes")
+                conversation.variable("addressFound", "yes");
                 var data = response.data;
                 if (data.length > 1 && data.length <= 3) {
+                    var count = 0;
+                    var promiseArr = [];
                     for (var k in data) {
                         newAccountNumber = data[k].accountNumber;
                         console.log("newAccountNumber " + k + ':' + newAccountNumber);
                         AccountNumber = "";
                         PhoneNumber = "";
                         getOutageStatus = ExelonService.getOutageStatus(mobileSdk, AccountNumber, PhoneNumber, newAccountNumber);
-                        getOutageStatus.then(function (res) {
-                            if (res.success) {
-                                newMaskedAddress.push(res.data[0].maskedAddress);
-                                console.log("newData in if success in the loop at outageStatus :" + newMaskedAddress);
-                                conversation.variable("accountsOptions", newMaskedAddress.toString());
-                                conversation.variable("numberOfAccount", 'multiple');
-                                conversation.variable("setAddress", 'My records indicate that there are multiple addresses associated with the phone number provided. Please select the correct address:');
-                            }
-                            else {
-                                logger.debug('getOutageStatus: outage status request failed!');
-                                conversation.variable("addressFound", "no");
-                                conversation.variable("noAddressFoundMessage", "I’m sorry, but I am unable to find an account associated with that phone number.\nDo you have another phone number or the account number available?");
-                                conversation.transition();
-                                done();
-                            }
-                        });
+                        promiseArr.push(getOutageStatus);
+                        console.log("promiseArr :" + promiseArr)
                     }
+                    Promise.all(promiseArr).then(function (allResult) {
+                        console.log("allResult : " + allResult);
+                        for (var i in allResult) {
+                            console.log("allResult " + i + " :" + JSON.stringify(allResult[i]));
+                            var res = allResult[i];
+                            if (res.success) {
+                                var address = res.data[0].maskedAddress;
+                                newMaskedAddress.push(address);
+                                count++;
+                                console.log("address: " + address + " and count is: " + count);
+                            }
+                        }
+                        conversation.variable("numberOfAccount", 'multiple');
+                        conversation.variable("accountsOptions", newMaskedAddress.toString());
+                        conversation.transition('setVariableValues');
+                        done();
+                    }).catch(function (err) {
+                        console.log("err : " + err);
+                        logger.debug('getOutageStatus: outage status request failed!');
+                        conversation.transition();
+                        done();
+                    });
                 }
                 else if (data.length == 1) {
                     conversation.variable("numberOfAccount", 'single');
