@@ -2,6 +2,7 @@
 
 var log4js = require('log4js');
 var logger = log4js.getLogger();
+var moment = require('moment');
 
 var ExelonService = require('./ExelonService');
 
@@ -40,8 +41,8 @@ module.exports = {
         .then(function (response) {
             console.log(response);
             if (response.success) {
-
-                conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
+                console.log(response.data.etr);
+                conversation.variable("outageReportProgress", 'Thank you for reporting your outage. I currently estimate your power will be restored by '+moment(response.data.etr).format("MM, DD, YYYY")+' at '+moment(response.data.etr).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
             } else {
                 logger.debug('reportOutage: report outage failed!');
                 conversation.variable("outageReportProgress", 'Sorry, Outage reporting could not be done');

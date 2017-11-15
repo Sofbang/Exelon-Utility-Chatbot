@@ -1,6 +1,6 @@
 {
   "name": "exelonBGEutilitybotcc",
-  "version": "1.0",
+  "version": "1.1.0",
   "description": "custom component used by Exelon BGE utility bot",
   "main": "exelonBGEutilitybotcc.js",
   "repository": {},
