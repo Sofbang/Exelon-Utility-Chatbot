@@ -1,6 +1,6 @@
 {
   "name": "exeloncomedutilitybotcc",
-  "version": "1.0",
+  "version": "0.0.1",
   "description": "custom component used by Exelon Comed utility bot",
   "main": "exeloncomedutilitybotcc.js",
   "repository": {},
