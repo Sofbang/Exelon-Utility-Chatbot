@@ -2,6 +2,7 @@
 
 var log4js = require('log4js');
 var logger = log4js.getLogger();
+var moment = require('moment');
 
 var ExelonService = require('./ExelonService');
 
@@ -40,11 +41,19 @@ module.exports = {
         .then(function (response) {
             console.log(response);
             if (response.success) {
-
+                console.log(response.data.etr);
                 conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
-            } else {
+                if(response.data.etr){
+                    conversation.variable("provideETR", 'As of '+moment().format("hh:mm a")+' on '+moment().format("MM/DD/YYYY") +' I see that there is a power outage in your area. The cause of the outage is under investigation and I apologize for any inconvenience. I currently estimate your power will be restored by '+moment(response.data.etr).format("MM, DD, YYYY")+' at '+moment(response.data.etr).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
+                }
+                else{
+                    conversation.variable("provideETR", 'As of '+moment().format("hh:mm a")+' on '+moment().format("MM/DD/YYYY") +' I see that there is a power outage in your area. The cause of the outage is under investigation and I apologize for any inconvenience. I am currently in the process of estimating when your service will be restored. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
+                }
+            } 
+            else {
                 logger.debug('reportOutage: report outage failed!');
                 conversation.variable("outageReportProgress", 'Sorry, Outage reporting could not be done');
+                conversation.variable("provideETR", 'Error in processing your request . Please try again after sometime');
             }
             conversation.transition();
             done();

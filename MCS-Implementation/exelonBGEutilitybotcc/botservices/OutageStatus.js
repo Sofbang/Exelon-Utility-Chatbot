@@ -47,7 +47,7 @@ module.exports = {
                     if(response.success){
                         console.log("after success in multiple address if condition :"+JSON.stringify(response));
                         conversation.variable("setStatus", response.data[0].status);
-                        conversation.variable("setOutageReported", 'As of '+moment(response.data[0].ETR).format("hh:mm a")+' on '+moment(response.data[0].ETR).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("MM, DD, YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                        conversation.variable("setOutageReported", 'As of '+moment().format("hh:mm a")+' on '+moment().format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("MM, DD, YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
                         conversation.variable("selectedAccountNumber",selectedAccountNumber);
                         conversation.variable("setETR", response.data[0].ETR);
                         conversation.transition('setVariableValues');
@@ -113,7 +113,7 @@ module.exports = {
                         if (data[0].maskedAddress) {
                             conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
                             conversation.variable("setStatus", data[0].status);
-                            conversation.variable("setOutageReported", 'As of '+moment(data[0].ETR).format("hh:mm a")+' on '+moment(data[0].ETR).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                            conversation.variable("setOutageReported", 'As of '+moment().format("hh:mm a")+' on '+moment().format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
                             conversation.variable("setETR", data[0].ETR);
                             conversation.transition('setVariableValues');
                             done();
