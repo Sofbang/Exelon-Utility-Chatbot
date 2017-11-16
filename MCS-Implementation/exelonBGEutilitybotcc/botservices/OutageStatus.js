@@ -35,6 +35,7 @@ module.exports = {
         var newMaskedAddress = [];
 
         if(SelectedMaskedAddress && MultipleAccountInfo){
+            console.log("conversation bot id :" + JSON.stringify(conversation) + conversation.channelType());
                 console.log("in if loop selectedMaskedAddress is : "+SelectedMaskedAddress+ " and all info is :{"+JSON.parse(MultipleAccountInfo)+"}");
                 var userAccounts = JSON.parse(MultipleAccountInfo);
                 var selectedAccountNumber = userAccounts.filter(function(userAccount){
@@ -48,7 +49,11 @@ module.exports = {
                     if(response.success){
                         console.log("after success in multiple address if condition :"+JSON.stringify(response));
                         conversation.variable("setStatus", response.data[0].status);
-                        conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("MM, DD, YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                        if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
+                            conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("Do MMMM YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("Do MMMM YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                        }else{
+                            conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("MM, DD, YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                        }
                         conversation.variable("selectedAccountNumber",selectedAccountNumber);
                         conversation.variable("setETR", response.data[0].ETR);
                         conversation.transition('setVariableValues');
@@ -114,7 +119,12 @@ module.exports = {
                         if (data[0].maskedAddress) {
                             conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
                             conversation.variable("setStatus", data[0].status);
-                            conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                            if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
+                                conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("Do MMMM YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("Do MMMM YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                            }
+                            else{
+                                conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                            }
                             conversation.variable("setETR", data[0].ETR);
                             conversation.transition('setVariableValues');
                             done();

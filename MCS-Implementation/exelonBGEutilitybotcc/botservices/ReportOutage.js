@@ -42,7 +42,12 @@ module.exports = {
             console.log(response);
             if (response.success) {
                 console.log(response.data.etr);
-                conversation.variable("outageReportProgress", 'Thank you for reporting your outage. I currently estimate your power will be restored by '+moment(response.data.etr).format("MM, DD, YYYY")+' at '+moment(response.data.etr).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
+                    conversation.variable("outageReportProgress", 'Thank you for reporting your outage. I currently estimate your power will be restored by '+moment(response.data.etr).format("Do MMMM YYYY")+' at '+moment(response.data.etr).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                }
+                else{
+                    conversation.variable("outageReportProgress", 'Thank you for reporting your outage. I currently estimate your power will be restored by '+moment(response.data.etr).format("MM, DD, YYYY")+' at '+moment(response.data.etr).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                }
             } else {
                 logger.debug('reportOutage: report outage failed!');
                 conversation.variable("outageReportProgress", "I'm not able to complete your request right now. Please try again later.");
