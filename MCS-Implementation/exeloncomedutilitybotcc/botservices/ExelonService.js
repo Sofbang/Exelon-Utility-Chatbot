@@ -5,7 +5,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var log4js = require('log4js');
 var logger = log4js.getLogger();
 
-var moment = require('moment');
+var moment = require('moment-timezone');
 var Promise = require('bluebird');
 var opco;
 

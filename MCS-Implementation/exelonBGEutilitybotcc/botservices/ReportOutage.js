@@ -45,7 +45,7 @@ module.exports = {
                 conversation.variable("outageReportProgress", 'Thank you for reporting your outage. I currently estimate your power will be restored by '+moment(response.data.etr).format("MM, DD, YYYY")+' at '+moment(response.data.etr).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
             } else {
                 logger.debug('reportOutage: report outage failed!');
-                conversation.variable("outageReportProgress", 'Sorry, Outage reporting could not be done');
+                conversation.variable("outageReportProgress", "I'm not able to complete your request right now. Please try again later.");
             }
             conversation.transition();
             done();

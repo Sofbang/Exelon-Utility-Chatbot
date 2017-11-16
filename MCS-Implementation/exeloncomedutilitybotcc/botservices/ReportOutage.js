@@ -2,7 +2,9 @@
 
 var log4js = require('log4js');
 var logger = log4js.getLogger();
-var moment = require('moment');
+var moment = require('moment-timezone');
+var myTimeZone = "America/Chicago"
+
 
 var ExelonService = require('./ExelonService');
 
@@ -44,16 +46,15 @@ module.exports = {
                 console.log(response.data.etr);
                 conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
                 if(response.data.etr){
-                    conversation.variable("provideETR", 'As of '+moment().format("hh:mm a")+' on '+moment().format("MM/DD/YYYY") +' I see that there is a power outage in your area. The cause of the outage is under investigation and I apologize for any inconvenience. I currently estimate your power will be restored by '+moment(response.data.etr).format("MM, DD, YYYY")+' at '+moment(response.data.etr).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
+                    conversation.variable("provideETR", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. The cause of the outage is under investigation and I apologize for any inconvenience. I currently estimate your power will be restored by '+moment(response.data.etr).format("MM, DD, YYYY")+' at '+moment(response.data.etr).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
                 }
                 else{
-                    conversation.variable("provideETR", 'As of '+moment().format("hh:mm a")+' on '+moment().format("MM/DD/YYYY") +' I see that there is a power outage in your area. The cause of the outage is under investigation and I apologize for any inconvenience. I am currently in the process of estimating when your service will be restored. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
+                    conversation.variable("provideETR", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. The cause of the outage is under investigation and I apologize for any inconvenience. I am currently in the process of estimating when your service will be restored. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
                 }
             } 
             else {
                 logger.debug('reportOutage: report outage failed!');
-                conversation.variable("outageReportProgress", 'Sorry, Outage reporting could not be done');
-                conversation.variable("provideETR", 'Error in processing your request . Please try again after sometime');
+                conversation.variable("outageReportProgress", "I'm not able to complete your request right now. Please try again later.");
             }
             conversation.transition();
             done();
