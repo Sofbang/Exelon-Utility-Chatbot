@@ -49,7 +49,7 @@ function messageToBot(channelUrl, channelSecretKey, userId, inMsg, callback) {
   }
 */
 function messageToBotWithProperties(channelUrl, channelSecretKey, userId, inMsg, additionalProperties, callback) {
-    console.log("Send this message to bot:");
+    console.log("Send this message to bot1:");
     var outMsg = {
         userId: userId,
         text: inMsg
@@ -57,16 +57,16 @@ function messageToBotWithProperties(channelUrl, channelSecretKey, userId, inMsg,
     if (additionalProperties){
       _.extend(outMsg, additionalProperties);
     }
-    console.log("Send this message to bot:", outMsg);
+    console.log("Send this message to bot2:", outMsg);
     const body = Buffer.from(JSON.stringify(outMsg), 'utf8');
 
-    console.log("Send this message to bot:", body);
+    console.log("Send this message to bot3:", body);
     const headers = {};
     headers['Content-Type'] = 'application/json; charset=utf-8';
     headers['X-Hub-Signature'] = buildSignatureHeader(body, channelSecretKey);
 
-    console.log("Send this message to bot:", headers);
-	
+    console.log("Send this message to bot4:", headers);
+
     request.post({
         uri: channelUrl,
         headers: headers,
@@ -76,7 +76,7 @@ function messageToBotWithProperties(channelUrl, channelSecretKey, userId, inMsg,
         followOriginalHttpMethod: true,
         callback: function(err, response, body) {
             if (!err) {
-                console.log(response);
+                console.log("response: "+JSON.stringify(response));
                 callback(null);
             } else {
                 console.log(response);
