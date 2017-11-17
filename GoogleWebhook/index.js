@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const webhookUtil = require('webhook/webhookUtil.js');
+const webhookUtil = require('./webhook/webhookUtil.js');
 const bodyParser = require('body-parser');
 
 const restService = express();
@@ -18,15 +18,30 @@ restService.use(bodyParser.json());
     };
 
 restService.post('/echo', function(req, res) {
-	console.log(JSON.stringify(req.body));
+	
     var speech = req.body.result && req.body.result.parameters && req.body.result.parameters.echoText ? req.body.result.parameters.echoText : "Seems like some problem. Speak again."
+	
+	  var additionalProperties = 
+	  {
+          "userProfile": 
+		  {
+          "clientType": "google"
+          }
+      };
+                webhookUtil.messageToBotWithProperties(metadata.channelUrl, metadata.channelSecretKey, '123433', speech, additionalProperties, function(err) {
+						
+                    if (err) {
+                        console.log("Failed sending message to Bot" + err);
+                        console.log("response" + JSON.stringify(res));
+                    }
+                });
     return res.json({
-        speech: 'Simarpreet '+speech,
+        speech: 'Simarpreet '+err,
         displayText: speech,
         source: 'google-webhook'
     });
 });
 
-restService.listen((process.env.PORT || 8000), function() {
+restService.listen((process.env.PORT || 9100), function() {
     console.log("Server up and listening");
 });
