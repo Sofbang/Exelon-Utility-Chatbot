@@ -14,7 +14,7 @@ restService.use(bodyParser.urlencoded({
 restService.use(bodyParser.json());
 var metadata = {
 	channelSecretKey: 'VD7RHEyN4Qi73BH3MYI8f0wWpfDYBkkp',
-	channelUrl: 'https://sfbdemo3.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/C800CBDA-7ACC-4CDA-8E78-E9CF1CDDB1F3'
+	channelUrl: 'https://sfbdemo3.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/83A843A8-27A0-4811-8A2F-396E91FBDFCF'
 };
 var speech;
 
@@ -37,6 +37,17 @@ console.log('google speech '+speech);
 		}
 		else {
 			console.log("success");
+			return res.json({
+					speech: 'Simarpreet '+speech,
+					displayText: speech,
+					source: 'google-webhook',
+					followupEvent: {
+					  name: 'customEvent',
+					  data: {
+						 test:'test param'
+					  }
+					}
+	});
 		}
 	});
 });
