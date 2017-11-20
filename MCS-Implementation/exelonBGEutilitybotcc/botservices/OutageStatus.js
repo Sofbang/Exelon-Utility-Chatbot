@@ -58,7 +58,6 @@ module.exports = {
                         conversation.variable("setETR", response.data[0].ETR);
                         conversation.transition('setVariableValues');
                         done();
-
                     }else{
                         console.log("after error in multiple address else condition :"+JSON.stringify(response));
                         conversation.variable("noAddressFoundMessage", "I’m sorry, but I am unable to find an account associated with that phone number.\nDo you have another phone number or the account number available?");
@@ -96,6 +95,7 @@ module.exports = {
                                     console.log("address: " + address + " and count is: " + count);
                                 }
                             }
+                            conversation.variable("maskedAddressFound", 'true');
                             conversation.variable("numberOfAccount", 'multiple');
                             conversation.variable("accountsOptions", newMaskedAddress.toString());
                             conversation.variable("allResult", JSON.stringify(allResult));
@@ -128,14 +128,19 @@ module.exports = {
                             conversation.variable("setETR", data[0].ETR);
                             conversation.transition('setVariableValues');
                             done();
+                        }else{
+                            conversation.variable("maskedAddressFound", 'false');
+                            conversation.transition();
+                            done();
+
                         }
                     }
                     else {
+                        conversation.variable("maskedAddressFound", 'true');
                         conversation.variable("moreThanThreeAccount", "true");
                         conversation.transition();
                         done();
                     }
-
                 }
                 else {
                     logger.debug('getOutageStatus: outage status request failed!');
