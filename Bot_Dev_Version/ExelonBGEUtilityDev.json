@@ -1,6 +1,6 @@
 {
-  "name" : "BGEUtility",
-  "description" : "BG&E Chatbot",
+  "name" : "ExelonBGEUtilityDev",
+  "description" : "BG&E Chatbot for development",
   "type" : "USER",
   "intents" : [ {
     "name" : "OutageStatus",
@@ -110,6 +110,10 @@
         "moreThanThreeAccount" : "string",
         "isMultipleAddressOrNot" : "string",
         "typeOfFault" : "string",
+        "maskedAddressFound" : "string",
+        "selectAccountOrPhoneVariable" : "string",
+        "unresolvedVariable" : "string",
+        "addressNotCorrectCountVariable" : "string",
         "iResult" : "nlpresult"
       }
     },
@@ -122,13 +126,20 @@
         },
         "transitions" : {
           "actions" : {
-            "StartBot" : "startBot",
-            "OutageStatus" : "outageStatus",
-            "ReportOutage" : "reportOutage",
-            "End" : "end",
-            "unresolvedIntent" : "unresolved"
+            "StartBot" : "resetStartBot",
+            "OutageStatus" : "resetOutageStatus",
+            "ReportOutage" : "resetAllReportOutageVariable",
+            "End" : "resetEnd",
+            "unresolvedIntent" : "checkUnresolvedCount"
           }
         }
+      },
+      "resetStartBot" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "addressNotCorrectCountVariable,user.addressNotCorrectCountVariable,unresolvedVariable,user.unresolvedVariable,selectAccountOrPhoneVariable,user.selectAccountOrPhoneVariable"
+        },
+        "transitions" : { }
       },
       "startBot" : {
         "component" : "System.List",
@@ -150,7 +161,7 @@
         },
         "transitions" : {
           "actions" : {
-            "Check Outage Status" : "outageStatus",
+            "Check Outage Status" : "resetOutageStatus",
             "Report An Outage" : "resetAllReportOutageVariable"
           }
         }
@@ -163,13 +174,20 @@
         },
         "transitions" : {
           "actions" : {
-            "StartBot" : "startBot",
-            "OutageStatus" : "outageStatus",
-            "ReportOutage" : "reportOutage",
-            "End" : "end",
-            "unresolvedIntent" : "unresolved"
+            "StartBot" : "resetStartBot",
+            "OutageStatus" : "resetOutageStatus",
+            "ReportOutage" : "resetAllReportOutageVariable",
+            "End" : "resetEnd",
+            "unresolvedIntent" : "checkUnresolvedCount"
           }
         }
+      },
+      "resetOutageStatus" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "addressNotCorrectCountVariable,user.addressNotCorrectCountVariable,unresolvedVariable,user.unresolvedVariable,selectAccountOrPhoneVariable,user.selectAccountOrPhoneVariable"
+        },
+        "transitions" : { }
       },
       "outageStatus" : {
         "component" : "System.Text",
@@ -201,9 +219,40 @@
         },
         "transitions" : {
           "actions" : {
-            "equal" : "checkAccountNumberType",
+            "equal" : "isMaskedAddressFound",
             "notequal" : "againResetVariables"
           }
+        }
+      },
+      "isMaskedAddressFound" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "maskedAddressFound",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "checkAccountNumberType",
+            "notequal" : "resetActiveStatusResponseForGasOnly"
+          }
+        }
+      },
+      "resetActiveStatusResponseForGasOnly" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "activeStatusResponse"
+        },
+        "transitions" : { }
+      },
+      "forGasOnly" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "I see that your account is associated with gas services only. For all gas emergencies, please contact BGE at 1-877-778-2222.\nIf you smell natural gas, leave the area immediately, and then call BGE. This number is available 24 hours a day, 7 days a week.\nIs there anything else that I can help you with?",
+          "variable" : "activeStatusResponse"
+        },
+        "transitions" : {
+          "next" : "checkActiveStatusResponse"
         }
       },
       "checkAccountNumberType" : {
@@ -276,16 +325,6 @@
           }
         }
       },
-      "selectCorrectAddress" : {
-        "component" : "System.SetVariable",
-        "properties" : {
-          "variable" : "CorrectAddress",
-          "value" : "true"
-        },
-        "transitions" : {
-          "next" : "printOutage"
-        }
-      },
       "againResetVariables" : {
         "component" : "System.ResetVariables",
         "properties" : {
@@ -293,12 +332,44 @@
         },
         "transitions" : { }
       },
+      "checkSelectAccountOrPhoneCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.selectAccountOrPhoneVariable",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "selectAccountOrPhone"
+          }
+        }
+      },
       "selectAccountOrPhone" : {
         "component" : "System.List",
         "properties" : {
           "options" : "Phone Number, Account Number",
           "prompt" : "I’m sorry, but I can't find an account associated with that phone number.\nDo you have another phone number or the account number available?",
-          "variable" : "selectedAccountType"
+          "variable" : "selectedAccountType",
+          "maxPrompts" : 1
+        },
+        "transitions" : {
+          "next" : "setAccountOrPhoneVariable"
+        }
+      },
+      "setAccountOrPhoneVariable" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "selectAccountOrPhoneVariable",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyAccountOrPhoneVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "selectAccountOrPhoneVariable",
+          "to" : "user.selectAccountOrPhoneVariable"
         },
         "transitions" : {
           "next" : "resetSelectedAccountVariables"
@@ -331,9 +402,40 @@
       "resetVariables" : {
         "component" : "System.ResetVariables",
         "properties" : {
-          "variableList" : "phoneNumber,accountNumber,addressResponse,selectedAccountType"
+          "variableList" : "phoneNumber,accountNumber,addressResponse,selectedAccountType,numberOfAccount"
         },
         "transitions" : { }
+      },
+      "checkAddressNotCorrectCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.addressNotCorrectCountVariable",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "setAddressNotCorrectCountVariable"
+          }
+        }
+      },
+      "setAddressNotCorrectCountVariable" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "addressNotCorrectCountVariable",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyAddressNotCorrectUserVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "addressNotCorrectCountVariable",
+          "to" : "user.addressNotCorrectCountVariable"
+        },
+        "transitions" : {
+          "next" : "addressNotCorrect"
+        }
       },
       "addressNotCorrect" : {
         "component" : "System.List",
@@ -354,16 +456,25 @@
         "transitions" : { }
       },
       "selectedAccount" : {
-        "component" : "System.ConditionEquals",
+        "component" : "System.Switch",
         "properties" : {
           "variable" : "selectedAccountType",
-          "value" : "Phone Number"
+          "values" : [ "Phone Number", "Account Number" ]
         },
         "transitions" : {
           "actions" : {
-            "equal" : "linkedViaPhoneNumber",
-            "notequal" : "linkedViaAccountNumber"
+            "Phone Number" : "linkedViaPhoneNumber",
+            "Account Number" : "linkedViaAccountNumber"
           }
+        }
+      },
+      "resetVariablesForWrongInput" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,accountNumber,addressResponse,selectedAccountType"
+        },
+        "transitions" : {
+          "next" : "selectAccountOrPhone"
         }
       },
       "linkedViaPhoneNumber" : {
@@ -464,7 +575,7 @@
       "resetAllReportOutageVariable" : {
         "component" : "System.ResetVariables",
         "properties" : {
-          "variableList" : "accountsOptions,setStatus,activeStatusResponse,reportOutageOrNot,selectedAccountOption,isMultipleAddressOrNot,numberOfAccount,addressFound,reportOutageVariable,outageType,anythingElseVariable,phoneNumber,accountNumber"
+          "variableList" : "addressNotCorrectCountVariable,user.addressNotCorrectCountVariable,accountsOptions,setStatus,activeStatusResponse,reportOutageOrNot,selectedAccountOption,isMultipleAddressOrNot,numberOfAccount,addressFound,reportOutageVariable,outageType,anythingElseVariable,phoneNumber,accountNumber,unresolvedVariable,user.unresolvedVariable,selectAccountOrPhoneVariable,user.selectAccountOrPhoneVariable"
         },
         "transitions" : { }
       },
@@ -621,7 +732,7 @@
       "resetAnythingElseVariable" : {
         "component" : "System.ResetVariables",
         "properties" : {
-          "variableList" : "anythingElseVariable,"
+          "variableList" : "anythingElseVariable"
         },
         "transitions" : { }
       },
@@ -649,14 +760,12 @@
           }
         }
       },
-      "provideETR" : {
-        "component" : "System.Output",
+      "resetEnd" : {
+        "component" : "System.ResetVariables",
         "properties" : {
-          "text" : "ETR provided by BGE once outage is reported"
+          "variableList" : "addressNotCorrectCountVariable,user.addressNotCorrectCountVariable,unresolvedVariable,user.unresolvedVariable,selectAccountOrPhoneVariable,user.selectAccountOrPhoneVariable"
         },
-        "transitions" : {
-          "return" : "provideETR"
-        }
+        "transitions" : { }
       },
       "end" : {
         "component" : "System.Output",
@@ -667,12 +776,44 @@
           "return" : "end"
         }
       },
+      "checkUnresolvedCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.unresolvedVariable",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "unresolved"
+          }
+        }
+      },
       "unresolved" : {
         "component" : "System.List",
         "properties" : {
           "options" : "${outageOptions.type.enumValues}",
           "prompt" : "I’m sorry, but I’m unavailable to assist you at this time. You can check Outage Status or Report an Outage.\nPlease pick one option.",
-          "variable" : "outageOptions"
+          "variable" : "outageOptions",
+          "maxPrompts" : 1
+        },
+        "transitions" : {
+          "next" : "setUnresolvedVariable"
+        }
+      },
+      "setUnresolvedVariable" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "unresolvedVariable",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyUserVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "unresolvedVariable",
+          "to" : "user.unresolvedVariable"
         },
         "transitions" : {
           "next" : "switchOutageOptions"
@@ -681,43 +822,10 @@
       "callCustCare" : {
         "component" : "System.Output",
         "properties" : {
-          "text" : "I’m sorry, but I am unavailable to assist you at this time. Please visit us at bge.com/contactus or you can call us at 1-800-685-0123 for further support."
+          "text" : "I’m sorry, but I am unavailable to assist you at this time. Please visit us at bge.com or you can call us at 1-800-685-0123 for further support."
         },
         "transitions" : {
           "return" : "callCustCare"
-        }
-      },
-      "servicesDown" : {
-        "component" : "System.Output",
-        "properties" : {
-          "text" : "Services are down right now!!. Please try after sometime.\nThank you!!"
-        },
-        "transitions" : {
-          "return" : "servicesDown"
-        }
-      },
-      "unresolvedIntentOutput" : {
-        "component" : "System.List",
-        "properties" : {
-          "options" : "${outageOptions.type.enumValues}",
-          "prompt" : "I’m sorry, but I’m unavailable to assist you at this time. You can check Outage Status or Report an Outage.\nPlease pick one option.",
-          "variable" : "outageOptions"
-        },
-        "transitions" : {
-          "next" : "switchOutageOptions"
-        }
-      },
-      "checkServices" : {
-        "component" : "System.ConditionEquals",
-        "properties" : {
-          "variable" : "requestTimeOut",
-          "value" : "out"
-        },
-        "transitions" : {
-          "actions" : {
-            "equal" : "servicesDown",
-            "notequal" : "addressFoundOrNot"
-          }
         }
       }
     }
@@ -1111,6 +1219,12 @@
     "namedEntities" : [ ]
   } ],
   "channels" : [ {
+    "name" : "FacebookChannel",
+    "enabled" : true,
+    "config" : {
+      "type" : "facebook"
+    }
+  }, {
     "name" : "System_Bot_Test",
     "description" : "Used by the BOT test feature. If it is disabled, the test UI will not work for this BOT.",
     "enabled" : true,

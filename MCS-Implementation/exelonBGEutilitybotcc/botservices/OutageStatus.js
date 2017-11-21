@@ -125,6 +125,7 @@ module.exports = {
                             else{
                                 conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
                             }
+                            conversation.variable("maskedAddressFound", 'true');
                             conversation.variable("setETR", data[0].ETR);
                             conversation.transition('setVariableValues');
                             done();
