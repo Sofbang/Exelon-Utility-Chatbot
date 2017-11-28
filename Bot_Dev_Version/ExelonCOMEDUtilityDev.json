@@ -3,6 +3,26 @@
   "description" : "COMED Chatbot for developement",
   "type" : "USER",
   "intents" : [ {
+    "name" : "ReportOutage",
+    "paramsList" : [ {
+      "entity" : {
+        "name" : "PHONE_NUMBER",
+        "type" : "SYSTEM",
+        "enumValues" : null,
+        "ruleParameters" : null,
+        "parentEntity" : null,
+        "patternExpression" : null
+      },
+      "name" : "PHONE_NUMBER",
+      "isRequired" : true,
+      "required" : true
+    } ],
+    "type" : "NLPIntent"
+  }, {
+    "name" : "SentimentalBot",
+    "paramsList" : [ ],
+    "type" : "NLPIntent"
+  }, {
     "name" : "OutageStatus",
     "paramsList" : [ {
       "entity" : {
@@ -19,32 +39,16 @@
     } ],
     "type" : "NLPIntent"
   }, {
-    "name" : "StartBot",
-    "paramsList" : [ ],
-    "type" : "NLPIntent"
-  }, {
     "name" : "CheckBalance",
     "paramsList" : [ ],
     "type" : "NLPIntent"
   }, {
-    "name" : "End",
+    "name" : "StartBot",
     "paramsList" : [ ],
     "type" : "NLPIntent"
   }, {
-    "name" : "ReportOutage",
-    "paramsList" : [ {
-      "entity" : {
-        "name" : "PHONE_NUMBER",
-        "type" : "SYSTEM",
-        "enumValues" : null,
-        "ruleParameters" : null,
-        "parentEntity" : null,
-        "patternExpression" : null
-      },
-      "name" : "PHONE_NUMBER",
-      "isRequired" : true,
-      "required" : true
-    } ],
+    "name" : "EndBot",
+    "paramsList" : [ ],
     "type" : "NLPIntent"
   } ],
   "entities" : [ {
@@ -64,7 +68,7 @@
   }, {
     "name" : "OutageOptions",
     "type" : "ENUMVALUES",
-    "enumValues" : "Check Outage Status{check outage:outage status:check status for outage},Report An Outage{report outage:report status for outage:report for outage}",
+    "enumValues" : "Check Outage Status{check outage:outage status:check status for outage},Report An Outage{report outage:report status for outage:report for outage},Check Balance{checkBalance:checkbalance:check balance:check Balance:balance:Check balance:CheckBalance:Check Balance:Checkbalance}",
     "ruleParameters" : null,
     "parentEntity" : null,
     "patternExpression" : null
@@ -82,6 +86,7 @@
         "outageOptions" : "OutageOptions",
         "phoneNumber" : "PHONE_NUMBER",
         "accountNumber" : "string",
+        "checkBalance_accountNumber" : "string",
         "outageType" : "OutageType",
         "outageStatus" : "string",
         "selectionType" : "string",
@@ -117,6 +122,11 @@
         "unresolvedVariable" : "string",
         "isMultipleAddressOrNot" : "string",
         "addressNotCorrectCountVariable" : "string",
+        "checkBalance_MaskedAddress" : "string",
+        "checkBalance_AccountInfo" : "string",
+        "addressResponseCount" : "string",
+        "extraVariable" : "string",
+        "noAddressFoundCount" : "string",
         "iResult" : "nlpresult"
       }
     },
@@ -132,7 +142,9 @@
             "StartBot" : "resetStartBot",
             "OutageStatus" : "resetOutageStatus",
             "ReportOutage" : "resetAllReportOutageVariable",
-            "End" : "resetEnd",
+            "EndBot" : "resetEnd",
+            "CheckBalance" : "checkBalance",
+            "SentimentalBot" : "sentimentalAnalysis",
             "unresolvedIntent" : "checkUnresolvedCount"
           }
         }
@@ -148,7 +160,7 @@
         "component" : "System.List",
         "properties" : {
           "options" : "${outageOptions.type.enumValues}",
-          "prompt" : "Hello, how may I help you today?\nYou can Check Outage Status or Report an Outage.\nPlease pick one option.",
+          "prompt" : "Hello, how may I help you today?\nYou can Check Outage Status, Report an Outage or Check Account Balance.\nPlease pick one option.",
           "variable" : "outageOptions",
           "maxPrompts" : 1
         },
@@ -160,12 +172,13 @@
         "component" : "System.Switch",
         "properties" : {
           "variable" : "outageOptions",
-          "values" : [ "Check Outage Status", "Report An Outage" ]
+          "values" : [ "Check Outage Status", "Report An Outage", "Check Balance" ]
         },
         "transitions" : {
           "actions" : {
             "Check Outage Status" : "resetOutageStatus",
-            "Report An Outage" : "resetAllReportOutageVariable"
+            "Report An Outage" : "resetAllReportOutageVariable",
+            "Check Balance" : "checkBalance"
           }
         }
       },
@@ -180,7 +193,9 @@
             "StartBot" : "resetStartBot",
             "OutageStatus" : "resetOutageStatus",
             "ReportOutage" : "resetAllReportOutageVariable",
-            "End" : "resetEnd",
+            "EndBot" : "resetEnd",
+            "CheckBalance" : "checkBalance",
+            "SentimentalBot" : "sentimentalAnalysis",
             "unresolvedIntent" : "checkUnresolvedCount"
           }
         }
@@ -575,7 +590,7 @@
         "component" : "System.List",
         "properties" : {
           "options" : "yes,no",
-          "prompt" : "I am not aware of an outage in your area. If you reported an outage within the past 15 minutes, it may not yet be reflected here.\nIf you are without service, please check your circuit breakers,\nor if your home has a fuse box, check your fuses to ensure they are in good working condition. \nIf this does not resolve the issue, you can also report an outage. \nWould you like to report an outage?",
+          "prompt" : "We are not aware of an outage in your area. If you reported an outage within the past 15 minutes, it may not yet be reflected here.\nIf you are without service, please check your circuit breakers,\nor if your home has a fuse box, check your fuses to ensure they are in good working condition. \nIf this does not resolve the issue, you can also report an outage. \nWould you like to report an outage?",
           "variable" : "reportOutageOrNot"
         },
         "transitions" : {
@@ -659,6 +674,249 @@
           "next" : "resetAnythingElseVariable"
         }
       },
+      "checkBalance" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,checkBalance_accountNumber,accountNumber,addressFound,addressResponse,addressResponseCount,user.addressResponseCount,noAddressFoundCount"
+        },
+        "transitions" : { }
+      },
+      "askAccountNumber" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "What is your account number?",
+          "variable" : "checkBalance_accountNumber"
+        },
+        "transitions" : {
+          "next" : "copyAccountNumberVariable"
+        }
+      },
+      "copyAccountNumberVariable" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "checkBalance_accountNumber",
+          "to" : "accountNumber"
+        },
+        "transitions" : {
+          "next" : "resetPhoneNumber"
+        }
+      },
+      "resetPhoneNumber" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,checkBalance_accountNumber,addressFound,addressResponse"
+        },
+        "transitions" : { }
+      },
+      "askPhoneNumber" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "What is the primary phone number associated with your account?",
+          "variable" : "phoneNumber"
+        },
+        "transitions" : {
+          "next" : "checkAccountBalance"
+        }
+      },
+      "checkAccountBalance" : {
+        "component" : "CheckBalance",
+        "properties" : {
+          "AccountNumber" : "${accountNumber.value}",
+          "PhoneNumber" : "${phoneNumber.value.completeNumber}"
+        },
+        "transitions" : {
+          "next" : "checkBalance_AddressFoundOrNot"
+        }
+      },
+      "checkBalance_AddressFoundOrNot" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "addressFound",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "checkBalance_AddressCorrectOrNot",
+            "notequal" : "resetNoAddressFoundVariable"
+          }
+        }
+      },
+      "checkBalance_AddressCorrectOrNot" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "${checkBalance_MaskedAddress}. Is this correct?",
+          "variable" : "addressResponse"
+        },
+        "transitions" : {
+          "next" : "checkBalance_AddressResponse"
+        }
+      },
+      "checkBalance_AddressResponse" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "addressResponse",
+          "value" : "yes"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "checkBalance_AccountInfo",
+            "notequal" : "checkBalance_AddressResponseCount"
+          }
+        }
+      },
+      "checkBalance_AccountInfo" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "${checkBalance_AccountInfo}"
+        },
+        "transitions" : {
+          "return" : "checkBalance_AccountInfo"
+        }
+      },
+      "checkBalance_AddressResponseCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.addressResponseCount",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "checkBalance_setAddressResponseCount"
+          }
+        }
+      },
+      "checkBalance_setAddressResponseCount" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "addressResponseCount",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyAddressResponseCountVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "addressResponseCount",
+          "to" : "user.addressResponseCount"
+        },
+        "transitions" : {
+          "next" : "checkBalance_resetVariables"
+        }
+      },
+      "checkBalance_resetVariables" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,checkBalance_accountNumber,accountNumber,addressResponse,addressFound,addressResponseCount,noAddressFoundCount"
+        },
+        "transitions" : { }
+      },
+      "checkBalance_AddressNotCorrect" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "Bot: I’m sorry. Do you have another phone number or the account number available?",
+          "variable" : "addressResponse"
+        },
+        "transitions" : {
+          "next" : "checkAddressNotCorrectResponse"
+        }
+      },
+      "checkAddressNotCorrectResponse" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "addressResponse",
+          "value" : "yes"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "againEnterAccountNumber",
+            "notequal" : "end"
+          }
+        }
+      },
+      "againEnterAccountNumber" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "Great. What is the account number?",
+          "variable" : "checkBalance_accountNumber"
+        },
+        "transitions" : {
+          "next" : "copyAccountNumberVariable"
+        }
+      },
+      "resetNoAddressFoundVariable" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,checkBalance_accountNumber,accountNumber,addressResponse,addressFound,addressResponseCount,noAddressFoundCount"
+        },
+        "transitions" : { }
+      },
+      "checkNoAddressFoundCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.noAddressFoundCount",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "setNoAddressCount"
+          }
+        }
+      },
+      "setNoAddressCount" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "noAddressFoundCount",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyNoAddressCountVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "noAddressFoundCount",
+          "to" : "user.noAddressFoundCount"
+        },
+        "transitions" : {
+          "next" : "checkBalance_noAccountFound"
+        }
+      },
+      "checkBalance_noAccountFound" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "I’m sorry, but information does not match with my records. Do you have another phone number or the account number available?",
+          "variable" : "addressResponse"
+        },
+        "transitions" : {
+          "next" : "checkNoAddressFoundResponse"
+        }
+      },
+      "checkNoAddressFoundResponse" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "addressResponse",
+          "value" : "yes"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "againEnterAccountNumber",
+            "notequal" : "end"
+          }
+        }
+      },
+      "sentimentalAnalysis" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "I understand your frustration and apologize for the inconvenience. Please reach us at 1-800-EDISON-1 so we can assist you further."
+        },
+        "transitions" : {
+          "return" : "sentimentalAnalysis"
+        }
+      },
       "resetAnythingElseVariable" : {
         "component" : "System.ResetVariables",
         "properties" : {
@@ -723,7 +981,7 @@
         "component" : "System.List",
         "properties" : {
           "options" : "${outageOptions.type.enumValues}",
-          "prompt" : "I’m sorry, but I’m unavailable to assist you at this time. You can check Outage Status or Report an Outage.\nPlease pick one option.",
+          "prompt" : "I’m sorry, but I’m unavailable to assist you with this request. You can check Outage Status, Report an Outage or Check Account Balance.\nPlease pick one option.",
           "variable" : "outageOptions",
           "maxPrompts" : 1
         },
@@ -776,6 +1034,606 @@
     }
   } ],
   "trainingDataList" : [ {
+    "sentence" : "I would like to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage for 9176789111",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage for phone number 4904861189",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My power is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I don’t have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I do not have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My power is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I have an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No electricity in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I don’t have electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I have an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i don’t have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power lost",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I have no power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Lost power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "turn my power on",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power on now",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "#OUT",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My electricity is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report outage for phone number <enter phone #>",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no power in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No lights",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i have no power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "lost power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report an Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "lights out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I don’t have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "It’s dark",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "im out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "turn my power back on",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report outage for <enter account #>",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I dont have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i do not have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "blackout",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "my electricity is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage for phone number <enter phone #>",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I need to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "OUT",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Lost power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i would like to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power back on",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power lost",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i have an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Lights out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "black out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i need to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no electricity in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "#out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no lights",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "it’s dark here",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "our lights are out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Black out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "turn my power on now",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "it’s dark",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "it’s dark in here",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My power is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Im out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i don’t’ have electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "It’s dark here",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "lost power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No Power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I don’t have electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage for <enter account #>",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i dont have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Blackout",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power on",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i’m out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power lost",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No electricity in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I would like to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "my power is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "It’s dark in here",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I do not have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power lost",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Our lights are out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Building Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "House Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Electric Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Electrical Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My lights are not on",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power’s off",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "We have no power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Service outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m going to the PSC",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Screw You",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’ll report this to the BBB",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m going to the ICC",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I AM NOT HAPPY WITH THIS",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You suck",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m going to get a lawyer",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m report this to the Illinois Commerce Commission",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I am not happy with this answer",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m calling a lawyer.",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "This is pissing me off",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I hate you",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’ll report this to the Better Business Bureau",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m going to the Public Service Commission",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "ComEd Sucks",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "scum bags",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m contacting my mayor",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "WTF",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "This is nonsense",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m contacting my alderman",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "This is unacceptable",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "ASAP",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You need to fix this now",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m contacting my councilman",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "ass wipe",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "bullshit",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "assholes",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "scumbags",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "bitches",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "asshole",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "go to hell",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "fuck off",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "asswipe",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "bull shit",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "fuck",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "dick",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "fuck you",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "shit",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "fuckers",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "bitch",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
     "sentence" : "when will my power be back?",
     "intent" : "OutageStatus",
     "namedEntities" : [ ]
@@ -1416,548 +2274,24 @@
     "intent" : "OutageStatus",
     "namedEntities" : [ ]
   }, {
-    "sentence" : "morning",
-    "intent" : "StartBot",
+    "sentence" : "update",
+    "intent" : "OutageStatus",
     "namedEntities" : [ ]
   }, {
-    "sentence" : "Good morning",
-    "intent" : "StartBot",
+    "sentence" : "information",
+    "intent" : "OutageStatus",
     "namedEntities" : [ ]
   }, {
-    "sentence" : "Hello ComEd",
-    "intent" : "StartBot",
+    "sentence" : "status",
+    "intent" : "OutageStatus",
     "namedEntities" : [ ]
   }, {
-    "sentence" : "Good Evening",
-    "intent" : "StartBot",
+    "sentence" : "Trying to confirm power outage",
+    "intent" : "OutageStatus",
     "namedEntities" : [ ]
   }, {
-    "sentence" : "Hey",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Evening",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Good Afternoon",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Good evening",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "would you please help me",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "What’s going on?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "What’s going on",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hello I have a question",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Whats going on",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Help",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "yo",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "What is going on",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "help me",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "what’s going on",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Need help",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Wassup",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "can you please help me",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "whats up",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "help me please",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Pls",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "what’s going on?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I need help",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "what’s going on?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "what’s going on",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "what is going on",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Whats going on?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "could you please help me",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Help me please",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "would you help me please",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "could you help me please",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Help me",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Help me please",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hi my name is <enter name>",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "help me pls",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "wassup?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I have a question",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "what’s up",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Pls help",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "what is going on?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Yo",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "What is going on?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "i need help",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hi, can you please help me?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hi, can you please help me?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hey",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hello",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "What's up",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "What's up?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Whats up?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Wuts up",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hi",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Comed app",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hello Comed",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hello",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Good Evening",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Good Morning",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Bot",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Comed App",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Good Afternoon",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hey ",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "good morning",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "good evening",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hey you there?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hi",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "good afternoon",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hey you there?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hi bot",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hello",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hi",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Good afternoon",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hi",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "good afternoon",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Howdy",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hi ComEd",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "are you there?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Can you help",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hi?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "ComEd App",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hello?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "are you there",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hello Comed",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "can you please help",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Can you help me",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "You there",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "ComEd app",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hello",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "you there",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hi?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "can you help?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Good Morning",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Bot",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "You there",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Can you help me?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hola",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hello",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hey you there",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "You there?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "howdy",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "you there",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hi comed",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hi",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Afternoon",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hi Comed",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "you there?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Are you there?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hello ComEd",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hola",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "good morning",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "You there?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hello Comed",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Morning",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "can you help me?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "good evening",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "you there?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hey",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hello?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hi ComEd",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "You There?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hi comed",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "evening",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "can you help me",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Are you there",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hello comed",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Sup",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Can you help?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hello comed",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "hi Comed",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "afternoon",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "sup",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Hey you there?",
-    "intent" : "StartBot",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "can you help",
-    "intent" : "StartBot",
+    "sentence" : "Question about outage",
+    "intent" : "OutageStatus",
     "namedEntities" : [ ]
   }, {
     "sentence" : "what’s this months bill?",
@@ -2688,484 +3022,648 @@
     "intent" : "CheckBalance",
     "namedEntities" : [ ]
   }, {
+    "sentence" : "Past Due Balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Billing Information",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Billing Info",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Balance Information",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Balance Info",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "check balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Check Balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello ComEd",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "would you please help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello I have a question",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "yo",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Need help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Wassup",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you please help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats up",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "help me please",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Pls",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I need help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "could you please help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Help me please",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "would you help me please",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "could you help me please",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Help me please",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi my name is <enter name>",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "help me pls",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "wassup?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I have a question",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s up",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Pls help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Yo",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i need help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi, can you please help me?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi, can you please help me?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hey",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What's up",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What's up?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats up?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Wuts up",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Comed app",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello Comed",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Bot",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Comed App",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey ",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "good morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "good evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "good afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hey you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi bot",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "good afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Howdy",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi ComEd",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "are you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "ComEd App",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "are you there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello Comed",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you please help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "ComEd app",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "you there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you help?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Bot",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you help me?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hola",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey you there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "howdy",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "you there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi comed",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi Comed",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Are you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello ComEd",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hola",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "good morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello Comed",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you help me?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "good evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hey",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi ComEd",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You There?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi comed",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Are you there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello comed",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Sup",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you help?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello comed",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi Comed",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "sup",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
     "sentence" : "Ty",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "Have a good day",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "I am done for now",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "Ttyl",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "No",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "Ty",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "Goodbye",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "Done",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "Bye",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "THX",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "TY",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "I’m done",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "End",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "TTYL",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "Thank you",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "Thanks",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "Thanks for your assistance",
-    "intent" : "End",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   }, {
     "sentence" : "That will be all",
-    "intent" : "End",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I would like to report an outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No power in my house",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Report outage for 9176789111",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No electricity",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Report outage for phone number 4904861189",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "My power is out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I don’t have power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I do not have power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Report Outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "My power is out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "report outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I have an outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No electricity in my house",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Report outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I don’t have electricity",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I have an outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "i don’t have power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Power lost",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I have no power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Report Outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "no electricity",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Lost power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "turn my power on",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I’m out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Turn my power on now",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "#OUT",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "My electricity is out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "report outage for phone number <enter phone #>",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "no power in my house",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No lights",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "i have no power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "lost power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Report an Outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "lights out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No power in my house",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I don’t have power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Report an outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "It’s dark",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "im out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "no power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "turn my power back on",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "report outage for <enter account #>",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I dont have power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "report outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "i do not have power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "blackout",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "my electricity is out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Report outage for phone number <enter phone #>",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "power outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I need to report an outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Power outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "OUT",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Power out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Lost power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "i would like to report an outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Turn my power back on",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "power lost",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "i have an outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Lights out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "black out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "i need to report an outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "no electricity in my house",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "#out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "no lights",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "it’s dark here",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "our lights are out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Black out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "power out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "turn my power on now",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "it’s dark",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "it’s dark in here",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "My power is out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Im out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "i don’t’ have electricity",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "report an outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "It’s dark here",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "lost power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No Power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I don’t have electricity",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Report outage for <enter account #>",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "i dont have power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Blackout",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Turn my power on",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "i’m out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Power lost",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No electricity in my house",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I would like to report an outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "my power is out",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "It’s dark in here",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "No electricity",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "I do not have power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "no power",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "power lost",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Report outage",
-    "intent" : "ReportOutage",
-    "namedEntities" : [ ]
-  }, {
-    "sentence" : "Our lights are out",
-    "intent" : "ReportOutage",
+    "intent" : "EndBot",
     "namedEntities" : [ ]
   } ],
   "channels" : [ {
