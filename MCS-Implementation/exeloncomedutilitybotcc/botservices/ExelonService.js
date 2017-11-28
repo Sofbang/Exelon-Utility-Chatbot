@@ -19,6 +19,8 @@ module.exports = {
                     logger.debug('GET OutageStatus Success: ' + JSON.stringify(response));
                     return response;
                 }, function (error) {
+                    console.log('error1:::::: ' + JSON.parse(error));
+                    console.log('error2:::::: ' + JSON.stringify(error));
                     var error = JSON.parse(error.error);
                     console.log('error:::::: ' + JSON.stringify(error));
                     logger.debug('GET OutageStatus Error: ' + JSON.stringify(error));

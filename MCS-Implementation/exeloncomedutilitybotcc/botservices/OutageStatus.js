@@ -80,7 +80,6 @@ module.exports = {
             getOutageStatus.then(function (response) {
                 if (response.success) {
                     console.log("after if success: " + JSON.stringify(response));
-                    conversation.variable("addressFound", "yes");
                     var data = response.data;
                     if (data.length > 1 && data.length <= 3) {
                         var count = 0;
@@ -94,6 +93,7 @@ module.exports = {
                             promiseArr.push(getOutageStatus);
                         }
                         Promise.all(promiseArr).then(function (allResult) {
+                            var addressFound = "yes";
                             for (var i in allResult) {
                                 console.log("allResult " + i + " :" + JSON.stringify(allResult[i]));
                                 var res = allResult[i];
@@ -102,21 +102,26 @@ module.exports = {
                                     newMaskedAddress.push(address);
                                     count++;
                                     console.log("address: " + address + " and count is: " + count);
+                                }else{
+                                    addressFound = "no";
                                 }
                             }
                             conversation.variable("numberOfAccount", 'multiple');
                             conversation.variable("accountsOptions", newMaskedAddress.toString());
                             conversation.variable("allResult", JSON.stringify(allResult));
+                            conversation.variable("addressFound", addressFound);
                             conversation.transition('setVariableValues');
                             done();
                         }).catch(function (err) {
                             console.log("err : " + err);
+                            conversation.variable("addressFound", "no");
                             logger.debug('getOutageStatus: outage status request failed!');
                             conversation.transition();
                             done();
                         });
                     }
                     else if (data.length == 1) {
+                        conversation.variable("addressFound", "yes");
                         conversation.variable("numberOfAccount", 'single');
                         logger.debug('getOutageStatus: outage status retrieved!');
                         console.info('getOutageStatus: outage status retrieved!' + JSON.stringify(response));
@@ -146,6 +151,7 @@ module.exports = {
                         }
                     }
                     else {
+                        conversation.variable("addressFound", "yes");
                         conversation.variable("moreThanThreeAccount", "true");
                         conversation.transition();
                         done();
