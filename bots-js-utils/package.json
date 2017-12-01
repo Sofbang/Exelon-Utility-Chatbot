@@ -1,0 +1,17 @@
+{
+  "name": "bots-js-utils",
+  "version": "0.1.0",
+  "description": "Oracle Bots JS utilties",
+  "author": "Oracle Bots Team",
+  "license": "ISC",
+  "repository": {},
+  "main": "app.js",
+  "dependencies": {
+    "request": "^2.79.0",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
