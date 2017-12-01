@@ -42,5 +42,20 @@ module.exports = {
 		    logger.debug('GET Report Outage Error: ' + JSON.stringify(error));
 		    return error;
 		});
+    },
+    checkBalance: function checkBalance(mobileSdk, AccountNumber, PhoneNumber, Identifier) {
+        opco = 'COMED';
+        return mobileSdk.custom.exelonbackendbotapi.get('bill/lookup?PhoneNumber=' + PhoneNumber + '&AccountNumber=' + AccountNumber + '&Identifier=' + Identifier + '&opco=' + opco, null, null).then(
+        function (result) {
+            var response = JSON.parse(result.result);
+            console.log('GET Check balance Success: ' + JSON.stringify(response));
+            logger.debug('GET Check balance Success: ' + JSON.stringify(response));
+            return response;
+        }, function (error) {
+            var error = JSON.parse(error.error);
+            console.log('GET Check balance Error: ' + JSON.stringify(error));
+            logger.debug('GET Check balance Error: ' + JSON.stringify(error));
+            return error;
+        });
     }
 };

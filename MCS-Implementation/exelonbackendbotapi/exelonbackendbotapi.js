@@ -117,4 +117,56 @@ module.exports = function (service) {
         }, handler);
     });
 
+    service.get('/mobile/custom/exelonbackendbotapi/bill/lookup', function (req, res) {
+        var PhoneNumber = req.query["PhoneNumber"];
+        var AccountNumber = req.query["AccountNumber"];
+        var Identifier = req.query["Identifier"];
+        var opco = req.query["opco"];
+        console.log("PhoneNumber: " + PhoneNumber + "AccountNumber: " + AccountNumber + "Identifier: " + Identifier + "opco: " + opco);
+        var pdata = {}
+        if(AccountNumber != "undefined"){
+            if (AccountNumber != "${accountNumber.value}") {
+                pdata = {
+                        "identifier": Identifier,
+                        "phone": PhoneNumber,
+                        "account_num": AccountNumber
+                };
+            }else {
+                pdata = {
+                        "phone": PhoneNumber,
+                        "identifier": Identifier
+                };
+            }
+        } else {
+            pdata = {
+                    "phone": PhoneNumber,
+                    "identifier": Identifier
+            };
+        }
+        console.log("pdata = " + JSON.stringify(pdata));
+        var handler = function (error, response, body) {
+            if (error) {
+                        console.log("Request error: " + JSON.stringify(error));
+                        res.send(500, error.message);
+            } else {
+                    console.log("Request success: " + JSON.stringify(body));
+                    res.send(response.statusCode, body);
+            }
+        };
+        var request = require("request");
+        require("./node_modules/request-debug")(request);
+        request({
+                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anonbots/' + opco + '/bill/lookup',
+                method: "POST",
+                json: true,
+                timeout: 200000,
+                headers: {
+                    "Authorization": "Basic QTQ1MzU3Nl9FWEVMT05FVU1PQklMRUFQUFRFU1RfTU9CSUxFX0FOT05ZTU9VU19BUFBJRDpraG0wQTV5cmtzX3Rkeg==",
+                    "Content-Type": "application/json",
+                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667"
+                },
+                body: pdata
+        }, handler);
+
+    });
 };

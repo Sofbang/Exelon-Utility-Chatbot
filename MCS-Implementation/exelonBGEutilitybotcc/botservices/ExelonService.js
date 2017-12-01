@@ -27,18 +27,32 @@ module.exports = {
     },
     reportOutage: function reportOutage(mobileSdk, accountNumber, PhoneNumber, OutageType) {
         opco = 'BGE';
-        console.log("getoutageStatus11 in report outage :" + accountNumber);
         return mobileSdk.custom.exelonbackendbotapi.get('outage?PhoneNumber=' + PhoneNumber + '&AccountNumber=' + accountNumber + '&OutageType=' + OutageType + '&opco=' + opco, null, null).then(
-		function (result) {
-			var response = JSON.parse(result.result);
-			console.log('GET Report Outage Success: ' + JSON.stringify(response));
-			logger.debug('GET Report Outage Success: ' + JSON.stringify(response));
-			return response;
-		},function(error) {
-			var error = JSON.parse(error.error);
-			console.log('GET Report Outage Error: ' + JSON.stringify(error));
-			logger.debug('GET Report Outage Error: ' + JSON.stringify(error));
-			return error;
-		});
+        		function (result) {
+        			var response = JSON.parse(result.result);
+        			console.log('GET Report Outage Success: ' + JSON.stringify(response));
+        			logger.debug('GET Report Outage Success: ' + JSON.stringify(response));
+        			return response;
+        		},function(error) {
+        			var error = JSON.parse(error.error);
+        			console.log('GET Report Outage Error: ' + JSON.stringify(error));
+        			logger.debug('GET Report Outage Error: ' + JSON.stringify(error));
+        			return error;
+        		});
+    },
+    checkBalance: function checkBalance(mobileSdk, AccountNumber, PhoneNumber, Identifier) {
+        opco = 'BGE';
+        return mobileSdk.custom.exelonbackendbotapi.get('bill/lookup?PhoneNumber=' + PhoneNumber + '&AccountNumber=' + AccountNumber + '&Identifier=' + Identifier + '&opco=' + opco, null, null).then(
+                function (result) {
+                    var response = JSON.parse(result.result);
+                    console.log('GET Check balance Success: ' + JSON.stringify(response));
+                    logger.debug('GET Check balance Success: ' + JSON.stringify(response));
+                    return response;
+                }, function (error) {
+                    var error = JSON.parse(error.error);
+                    console.log('GET Check balance Error: ' + JSON.stringify(error));
+                    logger.debug('GET Check balance Error: ' + JSON.stringify(error));
+                    return error;
+                });
     }
 };

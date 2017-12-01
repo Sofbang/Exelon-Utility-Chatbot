@@ -2,6 +2,8 @@
 
 var log4js = require('log4js');
 var logger = log4js.getLogger();
+var ExelonService = require('./ExelonService');
+var moment = require('moment');
 
 module.exports = {
 
@@ -10,7 +12,8 @@ module.exports = {
             "name": "CheckBalance",
             "properties": {
                 "PhoneNumber": { "type": "string", "required": true },
-                "AccountNumber": { "type": "string", "required": true }
+                "Identifier": { "type": "string", "required": true },
+                "AccountNumber": { "type": "string", "required": false }
             },
             "supportedActions": []
         };
@@ -19,12 +22,33 @@ module.exports = {
     invoke: function invoke(conversation, done) {
     	var PhoneNumber = conversation.properties().PhoneNumber;
     	var AccountNumber = conversation.properties().AccountNumber;
-    	console.log("Account Number is : "+AccountNumber+" and Phone Number is : "+PhoneNumber);
-    	conversation.variable("addressFound", "true");
-    	conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with “masked address");
-    	conversation.variable("checkBalance_AccountInfo", "You have $88 due on November 23, 2017. For a full breakdown of your bill, please login to My Account at comed.com or call us at 1-800-EDISON-1.");
-        conversation.transition();
-        done();
+        var Identifier = conversation.properties().Identifier;
+        var mobileSdk = conversation.oracleMobile;
+        console.log("Account Number is : "+AccountNumber+" Phone Number is : "+PhoneNumber+" and Identifier is : "+Identifier);
+        ExelonService.checkBalance(mobileSdk, AccountNumber, PhoneNumber, Identifier).then(function (response) {
+            console.log("response :"+JSON.stringify(response));
+            if(response.success){
+                    conversation.variable("addressFound","true");
+                    conversation.variable("multipleAddressFound","false");
+                    conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with "+ response.data.address);
+                    conversation.variable("checkBalance_AccountInfo", "You have $"+response.data.remainingBalanceDue+" due on "+moment(response.data.dueByDate).format("MMMM DD, YYYY")+". For a full breakdown of your bill, please login to My Account at comed.com or call us at 1-800-EDISON-1.");
+                    conversation.transition();
+                    done(); 
+            }else{
+                if(response.meta.code == "FN-MULTIPLE-ACCOUNTS"){
+                            conversation.variable("addressFound","true");
+                            conversation.variable("multipleAddressFound","true");
+                            conversation.transition();
+                            done();  
+                } else {
+                    conversation.variable("addressFound","false");
+                    conversation.transition();
+                    done();                     
+                }
+            }
+        }).catch(function(err){
+            console.log("error not handled at checkBalance service :"+ err);
+        });
     }
 
 }
