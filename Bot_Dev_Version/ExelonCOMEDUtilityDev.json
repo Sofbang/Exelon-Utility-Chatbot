@@ -59,16 +59,23 @@
     "parentEntity" : null,
     "patternExpression" : null
   }, {
-    "name" : "AccountType",
+    "name" : "OutageOptions",
     "type" : "ENUMVALUES",
-    "enumValues" : "Phone Number{contact number:phone:cell number:number},Account Number{account:account number}",
+    "enumValues" : "Check Outage Status{check outage:outage status:check status for outage},Report An Outage{report outage:report status for outage:report for outage},Check Balance{checkBalance:checkbalance:check balance:check Balance:balance:Check balance:CheckBalance:Check Balance:Checkbalance}",
     "ruleParameters" : null,
     "parentEntity" : null,
     "patternExpression" : null
   }, {
-    "name" : "OutageOptions",
+    "name" : "PIN",
+    "type" : "PATTERNBASED",
+    "enumValues" : null,
+    "ruleParameters" : null,
+    "parentEntity" : null,
+    "patternExpression" : "(?<!\\d)(?!0000)\\d{4}(?!\\d)"
+  }, {
+    "name" : "AccountType",
     "type" : "ENUMVALUES",
-    "enumValues" : "Check Outage Status{check outage:outage status:check status for outage},Report An Outage{report outage:report status for outage:report for outage},Check Balance{checkBalance:checkbalance:check balance:check Balance:balance:Check balance:CheckBalance:Check Balance:Checkbalance}",
+    "enumValues" : "Phone Number{contact number:phone:cell number:number},Account Number{account:account number}",
     "ruleParameters" : null,
     "parentEntity" : null,
     "patternExpression" : null
@@ -78,15 +85,15 @@
       "platformVersion" : "1.0"
     },
     "main" : true,
-    "name" : "COMEDUtility",
+    "name" : "COMEDUtilitybot",
     "context" : {
       "variables" : {
         "greeting" : "string",
         "name" : "string",
+        "identifier" : "PIN",
         "outageOptions" : "OutageOptions",
         "phoneNumber" : "PHONE_NUMBER",
         "accountNumber" : "string",
-        "checkBalance_accountNumber" : "string",
         "outageType" : "OutageType",
         "outageStatus" : "string",
         "selectionType" : "string",
@@ -127,6 +134,8 @@
         "addressResponseCount" : "string",
         "extraVariable" : "string",
         "noAddressFoundCount" : "string",
+        "setReportOutageReported" : "string",
+        "addressCorrectResponse" : "string",
         "iResult" : "nlpresult"
       }
     },
@@ -461,7 +470,7 @@
           "variableList" : "phoneNumber,accountNumber,addressResponse,selectedAccountType"
         },
         "transitions" : {
-          "next" : "selectAccountOrPhone"
+          "next" : "callCustCare"
         }
       },
       "linkedViaPhoneNumber" : {
@@ -590,7 +599,7 @@
         "component" : "System.List",
         "properties" : {
           "options" : "yes,no",
-          "prompt" : "We are not aware of an outage in your area. If you reported an outage within the past 15 minutes, it may not yet be reflected here.\nIf you are without service, please check your circuit breakers,\nor if your home has a fuse box, check your fuses to ensure they are in good working condition. \nIf this does not resolve the issue, you can also report an outage. \nWould you like to report an outage?",
+          "prompt" : "I am not aware of an outage in your area. If you reported an outage within the past 15 minutes, it may not yet be reflected here. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, you can also report an outage. Would you like to report an outage?",
           "variable" : "reportOutageOrNot"
         },
         "transitions" : {
@@ -624,14 +633,62 @@
       "resetReportOutageVariables" : {
         "component" : "System.ResetVariables",
         "properties" : {
-          "variableList" : "reportOutageVariable,outageType,anythingElseVariable"
+          "variableList" : "reportOutageVariable,outageType,anythingElseVariable,activeStatusResponse,reportOutageOrNot"
         },
         "transitions" : { }
+      },
+      "checkReportOutageStatus" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "setStatus",
+          "value" : "ACTIVE"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "activeReportOutageStatus",
+            "notequal" : "reportReportedOutage"
+          }
+        }
+      },
+      "activeReportOutageStatus" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "${setReportOutageReported}",
+          "variable" : "activeStatusResponse"
+        },
+        "transitions" : {
+          "next" : "checkReportActiveStatusResponse"
+        }
+      },
+      "reportReportedOutage" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "I am not aware of an outage in your area. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage.\nNote: If you reported an outage within the past 15 minutes, it may not yet be reflected on this site. Would you like to report an outage?",
+          "variable" : "activeStatusResponse"
+        },
+        "transitions" : {
+          "next" : "checkReportActiveStatusResponse"
+        }
+      },
+      "checkReportActiveStatusResponse" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "activeStatusResponse",
+          "value" : "no"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "activeStatusEnd",
+            "notequal" : "directReportOutage"
+          }
+        }
       },
       "directReportOutage" : {
         "component" : "System.List",
         "properties" : {
-          "options" : "${outageType.type.enumValues}",
+          "options" : "full,partial",
           "prompt" : "Ok, let’s get this reported. Is it a full outage or partial?",
           "variable" : "outageType"
         },
@@ -677,34 +734,23 @@
       "checkBalance" : {
         "component" : "System.ResetVariables",
         "properties" : {
-          "variableList" : "phoneNumber,checkBalance_accountNumber,accountNumber,addressFound,addressResponse,addressResponseCount,user.addressResponseCount,noAddressFoundCount"
+          "variableList" : "phoneNumber,identifier,accountNumber,addressFound,addressCorrectResponse,addressResponse,addressResponseCount,user.addressResponseCount,noAddressFoundCount,user.identifier,user.phoneNumber"
         },
         "transitions" : { }
       },
-      "askAccountNumber" : {
-        "component" : "System.Text",
+      "resolveAskPhoneNumber" : {
+        "component" : "System.SetVariable",
         "properties" : {
-          "prompt" : "What is your account number?",
-          "variable" : "checkBalance_accountNumber"
+          "variable" : "phoneNumber",
+          "value" : "${iResult.value.entityMatches['PHONE_NUMBER'][0]}"
         },
-        "transitions" : {
-          "next" : "copyAccountNumberVariable"
-        }
+        "transitions" : { }
       },
-      "copyAccountNumberVariable" : {
-        "component" : "System.CopyVariables",
+      "resolveAskIdentifier" : {
+        "component" : "System.SetVariable",
         "properties" : {
-          "from" : "checkBalance_accountNumber",
-          "to" : "accountNumber"
-        },
-        "transitions" : {
-          "next" : "resetPhoneNumber"
-        }
-      },
-      "resetPhoneNumber" : {
-        "component" : "System.ResetVariables",
-        "properties" : {
-          "variableList" : "phoneNumber,checkBalance_accountNumber,addressFound,addressResponse"
+          "variable" : "identifier",
+          "value" : "${iResult.value.entityMatches['PIN'][0]}"
         },
         "transitions" : { }
       },
@@ -714,6 +760,14 @@
           "prompt" : "What is the primary phone number associated with your account?",
           "variable" : "phoneNumber"
         },
+        "transitions" : { }
+      },
+      "askIdentifier" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "What are the last 4 Digits of Your Social Security Number, Business Tax ID, or ComEd PIN?",
+          "variable" : "identifier"
+        },
         "transitions" : {
           "next" : "checkAccountBalance"
         }
@@ -721,14 +775,76 @@
       "checkAccountBalance" : {
         "component" : "CheckBalance",
         "properties" : {
-          "AccountNumber" : "${accountNumber.value}",
+          "Identifier" : "${identifier.value}",
           "PhoneNumber" : "${phoneNumber.value.completeNumber}"
         },
         "transitions" : {
-          "next" : "checkBalance_AddressFoundOrNot"
+          "next" : "copyCheckBalanceVariables"
         }
       },
+      "copyCheckBalanceVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "identifier,phoneNumber",
+          "to" : "user.identifier,user.phoneNumber"
+        },
+        "transitions" : { }
+      },
       "checkBalance_AddressFoundOrNot" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "addressFound",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "checkBalance_MultipleAddressFound",
+            "notequal" : "resetNoAddressFoundVariable"
+          }
+        }
+      },
+      "checkBalance_MultipleAddressFound" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "multipleAddressFound",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "checkBalance_ForMultipleAddress",
+            "notequal" : "checkBalance_AddressCorrectOrNot"
+          }
+        }
+      },
+      "checkBalance_ForMultipleAddress" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "You are associated with multiple accounts. Please enter your account number.",
+          "variable" : "accountNumber"
+        },
+        "transitions" : {
+          "next" : "againCheckAccountBalance"
+        }
+      },
+      "checkBalance_resetAddressFoundVariable" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "addressFound,addressResponse"
+        },
+        "transitions" : { }
+      },
+      "againCheckAccountBalance" : {
+        "component" : "CheckBalance",
+        "properties" : {
+          "Identifier" : "${user.identifier.value}",
+          "PhoneNumber" : "${user.phoneNumber.value.completeNumber}",
+          "AccountNumber" : "${accountNumber.value}"
+        },
+        "transitions" : {
+          "next" : "AddressFoundOrNotForMultipleAcc"
+        }
+      },
+      "AddressFoundOrNotForMultipleAcc" : {
         "component" : "System.ConditionEquals",
         "properties" : {
           "variable" : "addressFound",
@@ -746,7 +862,7 @@
         "properties" : {
           "options" : "yes,no",
           "prompt" : "${checkBalance_MaskedAddress}. Is this correct?",
-          "variable" : "addressResponse"
+          "variable" : "addressCorrectResponse"
         },
         "transitions" : {
           "next" : "checkBalance_AddressResponse"
@@ -755,7 +871,7 @@
       "checkBalance_AddressResponse" : {
         "component" : "System.ConditionEquals",
         "properties" : {
-          "variable" : "addressResponse",
+          "variable" : "addressCorrectResponse",
           "value" : "yes"
         },
         "transitions" : {
@@ -808,7 +924,7 @@
       "checkBalance_resetVariables" : {
         "component" : "System.ResetVariables",
         "properties" : {
-          "variableList" : "phoneNumber,checkBalance_accountNumber,accountNumber,addressResponse,addressFound,addressResponseCount,noAddressFoundCount"
+          "variableList" : "phoneNumber,identifier,accountNumber,addressResponse,addressFound,addressResponseCount,noAddressFoundCount,addressCorrectResponse"
         },
         "transitions" : { }
       },
@@ -816,7 +932,7 @@
         "component" : "System.List",
         "properties" : {
           "options" : "yes,no",
-          "prompt" : "Bot: I’m sorry. Do you have another phone number or the account number available?",
+          "prompt" : "Bot: I’m sorry. Do you have another phone number or 4 Digits of Your Social Security Number, Business Tax ID, or ComEd PIN?",
           "variable" : "addressResponse"
         },
         "transitions" : {
@@ -831,25 +947,15 @@
         },
         "transitions" : {
           "actions" : {
-            "equal" : "againEnterAccountNumber",
+            "equal" : "againEnterPhoneNumber",
             "notequal" : "end"
           }
-        }
-      },
-      "againEnterAccountNumber" : {
-        "component" : "System.Text",
-        "properties" : {
-          "prompt" : "Great. What is the account number?",
-          "variable" : "checkBalance_accountNumber"
-        },
-        "transitions" : {
-          "next" : "copyAccountNumberVariable"
         }
       },
       "resetNoAddressFoundVariable" : {
         "component" : "System.ResetVariables",
         "properties" : {
-          "variableList" : "phoneNumber,checkBalance_accountNumber,accountNumber,addressResponse,addressFound,addressResponseCount,noAddressFoundCount"
+          "variableList" : "phoneNumber,identifier,accountNumber,addressCorrectResponse,addressResponse,addressFound,addressResponseCount,noAddressFoundCount"
         },
         "transitions" : { }
       },
@@ -862,11 +968,11 @@
         "transitions" : {
           "actions" : {
             "equal" : "callCustCare",
-            "notequal" : "setNoAddressCount"
+            "notequal" : "setNoAddressFoundCount"
           }
         }
       },
-      "setNoAddressCount" : {
+      "setNoAddressFoundCount" : {
         "component" : "System.SetVariable",
         "properties" : {
           "variable" : "noAddressFoundCount",
@@ -888,7 +994,7 @@
         "component" : "System.List",
         "properties" : {
           "options" : "yes,no",
-          "prompt" : "I’m sorry, but information does not match with my records. Do you have another phone number or the account number available?",
+          "prompt" : "I’m sorry, but information does not match with my records. Do you have another phone number or 4 Digits of Your Social Security Number, Business Tax ID, or ComEd PIN?",
           "variable" : "addressResponse"
         },
         "transitions" : {
@@ -903,9 +1009,19 @@
         },
         "transitions" : {
           "actions" : {
-            "equal" : "againEnterAccountNumber",
+            "equal" : "againEnterPhoneNumber",
             "notequal" : "end"
           }
+        }
+      },
+      "againEnterPhoneNumber" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "What is the primary phone number?",
+          "variable" : "phoneNumber"
+        },
+        "transitions" : {
+          "next" : "askIdentifier"
         }
       },
       "sentimentalAnalysis" : {
@@ -981,7 +1097,7 @@
         "component" : "System.List",
         "properties" : {
           "options" : "${outageOptions.type.enumValues}",
-          "prompt" : "I’m sorry, but I’m unavailable to assist you with this request. You can check Outage Status, Report an Outage or Check Account Balance.\nPlease pick one option.",
+          "prompt" : "I’m sorry, but I’m unable to assist you with this request. You can check Outage Status, Report an Outage or Check Account Balance.\nPlease pick one option.",
           "variable" : "outageOptions",
           "maxPrompts" : 1
         },
@@ -3667,19 +3783,12 @@
     "namedEntities" : [ ]
   } ],
   "channels" : [ {
-    "name" : "System_Bot_Test",
-    "description" : "Used by the BOT test feature. If it is disabled, the test UI will not work for this BOT.",
-    "enabled" : true,
-    "config" : {
-      "type" : "test"
-    }
-  }, {
-    "name" : "GoogleAssistant",
-    "description" : "Google assistant",
+    "name" : "GoogleAssistanceUsingWebsocket",
+    "description" : "GoogleAssistanceUsingWebsocket",
     "enabled" : true,
     "config" : {
       "type" : "webhook",
-      "webhookUri" : "https://36fbad9a.ngrok.io/echowebhook"
+      "webhookUri" : "https://bots-samples-nodejs:8889/apps/chat/bots/9B81EAA4-64C1-46B7-ACAC-9C047EAB7C35/messages"
     }
   }, {
     "name" : "Alexa",
@@ -3690,19 +3799,18 @@
       "webhookUri" : "https://bots-samples-nodejs:8889/apps/alexa-singleBot/singleBotWebhook/messages"
     }
   }, {
-    "name" : "GoogleAssistanceUsingWebsocket",
-    "description" : "GoogleAssistanceUsingWebsocket",
-    "enabled" : true,
-    "config" : {
-      "type" : "webhook",
-      "webhookUri" : "https://bots-samples-nodejs:8889/apps/chat/bots/9B81EAA4-64C1-46B7-ACAC-9C047EAB7C35/messages"
-    }
-  }, {
     "name" : "Facebook",
     "description" : "Facebook Channel for COMED bot",
     "enabled" : true,
     "config" : {
       "type" : "facebook"
+    }
+  }, {
+    "name" : "System_Bot_Test",
+    "description" : "Used by the BOT test feature. If it is disabled, the test UI will not work for this BOT.",
+    "enabled" : true,
+    "config" : {
+      "type" : "test"
     }
   } ],
   "settings" : {
