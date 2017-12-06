@@ -28,6 +28,7 @@ module.exports = {
         ExelonService.checkBalance(mobileSdk, AccountNumber, PhoneNumber, Identifier).then(function (response) {
             console.log("response :"+JSON.stringify(response));
             if(response.success){
+                    conversation.variable("servicesDown","false");
                     conversation.variable("addressFound","true");
                     conversation.variable("multipleAddressFound","false");
                     conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with 1617 PROS***");
@@ -36,18 +37,23 @@ module.exports = {
                     done(); 
             }else{
                 if(response.meta.code == "FN-MULTIPLE-ACCOUNTS"){
+                            conversation.variable("servicesDown","false");
                             conversation.variable("addressFound","true");
                             conversation.variable("multipleAddressFound","true");
                             conversation.transition();
                             done(); 
                 } else {
+                    conversation.variable("servicesDown","false");
                     conversation.variable("addressFound","false");
                     conversation.transition();
                     done();                     
                 }
             }
         }).catch(function(err){
-            console.log("error not handled at checkBalance service :"+ err);
+                    conversation.variable("servicesDown","true");
+                    conversation.transition();
+                    done(); 
+                    console.log("error not handled at checkBalance service :"+ err);
         });
     }
 
