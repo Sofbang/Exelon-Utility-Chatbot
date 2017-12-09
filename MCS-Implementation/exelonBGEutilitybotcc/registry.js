@@ -6,6 +6,7 @@ module.exports = {
     'OutageStatus': require('./botservices/OutageStatus'),
     'ReportOutage': require('./botservices/ReportOutage'),
     'CheckBalance': require('./botservices/CheckBalance'),
+    'CustomerSatisfaction': require('./botservices/CustomerSatisfaction'),
 
     // Utility components
     'SetVariablesFromFile': require('./util/set_variables_from_file'),

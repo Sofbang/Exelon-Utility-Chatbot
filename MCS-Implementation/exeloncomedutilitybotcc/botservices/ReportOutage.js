@@ -63,7 +63,8 @@ module.exports = {
             done();
         })
     .catch(function (e) {
-        console.log(e);
+        console.log("error in catch" +e);
+        conversation.variable("outageReportProgress", "I'm not able to complete your request right now. Please try again later.");
         conversation.transition();
         done();
     });

@@ -31,7 +31,11 @@ module.exports = {
                     conversation.variable("servicesDown","false");
                     conversation.variable("addressFound","true");
                     conversation.variable("multipleAddressFound","false");
-                    conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with 1617 PROS***");
+                    if(response.data.address){
+                        conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with "+ response.data.address);
+                    }else{
+                        conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with 1617 PROS***");
+                    }
                     conversation.variable("checkBalance_AccountInfo", "You have $"+response.data.remainingBalanceDue+" due on "+moment(response.data.dueByDate).format("MMMM DD, YYYY")+". For a full breakdown of your bill, please login to My Account at bge.com or call us at 1-800-685-0123.");
                     conversation.transition();
                     done(); 
