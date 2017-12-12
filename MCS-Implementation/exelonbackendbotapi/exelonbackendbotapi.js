@@ -24,7 +24,7 @@ module.exports = function (service) {
             };
         }
         else {
-            if (AccountNumber != undefined && AccountNumber != "${accountNumber.value}") {
+            if (AccountNumber != undefined && AccountNumber != "${accountNumber.value.number}") {
                 pdata = {
                     "account_number": AccountNumber
                 };
@@ -76,7 +76,7 @@ module.exports = function (service) {
         console.log("opco: " + opco);
         var pdata = {}
 
-        if (AccountNumber != undefined && AccountNumber != "${accountNumber.value}") {
+        if (AccountNumber != undefined && AccountNumber != "${accountNumber.value.number}") {
             pdata = {
                 "account_number": AccountNumber,
                 "outage_issue": outageType
@@ -125,7 +125,7 @@ module.exports = function (service) {
         console.log("PhoneNumber: " + PhoneNumber + "AccountNumber: " + AccountNumber + "Identifier: " + Identifier + "opco: " + opco);
         var pdata = {}
         if(AccountNumber != "undefined"){
-            if (AccountNumber != "${accountNumber.value}") {
+            if (AccountNumber != "${accountNumber.value.number}") {
                 pdata = {
                         "identifier": Identifier,
                         "phone": PhoneNumber,

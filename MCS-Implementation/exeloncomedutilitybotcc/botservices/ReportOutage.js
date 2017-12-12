@@ -57,7 +57,7 @@ module.exports = {
             }
             else {
                 logger.debug('reportOutage: report outage failed!');
-                conversation.variable("outageReportProgress", "I'm not able to complete your request right now. Please try again later.");
+                conversation.variable("outageReportProgress", "I'm not able to complete your request right now. Please try again later");
             }
             conversation.transition();
             done();

@@ -1,6 +1,6 @@
 {
   "name": "exeloncomedutilitybotcc",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "custom component used by Exelon Comed utility bot",
   "main": "exeloncomedutilitybotcc.js",
   "repository": {},
@@ -23,7 +23,7 @@
   "oracleMobile": {
     "dependencies": {
       "apis": {
-        "/mobile/custom/exelonbackendbotapi": "1.0"
+        "/mobile/custom/exelonbackendbotapi": "1.1"
       },
       "connectors": {}
     },
