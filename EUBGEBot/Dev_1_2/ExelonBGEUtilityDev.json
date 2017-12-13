@@ -1,0 +1,4396 @@
+{
+  "name" : "ExelonBGEUtilityDev",
+  "description" : "BG&E Chatbot for development \nv1.2",
+  "type" : "USER",
+  "intents" : [ {
+    "name" : "OutageStatus",
+    "paramsList" : [ ],
+    "type" : "NLPIntent"
+  }, {
+    "name" : "SentimentalBot",
+    "paramsList" : [ ],
+    "type" : "NLPIntent"
+  }, {
+    "name" : "ReportOutage",
+    "paramsList" : [ ],
+    "type" : "NLPIntent"
+  }, {
+    "name" : "StartBot",
+    "paramsList" : [ ],
+    "type" : "NLPIntent"
+  }, {
+    "name" : "EndBot",
+    "paramsList" : [ ],
+    "type" : "NLPIntent"
+  }, {
+    "name" : "PayBalance",
+    "paramsList" : [ ],
+    "type" : "NLPIntent"
+  }, {
+    "name" : "CheckBalance",
+    "paramsList" : [ ],
+    "type" : "NLPIntent"
+  } ],
+  "entities" : [ {
+    "name" : "OutageType",
+    "type" : "ENUMVALUES",
+    "enumValues" : "full{full:all out:everything gone:Full},partial{partial:not all:Partial:half}",
+    "ruleParameters" : null,
+    "parentEntity" : null,
+    "patternExpression" : null
+  }, {
+    "name" : "OutageOptions",
+    "type" : "ENUMVALUES",
+    "enumValues" : "Check Outage Status{check outage:outage status:check status for outage:check outage status},Report An Outage{report outage:report for outage:report},Check Balance{check balance:check Balance:balance}",
+    "ruleParameters" : null,
+    "parentEntity" : null,
+    "patternExpression" : null
+  }, {
+    "name" : "FaultType",
+    "type" : "ENUMVALUES",
+    "enumValues" : "ELECTRIC{light:electricity:electric:current:power},GAS{gas:lpg:LPG:nitrogen dioxide:nitrogen}",
+    "ruleParameters" : null,
+    "parentEntity" : null,
+    "patternExpression" : null
+  }, {
+    "name" : "AccountType",
+    "type" : "ENUMVALUES",
+    "enumValues" : "Phone Number{contact number:phone:cell number:number:call},Account Number{account:account number}",
+    "ruleParameters" : null,
+    "parentEntity" : null,
+    "patternExpression" : null
+  } ],
+  "dialog" : [ {
+    "metadata" : {
+      "platformVersion" : "1.0"
+    },
+    "main" : true,
+    "name" : "BGEutility",
+    "context" : {
+      "variables" : {
+        "greeting" : "string",
+        "name" : "string",
+        "identifier" : "string",
+        "numberEntity" : "NUMBER",
+        "accountTypeEntity" : "AccountType",
+        "outageOptions" : "OutageOptions",
+        "outageOptionVariable" : "string",
+        "phoneNumber" : "PHONE_NUMBER",
+        "phoneNumberEntity" : "PHONE_NUMBER",
+        "checkBalance_accountNumber" : "string",
+        "YesNoVariable" : "YES_NO",
+        "accountNumber" : "NUMBER",
+        "outageType" : "string",
+        "outageTypeEntity" : "OutageType",
+        "outageStatus" : "string",
+        "selectionType" : "string",
+        "outageStatusMessage" : "string",
+        "setStatus" : "string",
+        "selectedAccountType" : "string",
+        "verifiedAddressResult" : "string",
+        "addressResponse" : "string",
+        "accountType" : "AccountType",
+        "ifAddressExist" : "string",
+        "addressFound" : "string",
+        "setOutageReported" : "string",
+        "choices" : "string",
+        "accounts" : "string",
+        "setAddress" : "string",
+        "counter" : "string",
+        "outageReportProgress" : "string",
+        "anythingElseVariable" : "string",
+        "errorInMultipleAddress" : "string",
+        "reportOutageOrNot" : "string",
+        "reportOutageVariable" : "string",
+        "activeStatusResponse" : "string",
+        "numberOfAccount" : "string",
+        "accountsOptions" : "string",
+        "allResult" : "string",
+        "selectedAccountNumber" : "string",
+        "newUserAccount" : "string",
+        "selectedAccountOption" : "string",
+        "moreThanThreeAccount" : "string",
+        "maskedAddressFound" : "string",
+        "selectAccountOrPhoneVariable" : "string",
+        "unresolvedVariable" : "string",
+        "isMultipleAddressOrNot" : "string",
+        "addressNotCorrectCountVariable" : "string",
+        "checkBalance_MaskedAddress" : "string",
+        "checkBalance_AccountInfo" : "string",
+        "addressResponseCount" : "string",
+        "extraVariable" : "string",
+        "noAddressFoundCount" : "string",
+        "addressCorrectResponse" : "string",
+        "servicesDown" : "string",
+        "satisfiedRate" : "string",
+        "selectedAccountNumberType" : "string",
+        "faultType" : "FaultType",
+        "typeOfFault" : "string",
+        "identifierCountVariable" : "string",
+        "iResult" : "nlpresult"
+      }
+    },
+    "states" : {
+      "intent" : {
+        "component" : "System.Intent",
+        "properties" : {
+          "variable" : "iResult",
+          "confidenceThreshold" : 0.4
+        },
+        "transitions" : {
+          "actions" : {
+            "StartBot" : "resetStartBot",
+            "OutageStatus" : "resetOutageStatus",
+            "ReportOutage" : "resetAllReportOutageVariable",
+            "EndBot" : "resetEnd",
+            "CheckBalance" : "checkBalance",
+            "SentimentalBot" : "sentimentalAnalysis",
+            "PayBalance" : "payBalance",
+            "unresolvedIntent" : "checkUnresolvedCount"
+          }
+        }
+      },
+      "resetStartBot" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "addressNotCorrectCountVariable,identifierCountVariable,user.identifierCountVariable,multipleAddressCountVariable,user.multipleAddressCountVariable,checkUnresolvedCount,outageOptions,outageOptionVariable,user.addressNotCorrectCountVariable,unresolvedVariable,user.unresolvedVariable,selectAccountOrPhoneVariable,user.selectAccountOrPhoneVariable"
+        },
+        "transitions" : { }
+      },
+      "startBot" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${outageOptions.type.enumValues}",
+          "prompt" : "Hello, how may I help you today?\nYou can Check Outage Status, Report an Outage or Check Account Balance.\nPlease pick one option.",
+          "variable" : "outageOptionVariable"
+        },
+        "transitions" : {
+          "next" : "matchEntityForSwitchOutageOptions"
+        }
+      },
+      "matchEntityForSwitchOutageOptions" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "outageOptionVariable",
+          "variable" : "outageOptions"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "switchOutageOptions",
+            "nomatch" : "checkNumber"
+          }
+        }
+      },
+      "checkNumber" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "outageOptionVariable",
+          "variable" : "numberEntity"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "checkUnresolvedCount",
+            "nomatch" : "intent"
+          }
+        }
+      },
+      "switchOutageOptions" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "outageOptions",
+          "values" : [ "Check Outage Status", "Report An Outage", "Check Balance" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "Check Outage Status" : "resetOutageStatus",
+            "Report An Outage" : "resetAllReportOutageVariable",
+            "Check Balance" : "checkBalance"
+          }
+        }
+      },
+      "resetOutageStatus" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "identifierCountVariable,user.identifierCountVariable,multipleAddressCountVariable,user.multipleAddressCountVariable,phoneNumber,accountNumber,selectedAccountOption,addressNotCorrectCountVariable,activeStatusResponse,addressResponse,checkUnresolvedCount,outageOptions,outageOptionVariable,user.addressNotCorrectCountVariable,unresolvedVariable,user.unresolvedVariable,selectAccountOrPhoneVariable,user.selectAccountOrPhoneVariable"
+        },
+        "transitions" : { }
+      },
+      "outageStatus" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "Let's see what's going on with your service.\nWhat is the primary phone number associated with your account?",
+          "variable" : "phoneNumber",
+          "maxPrompts" : 2
+        },
+        "transitions" : {
+          "next" : "checkPhoneNumberSetOrNotForOutage"
+        }
+      },
+      "checkPhoneNumberSetOrNotForOutage" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "phoneNumber",
+          "value" : null
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "printOutage"
+          }
+        }
+      },
+      "printOutage" : {
+        "component" : "OutageStatus",
+        "properties" : {
+          "PhoneNumber" : "${phoneNumber.value.completeNumber}",
+          "AccountNumber" : "${accountNumber.value.number}"
+        },
+        "transitions" : {
+          "actions" : {
+            "setVariableValues" : "addressFoundOrNot"
+          }
+        }
+      },
+      "addressFoundOrNot" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "addressFound",
+          "value" : "yes"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "isMaskedAddressFound",
+            "notequal" : "againResetVariables"
+          }
+        }
+      },
+      "isMaskedAddressFound" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "maskedAddressFound",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "checkAccountNumberType",
+            "notequal" : "resetActiveStatusResponseForGasOnly"
+          }
+        }
+      },
+      "resetActiveStatusResponseForGasOnly" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "activeStatusResponse"
+        },
+        "transitions" : { }
+      },
+      "forGasOnly" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "I see that your account is associated with gas services only. For all gas emergencies, please contact BGE at 1-877-778-2222.\nIf you smell natural gas, leave the area immediately, and then call BGE. This number is available 24 hours a day, 7 days a week.\nIs there anything else that I can help you with?",
+          "variable" : "activeStatusResponse"
+        },
+        "transitions" : {
+          "next" : "CheckActiveStatusYesNo"
+        }
+      },
+      "CheckActiveStatusYesNo" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "activeStatusResponse",
+          "variable" : "YesNoVariable"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "setVariableForActiveStatusResponse",
+            "nomatch" : "intent"
+          }
+        }
+      },
+      "setVariableForActiveStatusResponse" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "activeStatusResponse",
+          "value" : "${YesNoVariable.value.yesno}"
+        },
+        "transitions" : {
+          "next" : "checkActiveStatusResponse"
+        }
+      },
+      "checkAccountNumberType" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "numberOfAccount",
+          "value" : "single"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "isAddressCorrect",
+            "notequal" : "checkNumberOfAccounts"
+          }
+        }
+      },
+      "checkNumberOfAccounts" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "moreThanThreeAccount",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "printMessageForMoreThanThreeAccounts",
+            "notequal" : "setVariableForMultipleAddress"
+          }
+        }
+      },
+      "printMessageForMoreThanThreeAccounts" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "My records indicate that there are several addresses associated with this account. Please visit us at bge.com or you can call us at 1-800-685-0123 for further support."
+        },
+        "transitions" : {
+          "return" : "printMessageForOverThreeAccounts"
+        }
+      },
+      "setVariableForMultipleAddress" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "isMultipleAddressOrNot",
+          "value" : "true"
+        },
+        "transitions" : {
+          "next" : "multipleAddressAccount"
+        }
+      },
+      "checkMultipleAddressCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.multipleAddressCountVariable",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "setMultipleAddressCountVariable"
+          }
+        }
+      },
+      "setMultipleAddressCountVariable" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "multipleAddressCountVariable",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyMultipleAddressCountVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "multipleAddressCountVariable",
+          "to" : "user.multipleAddressCountVariable"
+        },
+        "transitions" : {
+          "next" : "resetForMultipleAddressNotFound"
+        }
+      },
+      "resetForMultipleAddressNotFound" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "selectedAccountOption"
+        },
+        "transitions" : { }
+      },
+      "multipleAddressAccount" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${accountsOptions.value}",
+          "prompt" : "My records indicate that there are multiple addresses associated with the phone number provided. Please select the correct address:",
+          "variable" : "selectedAccountOption"
+        },
+        "transitions" : {
+          "next" : "selectedAddressFromMultiple"
+        }
+      },
+      "selectedAddressFromMultiple" : {
+        "component" : "OutageStatus",
+        "properties" : {
+          "PhoneNumber" : "",
+          "AccountNumber" : "",
+          "SelectedMaskedAddress" : "${selectedAccountOption.value}",
+          "MultipleAccountInfo" : "${allResult}"
+        },
+        "transitions" : {
+          "actions" : {
+            "setVariableValues" : "checkAddressFoundForMultipleAddress"
+          }
+        }
+      },
+      "checkAddressFoundForMultipleAddress" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "errorInMultipleAddress",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "checkMultipleAddressCount",
+            "notequal" : "checkStatusOrReportOutage"
+          }
+        }
+      },
+      "againResetVariables" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,accountNumber,addressResponse,selectedAccountType,activeStatusResponse"
+        },
+        "transitions" : { }
+      },
+      "checkSelectAccountOrPhoneCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.selectAccountOrPhoneVariable",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "selectAccountOrPhone"
+          }
+        }
+      },
+      "selectAccountOrPhone" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${accountTypeEntity.type.enumValues}",
+          "prompt" : "I’m sorry, but I can't find an account associated with that phone number.\nDo you have another phone number or the account number available?",
+          "variable" : "selectedAccountType"
+        },
+        "transitions" : {
+          "next" : "CheckSelectedAccountType"
+        }
+      },
+      "CheckSelectedAccountType" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "selectedAccountType",
+          "variable" : "accountTypeEntity"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "setAccountOrPhoneVariable",
+            "nomatch" : "intent"
+          }
+        }
+      },
+      "setAccountOrPhoneVariable" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "selectAccountOrPhoneVariable",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyAccountOrPhoneVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "selectAccountOrPhoneVariable",
+          "to" : "user.selectAccountOrPhoneVariable"
+        },
+        "transitions" : {
+          "next" : "resetSelectedAccountVariables"
+        }
+      },
+      "isAddressCorrect" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "${setAddress.value}.\nIs this correct?",
+          "variable" : "addressResponse"
+        },
+        "transitions" : {
+          "next" : "matchEntity_CheckAddressResponse"
+        }
+      },
+      "matchEntity_CheckAddressResponse" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "addressResponse",
+          "variable" : "YesNoVariable"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "setVariableForAddressResponse",
+            "nomatch" : "intent"
+          }
+        }
+      },
+      "setVariableForAddressResponse" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "addressResponse",
+          "value" : "${YesNoVariable.value.yesno}"
+        },
+        "transitions" : {
+          "next" : "checkAddressResponse"
+        }
+      },
+      "checkAddressResponse" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "addressResponse",
+          "values" : [ "YES", "NO" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "YES" : "checkStatusOrReportOutage",
+            "NO" : "resetVariables"
+          }
+        }
+      },
+      "resetVariables" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,accountNumber,addressResponse,selectedAccountType,numberOfAccount"
+        },
+        "transitions" : { }
+      },
+      "checkAddressNotCorrectCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.addressNotCorrectCountVariable",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "setAddressNotCorrectCountVariable"
+          }
+        }
+      },
+      "setAddressNotCorrectCountVariable" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "addressNotCorrectCountVariable",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyAddressNotCorrectUserVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "addressNotCorrectCountVariable",
+          "to" : "user.addressNotCorrectCountVariable"
+        },
+        "transitions" : {
+          "next" : "addressNotCorrect"
+        }
+      },
+      "addressNotCorrect" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${accountTypeEntity.type.enumValues}",
+          "prompt" : " I am sorry. Can you please provide an alternate phone number or account number?",
+          "variable" : "selectedAccountNumberType"
+        },
+        "transitions" : {
+          "next" : "CheckSelectedAccountNumberType"
+        }
+      },
+      "CheckSelectedAccountNumberType" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "selectedAccountNumberType",
+          "variable" : "accountTypeEntity"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "selectedAccount",
+            "nomatch" : "intent"
+          }
+        }
+      },
+      "resetSelectedAccountVariables" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,accountNumber,addressResponse"
+        },
+        "transitions" : { }
+      },
+      "selectedAccount" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "accountTypeEntity",
+          "values" : [ "Phone Number", "Account Number" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "Phone Number" : "linkedViaPhoneNumber",
+            "Account Number" : "linkedViaAccountNumber"
+          }
+        }
+      },
+      "linkedViaPhoneNumber" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "Great. What is the primary phone number?",
+          "variable" : "phoneNumber",
+          "maxPrompts" : 2
+        },
+        "transitions" : {
+          "next" : "againCheckPhoneNumberSetOrNotForOutage"
+        }
+      },
+      "againCheckPhoneNumberSetOrNotForOutage" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "phoneNumber",
+          "value" : null
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "printOutage"
+          }
+        }
+      },
+      "linkedViaAccountNumber" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "Great. What is the account number?",
+          "variable" : "accountNumber",
+          "maxPrompts" : 2
+        },
+        "transitions" : {
+          "next" : "againCheckAccountNumberSetOrNotForOutage"
+        }
+      },
+      "againCheckAccountNumberSetOrNotForOutage" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "accountNumber",
+          "value" : null
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "printOutage"
+          }
+        }
+      },
+      "checkStatusOrReportOutage" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "reportOutageVariable",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "resetReportOutageVariables",
+            "notequal" : "resetMultipleAddressVariable"
+          }
+        }
+      },
+      "resetMultipleAddressVariable" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "activeStatusResponse,reportOutageOrNot,outageType"
+        },
+        "transitions" : { }
+      },
+      "checkOutageStatus" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "setStatus",
+          "value" : "ACTIVE"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "activeOutageStatus",
+            "notequal" : "checkReportedOutage"
+          }
+        }
+      },
+      "activeOutageStatus" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "${setOutageReported.value} \nIs there anything else that I can help you with?",
+          "variable" : "activeStatusResponse"
+        },
+        "transitions" : {
+          "next" : "CheckActiveStatusYesNo"
+        }
+      },
+      "checkActiveStatusResponse" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "activeStatusResponse",
+          "values" : [ "YES", "NO" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "YES" : "resetStartBot",
+            "NO" : "resetEnd"
+          }
+        }
+      },
+      "resetStartBotVariables" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "typeOfFault,outageOptions,outageOptionVariable,phoneNumber,accountNumber,addressResponse,addressFound,setStatus,activeStatusResponse"
+        },
+        "transitions" : {
+          "next" : "startBot"
+        }
+      },
+      "activeStatusEnd" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "Thank you. Please come back anytime. Have a nice day!"
+        },
+        "transitions" : {
+          "return" : "activeStatusEnd"
+        }
+      },
+      "resetAllReportOutageVariable" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "addressNotCorrectCountVariable,identifierCountVariable,user.identifierCountVariable,phoneNumberEntity,user.addressNotCorrectCountVariable,accountsOptions,setStatus,activeStatusResponse,reportOutageOrNot,selectedAccountOption,isMultipleAddressOrNot,multipleAddressCountVariable,user.multipleAddressCountVariable,numberOfAccount,addressFound,reportOutageVariable,outageType,anythingElseVariable,phoneNumber,accountNumber,unresolvedVariable,user.unresolvedVariable,selectAccountOrPhoneVariable,user.selectAccountOrPhoneVariable"
+        },
+        "transitions" : { }
+      },
+      "reportOutage" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "What's the primary phone number associated with your account?",
+          "variable" : "phoneNumber",
+          "maxPrompts" : 2
+        },
+        "transitions" : {
+          "next" : "checkPhoneNumberSetOrNotForReport"
+        }
+      },
+      "checkPhoneNumberSetOrNotForReport" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "phoneNumber",
+          "value" : null
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "setReportOutageVariable"
+          }
+        }
+      },
+      "setReportOutageVariable" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "reportOutageVariable",
+          "value" : "true"
+        },
+        "transitions" : {
+          "next" : "printOutage"
+        }
+      },
+      "checkReportedOutage" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "Ok, thank you. We are not aware of an outage in your area. If you reported an outage within the past 15 minutes, it may not yet be reflected here. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, you can also report an outage. Would you like to report an outage?",
+          "variable" : "reportOutageOrNot"
+        },
+        "transitions" : {
+          "next" : "CheckReportOutageOrNot"
+        }
+      },
+      "CheckReportOutageOrNot" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "reportOutageOrNot",
+          "variable" : "YesNoVariable"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "setVariableForReportOutageOrNot",
+            "nomatch" : "intent"
+          }
+        }
+      },
+      "setVariableForReportOutageOrNot" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "reportOutageOrNot",
+          "value" : "${YesNoVariable.value.yesno}"
+        },
+        "transitions" : {
+          "next" : "selectResponseForReport"
+        }
+      },
+      "selectResponseForReport" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "reportOutageOrNot",
+          "values" : [ "YES", "NO" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "YES" : "askOutageType",
+            "NO" : "resetEnd"
+          }
+        }
+      },
+      "askOutageType" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${outageTypeEntity.type.enumValues}",
+          "prompt" : "Ok, let's get that reported.\nIs it a full outage or partial outage?",
+          "variable" : "outageType"
+        },
+        "transitions" : {
+          "next" : "checkSelectedOutageType"
+        }
+      },
+      "resetReportOutageVariables" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "reportOutageVariable,outageType,anythingElseVariable,typeOfFault"
+        },
+        "transitions" : { }
+      },
+      "reportForGasOrElectric" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "gas,electric",
+          "prompt" : "Ok, let’s get this reported. Is this an electric outage or a gas emergency?",
+          "variable" : "typeOfFault"
+        },
+        "transitions" : {
+          "next" : "matchSelectedFaultOptionEntity"
+        }
+      },
+      "matchSelectedFaultOptionEntity" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "typeOfFault",
+          "variable" : "faultType"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "checkSelectedFaultOption",
+            "nomatch" : "resetReportOutageVariables"
+          }
+        }
+      },
+      "checkSelectedFaultOption" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "faultType",
+          "values" : [ "ELECTRIC", "GAS" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "ELECTRIC" : "directReportOutage",
+            "GAS" : "resetActiveStatusResponse"
+          }
+        }
+      },
+      "resetActiveStatusResponse" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "activeStatusResponse"
+        },
+        "transitions" : { }
+      },
+      "reportGasOutage" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "For all gas emergencies, please contact BGE at 1-877-778-2222.\nIf you smell natural gas, leave the area immediately, and then call BGE.\nThis number is available 24 hours a day, 7 days a week.\nIs there anything else that I can help you with?",
+          "variable" : "activeStatusResponse"
+        },
+        "transitions" : {
+          "next" : "checkActiveStatusResponse"
+        }
+      },
+      "resetToSelectOutageTypeAgain" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "outageType"
+        },
+        "transitions" : { }
+      },
+      "directReportOutage" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${outageTypeEntity.type.enumValues}",
+          "prompt" : "Ok, let’s get this reported. Is it a full outage or partial?",
+          "variable" : "outageType"
+        },
+        "transitions" : {
+          "next" : "checkSelectedOutageType"
+        }
+      },
+      "checkSelectedOutageType" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "outageType",
+          "variable" : "outageTypeEntity"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "forMultipleOrSingle",
+            "nomatch" : "resetToSelectOutageTypeAgain"
+          }
+        }
+      },
+      "forMultipleOrSingle" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "isMultipleAddressOrNot",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "printReportOutageForMultiple",
+            "notequal" : "printReportOutage"
+          }
+        }
+      },
+      "printReportOutageForMultiple" : {
+        "component" : "ReportOutage",
+        "properties" : {
+          "PhoneNumber" : "",
+          "AccountNumber" : "${selectedAccountNumber}",
+          "OutageType" : "${outageType.value}"
+        },
+        "transitions" : {
+          "next" : "resetAnythingElseVariable"
+        }
+      },
+      "printReportOutage" : {
+        "component" : "ReportOutage",
+        "properties" : {
+          "PhoneNumber" : "${user.phoneNumber.value}",
+          "AccountNumber" : "${user.accountNumber.value}",
+          "OutageType" : "${outageType.value}"
+        },
+        "transitions" : {
+          "next" : "resetAnythingElseVariable"
+        }
+      },
+      "resetAnythingElseVariable" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "anythingElseVariable"
+        },
+        "transitions" : { }
+      },
+      "anythingElse" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "${outageReportProgress.value} .\nIs there anything else that I can help you with?",
+          "variable" : "anythingElseVariable"
+        },
+        "transitions" : {
+          "next" : "CheckAnythingElseVariable"
+        }
+      },
+      "CheckAnythingElseVariable" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "anythingElseVariable",
+          "variable" : "YesNoVariable"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "setVariableForAnythingElseVariable",
+            "nomatch" : "intent"
+          }
+        }
+      },
+      "setVariableForAnythingElseVariable" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "anythingElseVariable",
+          "value" : "${YesNoVariable.value.yesno}"
+        },
+        "transitions" : {
+          "next" : "checkQuestionResponse"
+        }
+      },
+      "checkQuestionResponse" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "anythingElseVariable",
+          "values" : [ "YES", "NO" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "YES" : "resetStartBot",
+            "NO" : "resetEnd"
+          }
+        }
+      },
+      "checkBalance" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,identifier,identifierCountVariable,user.identifierCountVariable,selectedAccountOption,servicesDown,accountNumber,addressFound,addressCorrectResponse,addressResponse,addressResponseCount,user.addressResponseCount,noAddressFoundCount,user.identifier,user.phoneNumber"
+        },
+        "transitions" : { }
+      },
+      "askPhoneNumber" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "What is the primary phone number associated with your account?",
+          "variable" : "phoneNumber",
+          "maxPrompts" : 2
+        },
+        "transitions" : {
+          "next" : "checkPhoneNumberSetOrNotForCheckBalance"
+        }
+      },
+      "checkPhoneNumberSetOrNotForCheckBalance" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "phoneNumber",
+          "value" : null
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "askIdentifier"
+          }
+        }
+      },
+      "checkIdentifierCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.identifierCountVariable",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "setIdentifierCountVariable"
+          }
+        }
+      },
+      "setIdentifierCountVariable" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "identifierCountVariable",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyIdentifierVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "identifierCountVariable",
+          "to" : "user.identifierCountVariable"
+        },
+        "transitions" : {
+          "next" : "resetIdentifier"
+        }
+      },
+      "resetIdentifier" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "identifier"
+        },
+        "transitions" : { }
+      },
+      "askIdentifier" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "What are the last 4 Digits of Your Social Security Number, Business Tax ID, or BGE PIN?",
+          "variable" : "identifier"
+        },
+        "transitions" : {
+          "next" : "checkIdentifierSetOrNotForCheckBalance"
+        }
+      },
+      "checkIdentifierSetOrNotForCheckBalance" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "identifier",
+          "variable" : "numberEntity"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "checkBackendServices",
+            "nomatch" : "checkIdentifierCount"
+          }
+        }
+      },
+      "checkBackendServices" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "servicesDown",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "servicesAreDown",
+            "notequal" : "checkIdentifierCount"
+          }
+        }
+      },
+      "checkAccountBalance" : {
+        "component" : "CheckBalance",
+        "properties" : {
+          "Identifier" : "${identifier.value}",
+          "PhoneNumber" : "${phoneNumber.value.completeNumber}"
+        },
+        "transitions" : {
+          "next" : "copyCheckBalanceVariables"
+        }
+      },
+      "copyCheckBalanceVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "identifier,phoneNumber",
+          "to" : "user.identifier,user.phoneNumber"
+        },
+        "transitions" : { }
+      },
+      "checkBalance_AddressFoundOrNot" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "addressFound",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "checkBalance_MultipleAddressFound",
+            "notequal" : "resetNoAddressFoundVariable"
+          }
+        }
+      },
+      "checkBalance_MultipleAddressFound" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "multipleAddressFound",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "checkBalance_ForMultipleAddress",
+            "notequal" : "checkBalance_AddressCorrectOrNot"
+          }
+        }
+      },
+      "resetAccountNumber" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "checkBalance_accountNumber"
+        },
+        "transitions" : { }
+      },
+      "checkBalance_ForMultipleAddress" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "You are associated with multiple accounts. Please enter your account number.",
+          "variable" : "checkBalance_accountNumber"
+        },
+        "transitions" : {
+          "next" : "checkAccountNumber"
+        }
+      },
+      "checkAccountNumber" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "checkBalance_accountNumber",
+          "variable" : "numberEntity"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "checkBalance_resetAddressFoundVariable",
+            "nomatch" : "resetAccountNumber"
+          }
+        }
+      },
+      "checkBalance_resetAddressFoundVariable" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "addressFound,addressResponse"
+        },
+        "transitions" : { }
+      },
+      "againCheckAccountBalance" : {
+        "component" : "CheckBalance",
+        "properties" : {
+          "Identifier" : "${user.identifier.value}",
+          "PhoneNumber" : "${user.phoneNumber.value.phoneNumber}",
+          "AccountNumber" : "${checkBalance_accountNumber.value}"
+        },
+        "transitions" : {
+          "next" : "AddressFoundOrNotForMultipleAcc"
+        }
+      },
+      "AddressFoundOrNotForMultipleAcc" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "addressFound",
+          "value" : "true"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "checkBalance_AddressCorrectOrNot",
+            "notequal" : "resetNoAddressFoundVariable"
+          }
+        }
+      },
+      "checkBalance_AddressCorrectOrNot" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "${checkBalance_MaskedAddress}. Is this correct?",
+          "variable" : "addressCorrectResponse"
+        },
+        "transitions" : {
+          "next" : "checkAddressCorrectResponse"
+        }
+      },
+      "checkAddressCorrectResponse" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "addressCorrectResponse",
+          "variable" : "YesNoVariable"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "setVariableForAddressCorrectResponse",
+            "nomatch" : "intent"
+          }
+        }
+      },
+      "setVariableForAddressCorrectResponse" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "addressCorrectResponse",
+          "value" : "${YesNoVariable.value.yesno}"
+        },
+        "transitions" : {
+          "next" : "checkBalance_AddressResponse"
+        }
+      },
+      "checkBalance_AddressResponse" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "addressCorrectResponse",
+          "values" : [ "YES", "NO" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "YES" : "checkBalance_AccountInfo",
+            "NO" : "checkBalance_AddressResponseCount"
+          }
+        }
+      },
+      "checkBalance_AccountInfo" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "${checkBalance_AccountInfo}"
+        },
+        "transitions" : {
+          "return" : "checkBalance_AccountInfo"
+        }
+      },
+      "checkBalance_AddressResponseCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.addressResponseCount",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "checkBalance_setAddressResponseCount"
+          }
+        }
+      },
+      "checkBalance_setAddressResponseCount" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "addressResponseCount",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyAddressResponseCountVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "addressResponseCount",
+          "to" : "user.addressResponseCount"
+        },
+        "transitions" : {
+          "next" : "checkBalance_resetVariables"
+        }
+      },
+      "checkBalance_resetVariables" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,identifier,accountNumber,addressResponse,addressFound,addressResponseCount,noAddressFoundCount,servicesDown,addressCorrectResponse,identifierCountVariable"
+        },
+        "transitions" : { }
+      },
+      "checkBalance_AddressNotCorrect" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "I’m sorry. Do you have another phone number or 4 Digits of Your Social Security Number, Business Tax ID, or BGE PIN?",
+          "variable" : "addressResponse"
+        },
+        "transitions" : {
+          "next" : "checkAddressResponse_checkBalance"
+        }
+      },
+      "checkAddressResponse_checkBalance" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "addressResponse",
+          "variable" : "YesNoVariable"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "setVariableForAddressResponse_checkBalance",
+            "nomatch" : "intent"
+          }
+        }
+      },
+      "setVariableForAddressResponse_checkBalance" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "addressResponse",
+          "value" : "${YesNoVariable.value.yesno}"
+        },
+        "transitions" : {
+          "next" : "checkAddressNotCorrectResponse"
+        }
+      },
+      "checkAddressNotCorrectResponse" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "addressResponse",
+          "values" : [ "YES", "NO" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "YES" : "againEnterPhoneNumber",
+            "NO" : "resetEnd_checkBalance"
+          }
+        }
+      },
+      "resetNoAddressFoundVariable" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "phoneNumber,servicesDown,identifier,accountNumber,addressCorrectResponse,addressResponse,addressFound,addressResponseCount,noAddressFoundCount,identifierCountVariable"
+        },
+        "transitions" : { }
+      },
+      "checkNoAddressFoundCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.noAddressFoundCount",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "setNoAddressFoundCount"
+          }
+        }
+      },
+      "setNoAddressFoundCount" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "noAddressFoundCount",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyNoAddressCountVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "noAddressFoundCount",
+          "to" : "user.noAddressFoundCount"
+        },
+        "transitions" : {
+          "next" : "checkBalance_noAccountFound"
+        }
+      },
+      "checkBalance_noAccountFound" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "yes,no",
+          "prompt" : "I’m sorry, but information does not match with my records. Do you have another phone number or 4 Digits of Your Social Security Number, Business Tax ID, or BGE PIN?",
+          "variable" : "addressResponse"
+        },
+        "transitions" : {
+          "next" : "checkNoAddressFoundResponse_checkBalance"
+        }
+      },
+      "checkNoAddressFoundResponse_checkBalance" : {
+        "component" : "System.MatchEntity",
+        "properties" : {
+          "sourceVariable" : "addressResponse",
+          "variable" : "YesNoVariable"
+        },
+        "transitions" : {
+          "actions" : {
+            "match" : "setVariableForNoAddressFoundResponse_checkBalance",
+            "nomatch" : "intent"
+          }
+        }
+      },
+      "setVariableForNoAddressFoundResponse_checkBalance" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "addressResponse",
+          "value" : "${YesNoVariable.value.yesno}"
+        },
+        "transitions" : {
+          "next" : "checkNoAddressFoundResponse"
+        }
+      },
+      "checkNoAddressFoundResponse" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "addressResponse",
+          "values" : [ "YES", "NO" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "YES" : "againEnterPhoneNumber",
+            "NO" : "resetEnd_checkBalance"
+          }
+        }
+      },
+      "againEnterPhoneNumber" : {
+        "component" : "System.Text",
+        "properties" : {
+          "prompt" : "What is the primary phone number?",
+          "variable" : "phoneNumber",
+          "maxPrompts" : 2
+        },
+        "transitions" : {
+          "next" : "checkPhoneNumber_CheckBalance"
+        }
+      },
+      "checkPhoneNumber_CheckBalance" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "phoneNumber",
+          "value" : null
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "askIdentifier"
+          }
+        }
+      },
+      "servicesAreDown" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "I'm not able to complete your request right now. Please try again later."
+        },
+        "transitions" : {
+          "return" : "servicesAreDown"
+        }
+      },
+      "end" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "Thank you. Please come back anytime. Have a nice day!"
+        },
+        "transitions" : {
+          "return" : "end"
+        }
+      },
+      "resetEnd" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "addressNotCorrectCountVariable,user.addressNotCorrectCountVariable,unresolvedVariable,user.unresolvedVariable,selectAccountOrPhoneVariable,user.selectAccountOrPhoneVariable"
+        },
+        "transitions" : { }
+      },
+      "rateSatisfaction" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "1,2,3,4,5",
+          "prompt" : "How satisfied were you with your experience today? Please rate on a scale from 1-5, with 5 being the most satisfied.",
+          "variable" : "satisfiedRate"
+        },
+        "transitions" : {
+          "next" : "checkSatisfactionRate"
+        }
+      },
+      "checkSatisfactionRate" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "satisfiedRate",
+          "values" : [ "1", "2", "3", "4", "5" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "1" : "sendSatisfactionRate",
+            "2" : "sendSatisfactionRate",
+            "3" : "sendSatisfactionRate",
+            "4" : "sendSatisfactionRate",
+            "5" : "sendSatisfactionRate"
+          }
+        }
+      },
+      "resetSatisfiedRate" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "satisfiedRate"
+        },
+        "transitions" : { }
+      },
+      "wrongSatisfactionRate" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "1,2,3,4,5",
+          "prompt" : "I’m sorry, but I didn’t understand. Just to clarify, how satisfied were you with your experience today? Please rate on a scale from 1-5, with 5 being the most satisfied.",
+          "variable" : "satisfiedRate"
+        },
+        "transitions" : {
+          "next" : "sendSatisfactionRate"
+        }
+      },
+      "sendSatisfactionRate" : {
+        "component" : "CustomerSatisfaction",
+        "properties" : {
+          "SatisfactionRate" : "${satisfiedRate.value}",
+          "PhoneNumber" : "${phoneNumber.value.completeNumber}",
+          "AccountNumber" : "${accountNumber.value}"
+        },
+        "transitions" : {
+          "next" : "endGreetings"
+        }
+      },
+      "resetEnd_checkBalance" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "addressNotCorrectCountVariable,user.addressNotCorrectCountVariable,unresolvedVariable,user.unresolvedVariable,selectAccountOrPhoneVariable,user.selectAccountOrPhoneVariable"
+        },
+        "transitions" : { }
+      },
+      "rateSatisfaction_checkBalance" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "1,2,3,4,5",
+          "prompt" : "How satisfied were you with your experience today? Please rate on a scale from 1-5, with 5 being the most satisfied.",
+          "variable" : "satisfiedRate"
+        },
+        "transitions" : {
+          "next" : "checkSatisfactionRate_checkBalance"
+        }
+      },
+      "checkSatisfactionRate_checkBalance" : {
+        "component" : "System.Switch",
+        "properties" : {
+          "variable" : "satisfiedRate",
+          "values" : [ "1", "2", "3", "4", "5" ]
+        },
+        "transitions" : {
+          "actions" : {
+            "1" : "sendSatisfactionRate",
+            "2" : "sendSatisfactionRate",
+            "3" : "sendSatisfactionRate",
+            "4" : "sendSatisfactionRate",
+            "5" : "sendSatisfactionRate"
+          }
+        }
+      },
+      "resetSatisfiedRate_checkBalance" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "satisfiedRate"
+        },
+        "transitions" : { }
+      },
+      "wrongSatisfactionRate_checkBalance" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "1,2,3,4,5",
+          "prompt" : "I’m sorry, but I didn’t understand. Just to clarify, how satisfied were you with your experience today? Please rate on a scale from 1-5, with 5 being the most satisfied.",
+          "variable" : "satisfiedRate"
+        },
+        "transitions" : {
+          "next" : "sendSatisfactionRate_checkBalance"
+        }
+      },
+      "sendSatisfactionRate_checkBalance" : {
+        "component" : "CustomerSatisfaction",
+        "properties" : {
+          "SatisfactionRate" : "${satisfiedRate.value}",
+          "PhoneNumber" : "${phoneNumber.value.completeNumber}",
+          "AccountNumber" : "${checkBalance_accountNumber.value}"
+        },
+        "transitions" : {
+          "next" : "endGreetings"
+        }
+      },
+      "endGreetings" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "Thank you for your feedback. Have a nice day!"
+        },
+        "transitions" : {
+          "return" : "endGreetings"
+        }
+      },
+      "checkUnresolvedCount" : {
+        "component" : "System.ConditionEquals",
+        "properties" : {
+          "variable" : "user.unresolvedVariable",
+          "value" : "1"
+        },
+        "transitions" : {
+          "actions" : {
+            "equal" : "callCustCare",
+            "notequal" : "resetOutageOptionVariable"
+          }
+        }
+      },
+      "resetOutageOptionVariable" : {
+        "component" : "System.ResetVariables",
+        "properties" : {
+          "variableList" : "outageOptionVariable"
+        },
+        "transitions" : { }
+      },
+      "unresolved" : {
+        "component" : "System.List",
+        "properties" : {
+          "options" : "${outageOptions.type.enumValues}",
+          "prompt" : "I’m sorry, but I’m unavailable to assist you with this request. You can check Outage Status, Report an Outage or Check Account Balance.\nPlease pick one option.",
+          "variable" : "outageOptionVariable"
+        },
+        "transitions" : {
+          "next" : "setUnresolvedVariable"
+        }
+      },
+      "setUnresolvedVariable" : {
+        "component" : "System.SetVariable",
+        "properties" : {
+          "variable" : "unresolvedVariable",
+          "value" : "1"
+        },
+        "transitions" : { }
+      },
+      "copyUserVariables" : {
+        "component" : "System.CopyVariables",
+        "properties" : {
+          "from" : "unresolvedVariable",
+          "to" : "user.unresolvedVariable"
+        },
+        "transitions" : {
+          "next" : "matchEntityForSwitchOutageOptions"
+        }
+      },
+      "sentimentalAnalysis" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "I understand your frustration and apologize for the inconvenience. Please reach us at 1-800-685-0123 so we can assist you further."
+        },
+        "transitions" : {
+          "return" : "sentimentalAnalysis"
+        }
+      },
+      "callCustCare" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "I’m sorry, but I am unable to assist you at this time. Please visit us at bge.com or you can call us at 1-800-685-0123 for further support."
+        },
+        "transitions" : {
+          "return" : "callCustCare"
+        }
+      },
+      "payBalance" : {
+        "component" : "System.Output",
+        "properties" : {
+          "text" : "To pay your bill, please login to My Account at bge.com or call us at 1-800-685-0123. Is there anything I can help you with?"
+        },
+        "transitions" : {
+          "return" : "payBalance"
+        }
+      }
+    }
+  } ],
+  "componentServices" : [ {
+    "name" : "BGECustomComponents",
+    "description" : "custom components",
+    "url" : "https://mobileportaldev-sofbangsub.mobileenv.us2.oraclecloud.com:443/mobile/custom/ExelonBGEUtilityBotCC/components",
+    "version" : "1.0",
+    "headers" : [ ],
+    "credentials" : {
+      "type" : "mcs",
+      "mobileBackendId" : "cbf65046-c4ba-466b-aa39-e57aad157133",
+      "anonymous" : true,
+      "username" : null,
+      "anonymousKeyKey" : null,
+      "passwordKey" : null
+    }
+  } ],
+  "trainingDataList" : [ {
+    "sentence" : "Is there an outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Is there an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My electricity is out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Check my outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Check my Outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Do we have an Outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Do we have an outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Do we have an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will my power be back?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will my power be back",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "outage status",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will my power be restored?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you tell me outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the outage status?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "OUT",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "It’s dark in here",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Out lights are out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Black out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No Power",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no power",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no lights",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Lights out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power on",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power back on",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power on now",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "We have an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "we have an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Electric outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "outage notification",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s the status for my outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "how long will I be without power?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "how long will I be without power",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power was cut",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is the status for my outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when will my power be back?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s the outage status for my account <enter account #>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the outage status",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will my power be back?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "#stat",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the outage status for my account <enter account #>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Do we have an outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the outage status for my account <enter account #>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the status for my outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the outage status",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "do you show an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will my power be restored?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "how long will the power be off?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "why is the power out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats the outage status for my account <enter account #>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "check outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats the status for my outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power shut off",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Outage at <account number>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Do I have an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s the outage status",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My power is out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "How long will the power be off?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power shut off",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats the outage status",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "is there an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is the outage status",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you tell me outage status for my account <enter phone #>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s the outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when will my power be back?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "How long will I be without power",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when will the power be back on",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will power be restored?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Is there an outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "do you show power outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "service shut off",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is the outage status for my account",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will the power be back on",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the outage status?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "our power is out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "we lost power",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the outage status?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when will the power be back on?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power turned off",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will power be restored",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is the outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s the status for my outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats the status for my outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Do I have an outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "my power has been shut off",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when will power be restored?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when will I get my power back?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power is out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will the power be back on?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power is out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "why is the power out?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Service shut off",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Why is the power out?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s the outage status for my account",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the status for my outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "how long will the power be off",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats the outage status?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s the status for my outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "outage on <account number>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats the outage status for my account",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "How long will I be without power?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the status for my outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when will my power be back",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "check my outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power was cut",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "outage at <account number>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Why is the power out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Is there an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "do I have an outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s the outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is the outage status?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Outage on <account number>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "why is the power out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s the outage status?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will my power be restored",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Outage notification",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When will my power be back",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Outage status",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s the outage status for my account <enter account #>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Check my outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My power has been shut off",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you tell me outage status for my account <enter phone #>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s the status for my outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "electric outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when will power be restored",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when will my power be restored",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I want to report an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats the outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s the outage status",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Our power is out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "do we have an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "still no power",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s the outage status?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "We lost power",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i want to report an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the outage status for my account?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "do I have an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is the status for my outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is the outage status for my account <enter account #>",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the outage status for my account",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Do we have an outage",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s the outage status for my account",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the outage status for my account",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "How long will the power be off",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Still no power",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "how long will the power be out?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the status for my outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "outage status",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power turned off",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "do we have an outage?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when will my power be restored?",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "my power is out",
+    "intent" : "OutageStatus",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "This is unacceptable",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m going to the ICC",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I AM NOT HAPPY WITH THIS",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m calling a lawyer",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "assholes",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Screw you",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m contacting my councilman",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "This is pissing me off",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "ASAP",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "asshole",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "shit",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "ass wipe",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "go to hell",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You need to fix this now",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "bitches",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "fuck",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I am not happy with this answer",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m going to get a lawyer",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "WTF",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "bitch",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’ll report this to the Better Business Bureau",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "fuckers",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "This is nonsense",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m contacting my mayor",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m contacting my alderman",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "asswipe",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "fuck you",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "scumbags",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "dick",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You suck",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "fuck off",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "scum bags",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m reporting this to the Illinois Commerce Commission",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’ll report this to the BBB",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Screw You",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "bullshit",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "bull shit",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "BGE Sucks",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "suck",
+    "intent" : "SentimentalBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I have an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I would like to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I don’t have electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I don’t have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I do not have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My power is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage for 9176789111",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage for phone number 4904861189",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My power is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No electricity in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "#OUT",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "it’s dark",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "my power is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I have no power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Black out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power back on",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i have no power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "it’s dark here",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Blackout",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power lost",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i dont have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "#out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "my electricity is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I dont have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "turn my power on now",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I’m out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No electricity in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power lost",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i would like to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i don’t have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no lights",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power on",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Turn my power on now",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "lost power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Lost power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "It’s dark in here",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Im out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I would like to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "It’s dark",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report an Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i have an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Lights out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My electricity is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no electricity in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Our lights are out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power lost",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report outage for <enter account #>",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report Outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage for <enter account #>",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "our lights are out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Lost power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i’m out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report outage for phone number <enter phone #>",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My power is out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i do not have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I do not have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "It’s dark here",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i don’t’ have electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I have an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "it’s dark in here",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "im out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I don’t have electricity",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "turn my power on",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "blackout",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "lights out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I need to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i need to report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "black out",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report outage for phone number <enter phone #>",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "power lost",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report an outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No Power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Power outage",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "lost power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No lights",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "turn my power back on",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I don’t have power",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "no power in my house",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "OUT",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "report",
+    "intent" : "ReportOutage",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello BG&E",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "BG&E App",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "BG&E app",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey ",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey you there ?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Bot",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What's up",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What's up?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats up",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Wuts up?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Wuts up",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "to s",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Yo",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you please help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "yo",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s up",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "would you help me please",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Wassup",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "would you please help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Pls",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "wassup?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Help me please",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Help me please",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi my name is <enter name>",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Need help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "could you help me please",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi, can you please help me?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You There?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hola",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello bge",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "good afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi bge",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello Bge",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello bge",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "sup",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello Bge",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "good morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi BGE",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hola",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Sup",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "BGE App",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey you there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Bot",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello BGE",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi Bge",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "good evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "you there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "BGE app",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi Bge",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hello BGE",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hey you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hey",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hi bge",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Howdy",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Hi BGE",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "howdy",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "are you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you please help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you help?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Are you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you please help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "you there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "evening",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "you there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you help?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you help me?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you help me?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "are you there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "You there?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "afternoon",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "morning",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Are you there",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "could you please help me",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Pls help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I need help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s going on",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I have a question",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "hello I have a question",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "help me please",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats up",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s going on?",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i need help",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "help me pls",
+    "intent" : "StartBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "close",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I am all done for now",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "not right now",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I am done for now",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "not right now",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "thank you",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "thanks",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "thats it",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "thats it for now",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "end",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "nothing",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Bye",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Thank you",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Have a good day",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "That will be all",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Good Bye",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Goodbye",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Thanks",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "THX",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "TY",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "ty",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Ty",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Done",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "i'm done",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "I'm done",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "ttyl",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "TTYL",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "No",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "bye",
+    "intent" : "EndBot",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Pay my balance",
+    "intent" : "PayBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "pay",
+    "intent" : "PayBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Pay",
+    "intent" : "PayBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "pay balance",
+    "intent" : "PayBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Pay Balance",
+    "intent" : "PayBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Pay balance",
+    "intent" : "PayBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "pay Balance",
+    "intent" : "PayBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "pay my dues",
+    "intent" : "PayBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "pay my balance",
+    "intent" : "PayBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "How much do I owe",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Current balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What will my bill be",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When is my bill due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "How much is my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats this months bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "how much is my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my bill amount?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my current bill due date?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s this month’s bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "check my account balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when is my payment due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When is my current bill due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s the balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my current balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is the balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my bill amount",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is this month’s bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is the balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my current bill due date?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats the balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my bill amount",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What do I owe?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When is my payment due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my current balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what will my bill be?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my amount due for the prior month?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when is my current bill due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my bill amount?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whens my bill due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my bill amount",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is this months bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my current balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whens my bill due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "current balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s the balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my bill amount",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you tell my account balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Check my account balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my amount due for the prior month?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my bill amount?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s this month’s bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my current bill due date?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When is my current bill due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my current amount due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my current amount due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is this months bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "How much is my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my amount due for the prior month",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "My account balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my current bill due date",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s this month’s bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s this months bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When’s my bill due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my current balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats this months bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my current bill due date",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When is my bill due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is this months bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Pay my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my current balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what do I owe",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What do I owe",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my amount due for the prior month",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my current balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my current amount due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my current balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my current amount due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what will my bill be",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my bill amount",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my amount due for prior month",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is this month’s bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my current amount due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "How much do I owe?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my current amount due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my current amount due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my current bill due date",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Account balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my bill amount?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whens my bill due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s this months bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my current balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my amount due for the prior month?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my current balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you tell my account balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Can you tell my account balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is this months bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my current balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my amount due for the prior month",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "account balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is this month’s bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my amount due for the prior month",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats this months bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "current balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my current amount due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats this months bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when is my payment due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "pay my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when is my bill due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my current bill due date?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when is my bill due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my amount due for prior month?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "my account balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When’s my bill due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my current bill due date?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "how much do I owe",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my current amount due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "When is my payment due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is my bill amount?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my current amount due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when’s my bill due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s the balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my amount due for the prior month?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when’s my bill due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my amount due for the prior month?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my bill amount",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my current bill due date",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my current bill due date?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats the balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Current balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats this months bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my amount due for the prior month",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my bill amount?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my current balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Whats my current amount due",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s the balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "how much is my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whens my bill due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "how much do I owe?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is this month’s bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What is the balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s my current balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats this months bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my current amount due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what do I owe?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what’s this month’s bill?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats the balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "can you tell my account balance?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "whats my current bill due date",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What’s my bill",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "What will my bill be?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "when is my current bill due?",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "what is my current bill due date",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "check balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  }, {
+    "sentence" : "Check Balance",
+    "intent" : "CheckBalance",
+    "namedEntities" : [ ]
+  } ],
+  "channels" : [ {
+    "name" : "System_Bot_Test",
+    "description" : "Used by the BOT test feature. If it is disabled, the test UI will not work for this BOT.",
+    "enabled" : true,
+    "config" : {
+      "type" : "test"
+    }
+  }, {
+    "name" : "GoogleAssistance",
+    "description" : "GoogleAssistance",
+    "enabled" : true,
+    "config" : {
+      "type" : "webhook",
+      "webhookUri" : "https://bots-samples-nodejs:8889/apps/chat/bots/0790802F-43A9-47A4-9AE9-34C7611B78C6/messages"
+    }
+  }, {
+    "name" : "Alexa",
+    "enabled" : true,
+    "config" : {
+      "type" : "webhook",
+      "webhookUri" : "https://bots-samples-nodejs:8889/apps/alexa-singleBot/singleBotWebhook/messages"
+    }
+  }, {
+    "name" : "FacebookChannel",
+    "enabled" : true,
+    "config" : {
+      "type" : "facebook"
+    }
+  } ],
+  "settings" : {
+    "createdOn" : "2017-11-03T05:51:56.999Z",
+    "updatedOn" : "2017-11-03T05:51:56.999Z",
+    "links" : null,
+    "settings" : {
+      "Multistage_Pipeline" : true,
+      "Verbose_Output" : false,
+      "Result_Size" : 10,
+      "Pipeline_Output_Size" : 100
+    }
+  }
+}
