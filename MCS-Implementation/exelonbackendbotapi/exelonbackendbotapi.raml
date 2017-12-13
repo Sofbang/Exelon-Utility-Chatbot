@@ -1,0 +1,29 @@
+#%RAML 0.8
+title: ExelonBackendBotAPI
+version: 1.0
+baseUri: /mobile/custom/exelonbackendbotapi
+protocols: [HTTPS]
+/{opco}/outage/query:
+  displayName: Get Outage Status
+  get:
+    displayName: Outage Status
+    description: |
+      Endpoint to get outage status
+      
+    protocols: [HTTPS]
+    queryParameters:
+      PhoneNumber:
+        displayName: Phone Number
+        type: string
+/{opco}/outage:
+  displayName: Report Outage
+  get:
+    displayName: Report Outage
+    protocols: [HTTPS]
+    queryParameters:
+      PhoneNumber:
+        displayName: Phone Number
+        type: string
+      AccNumber:
+        displayName: Account Number
+        type: string

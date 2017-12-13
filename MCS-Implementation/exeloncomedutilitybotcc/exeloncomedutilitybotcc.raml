@@ -1,0 +1,27 @@
+#%RAML 0.8
+title: ExelonComedUtilityBotCC
+version: 1.0
+baseUri: /mobile/custom/ExelonComedUtilityBotCC
+protocols: [HTTPS]
+/components:
+  description: |
+    Component metadata retrieval
+    
+  get:
+    displayName: Metadata
+    description: |
+      Component metadata catalog
+      
+    protocols: [HTTPS]
+  /{componentName}:
+    description: |
+      Component invocation
+      
+    uriParameters:
+      componentName:
+        displayName: componentName
+        type: string
+        required: true
+    post:
+      description: |
+        Invoke the named component
