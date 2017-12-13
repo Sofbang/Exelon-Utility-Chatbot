@@ -3,7 +3,7 @@ const _ = require("underscore");
 const express = require('express');
 const bodyParser = require('body-parser');
 const PubSub = require('pubsub-js');
-const webhookUtil = require('../lib/webhookUtil.js');
+const webhookUtil = require('./lib/webhookUtil.js');
 const WebSocket = require('ws');
 
 PubSub.immediateExceptions = true;
