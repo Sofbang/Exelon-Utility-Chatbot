@@ -75,5 +75,5 @@ var appConfig = {
 }
 
 exports.get = function get(env) {
-    return appConfig[env] || appConfig.default;
+    return appConfig[env] || appConfig.dev;
 }
