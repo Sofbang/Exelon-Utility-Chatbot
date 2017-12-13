@@ -37,8 +37,8 @@ module.exports = {
         if(SelectedMaskedAddress && MultipleAccountInfo){
                 console.log("in if loop selectedMaskedAddress is : "+SelectedMaskedAddress+ " and all info is :{"+JSON.parse(MultipleAccountInfo)+"}");
                 var userAccounts = JSON.parse(MultipleAccountInfo);
-                var filteredUserAccounts = userAccounts.filter(function(userAccount){
-                    return userAccount.data[0].maskedAddress == SelectedMaskedAddress;
+                var filteredUserAccounts = userAccounts.filter(function(userAccount){                
+                    return (userAccount.data[0].maskedAddress).toLowerCase() == SelectedMaskedAddress.toLowerCase();
                 });
                 var selectedAccountNumber;
                 if(filteredUserAccounts.length > 0){
