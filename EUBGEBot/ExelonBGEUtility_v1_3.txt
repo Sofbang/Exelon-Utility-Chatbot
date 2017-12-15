@@ -1,0 +1,1434 @@
+metadata:
+  platformVersion: 1.0
+main: true
+name: BGEutility
+context:
+  variables:
+    name: "string"
+    identifier: "string"
+    numberEntity: "NUMBER"
+    accountTypeEntity: "AccountType"
+    outageOptions: "OutageOptions"
+    outageOptionVariable: "string"
+    phoneNumber: "PHONE_NUMBER"
+    phoneNumberEntity: "PHONE_NUMBER"
+    checkBalance_accountNumber: "string"
+    YesNoVariable: "YES_NO"    
+    accountNumber: "NUMBER"
+    outageType: "string"
+    outageTypeEntity: "OutageType"
+    outageStatus: "string"
+    selectionType: "string"
+    outageStatusMessage: "string"
+    setStatus: "string"
+    selectedAccountType: "string"
+    verifiedAddressResult: "string"
+    addressResponse: "string"
+    accountType: "AccountType"
+    ifAddressExist: "string"
+    addressFound: "string"
+    setOutageReported: "string"
+    choices: "string"
+    accounts: "string"
+    setAddress: "string"
+    counter: "string"
+    outageReportProgress: "string"
+    anythingElseVariable: "string"
+    errorInMultipleAddress: "string"
+    reportOutageOrNot: "string"
+    reportOutageVariable: "string"
+    activeStatusResponse: "string"
+    numberOfAccount: "string"
+    accountsOptions: "string"
+    allResult: "string"
+    selectedAccountNumber: "string"
+    newUserAccount: "string"
+    selectedAccountOption: "string"
+    moreThanThreeAccount: "string"
+    maskedAddressFound: "string"
+    selectAccountOrPhoneVariable: "string"
+    unresolvedVariable: "string"
+    isMultipleAddressOrNot: "string"
+    addressNotCorrectCountVariable: "string"
+    checkBalance_MaskedAddress: "string"
+    checkBalance_AccountInfo: "string"
+    addressResponseCount: "string"
+    extraVariable: "string"
+    noAddressFoundCount: "string"
+    addressCorrectResponse: "string"
+    servicesDown: "string"
+    satisfiedRate: "string"
+    selectedAccountNumberType: "string"
+    faultType: "FaultType"
+    typeOfFault: "string"
+    identifierCountVariable: "string"
+    accountNumberCountVariable: "string"
+    multipleAddressCountVariable: "string"
+    checkAccountNumberCount: "string"
+    iResult: "nlpresult"
+states:
+  intent:
+    component: "System.Intent"
+    properties:
+      variable: "iResult"
+      confidenceThreshold: 0.4
+    transitions:
+      actions:
+        StartBot: "resetStartBot"
+        OutageStatus: "resetOutageStatus"
+        ReportOutage: "resetAllReportOutageVariable"
+        EndBot: "resetEnd"
+        CheckBalance: "checkBalance"
+        SentimentalBot: "sentimentalAnalysis"
+        PayBalance: "payBalance"
+        unresolvedIntent: "checkUnresolvedCount"
+        
+  resetStartBot:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "user.addressNotCorrectCountVariable,user.identifier,user.phoneNumber,user.noAddressFoundCount,user.addressResponseCount,user.checkAccountNumberCount,user.unresolvedVariable,multipleAddressCountVariable,user.selectAccountOrPhoneVariable,user.identifierCountVariable,user.multipleAddressCountVariable,identifier,numberEntity,accountTypeEntity,outageOptions,outageOptionVariable,phoneNumber,phoneNumberEntity,checkBalance_accountNumber,YesNoVariable,accountNumber,outageType,outageTypeEntity,outageStatus,selectionType,outageStatusMessage,setStatus,selectedAccountType,verifiedAddressResult,addressResponse,accountType,ifAddressExist,addressFound,setOutageReported,choices,accounts,setAddress,counter,outageReportProgress,anythingElseVariable,errorInMultipleAddress,reportOutageOrNot,reportOutageVariable,activeStatusResponse,numberOfAccount,accountsOptions,allResult,selectedAccountNumber,newUserAccount,selectedAccountOption,moreThanThreeAccount,maskedAddressFound,selectAccountOrPhoneVariable,unresolvedVariable,isMultipleAddressOrNot,addressNotCorrectCountVariable,checkBalance_MaskedAddress,checkBalance_AccountInfo,addressResponseCount,extraVariable,noAddressFoundCount,addressCorrectResponse,servicesDown,satisfiedRate,selectedAccountNumberType,faultType,typeOfFault,identifierCountVariable,accountNumberCountVariable,checkAccountNumberCount"
+    transitions: {}    
+        
+  startBot:
+    component: "System.List"
+    properties:
+      options: "${outageOptions.type.enumValues}"
+      prompt: "Hello, how may I help you today? You can Check Outage Status, Report an Outage or Check Account Balance. Please pick one option."
+      variable: "outageOptionVariable"
+    transitions:
+      next: "matchEntityForSwitchOutageOptions"   
+  
+  matchEntityForSwitchOutageOptions:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "outageOptionVariable"
+      variable: "outageOptions"
+    transitions:
+      actions:
+        match: "switchOutageOptions"
+        nomatch: "checkNumber"
+        
+  checkNumber:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "outageOptionVariable"
+      variable: "numberEntity"
+    transitions:
+      actions:
+        match: "checkUnresolvedCount"
+        nomatch: "intent"
+      
+  switchOutageOptions:
+    component: "System.Switch"
+    properties:
+      variable: "outageOptions"
+      values:
+      - "Check Outage Status"
+      - "Report An Outage"
+      - "Check Balance"
+    transitions:
+      actions:
+        Check Outage Status: "resetOutageStatus"
+        Report An Outage: "resetAllReportOutageVariable"
+        Check Balance: "checkBalance"
+        
+  resetOutageStatus:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "user.addressNotCorrectCountVariable,user.identifier,user.phoneNumber,user.noAddressFoundCount,user.addressResponseCount,user.checkAccountNumberCount,user.unresolvedVariable,multipleAddressCountVariable,user.selectAccountOrPhoneVariable,user.identifierCountVariable,user.multipleAddressCountVariable,identifier,numberEntity,accountTypeEntity,outageOptions,outageOptionVariable,phoneNumber,phoneNumberEntity,checkBalance_accountNumber,YesNoVariable,accountNumber,outageType,outageTypeEntity,outageStatus,selectionType,outageStatusMessage,setStatus,selectedAccountType,verifiedAddressResult,addressResponse,accountType,ifAddressExist,addressFound,setOutageReported,choices,accounts,setAddress,counter,outageReportProgress,anythingElseVariable,errorInMultipleAddress,reportOutageOrNot,reportOutageVariable,activeStatusResponse,numberOfAccount,accountsOptions,allResult,selectedAccountNumber,newUserAccount,selectedAccountOption,moreThanThreeAccount,maskedAddressFound,selectAccountOrPhoneVariable,unresolvedVariable,isMultipleAddressOrNot,addressNotCorrectCountVariable,checkBalance_MaskedAddress,checkBalance_AccountInfo,addressResponseCount,extraVariable,noAddressFoundCount,addressCorrectResponse,servicesDown,satisfiedRate,selectedAccountNumberType,faultType,typeOfFault,identifierCountVariable,accountNumberCountVariable,checkAccountNumberCount" 
+    transitions: {} 
+        
+  outageStatus:
+    component: "System.Text"
+    properties:
+      prompt: "Let's see what's going on with your service. What is the primary phone number associated with your account?"
+      variable: "phoneNumber"
+      maxPrompts: 2
+    transitions:
+      next: "checkPhoneNumberSetOrNotForOutage"
+      
+  checkPhoneNumberSetOrNotForOutage:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "phoneNumber"
+      value: null
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "printOutage"  
+      
+  printOutage:
+    component: "OutageStatus"
+    properties:
+      PhoneNumber: "${phoneNumber.value.completeNumber}"
+      AccountNumber: "${accountNumber.value.number}"
+    transitions:
+      actions:
+        setVariableValues: "addressFoundOrNot"
+        
+  addressFoundOrNot:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "addressFound"
+      value: "yes"
+    transitions:
+      actions:
+        equal: "isMaskedAddressFound"
+        notequal: "againResetVariables"
+        
+  isMaskedAddressFound:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "maskedAddressFound"
+      value: "true"
+    transitions:
+      actions:
+        equal: "checkAccountNumberType"
+        notequal: "resetActiveStatusResponseForGasOnly"
+        
+  resetActiveStatusResponseForGasOnly:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "activeStatusResponse"
+    transitions: {} 
+        
+  forGasOnly:
+    component: "System.List"
+    properties:
+      options: "Yes,No"
+      prompt: "I see that your account is associated with gas services only. For all gas emergencies, please contact BGE at 1-877-778-2222.If you smell natural gas, leave the area immediately, and then call BGE. This number is available 24 hours a day, 7 days a week. Is there anything else that I can help you with?"
+      variable: "activeStatusResponse"
+    transitions:
+      next: "CheckActiveStatusYesNo" 
+  
+  CheckActiveStatusYesNo:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "activeStatusResponse"
+      variable: "YesNoVariable"
+    transitions:
+      actions:
+        match: "setVariableForActiveStatusResponse"
+        nomatch: "intent"
+      
+  setVariableForActiveStatusResponse:
+    component: "System.SetVariable"
+    properties:
+      variable: "activeStatusResponse"
+      value: "${YesNoVariable.value.yesno}"
+    transitions:
+      next: "checkActiveStatusResponse"
+        
+  checkAccountNumberType:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "numberOfAccount"
+      value: "single"
+    transitions:
+      actions:
+        equal: "isAddressCorrect"
+        notequal: "checkNumberOfAccounts"    
+        
+  checkNumberOfAccounts:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "moreThanThreeAccount"
+      value: "true"
+    transitions:
+      actions:
+        equal: "printMessageForMoreThanThreeAccounts"
+        notequal: "setVariableForMultipleAddress"
+   
+  printMessageForMoreThanThreeAccounts:
+    component: "System.Output"
+    properties:
+      text: "My records indicate that there are several addresses associated with this account. Please visit us at bge.com or you can call us at 1-800-685-0123 for further support."
+    transitions:
+      return: "printMessageForOverThreeAccounts"
+        
+  setVariableForMultipleAddress:
+    component: "System.SetVariable"
+    properties:
+      variable: "isMultipleAddressOrNot"
+      value: "true"
+    transitions:
+      next: "multipleAddressAccount"
+      
+  checkMultipleAddressCount:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "user.multipleAddressCountVariable"
+      value: "1"
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "setMultipleAddressCountVariable"
+      
+  setMultipleAddressCountVariable:
+    component: "System.SetVariable"
+    properties:
+      variable: "multipleAddressCountVariable"
+      value: "1"
+    transitions: {}
+    
+  copyMultipleAddressCountVariables:
+    component: "System.CopyVariables"
+    properties:
+      from: "multipleAddressCountVariable"
+      to: "user.multipleAddressCountVariable"
+    transitions:
+      next: "resetForMultipleAddressNotFound"
+      
+  resetForMultipleAddressNotFound:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "selectedAccountOption"
+    transitions: {}     
+        
+  multipleAddressAccount:
+    component: "System.List"
+    properties:
+      options: "${accountsOptions.value}"
+      prompt: "My records indicate that there are multiple addresses associated with the phone number provided. Please select the correct address:"
+      variable: "selectedAccountOption"
+    transitions:
+      next: "selectedAddressFromMultiple"
+      
+  selectedAddressFromMultiple:
+    component: "OutageStatus"
+    properties:
+      PhoneNumber: ""
+      AccountNumber: ""
+      SelectedMaskedAddress: "${selectedAccountOption.value}"
+      MultipleAccountInfo: "${allResult}"
+    transitions:
+      actions:
+        setVariableValues: "checkAddressFoundForMultipleAddress"
+        
+  checkAddressFoundForMultipleAddress:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "errorInMultipleAddress"
+      value: "true"
+    transitions:
+      actions:
+        equal: "checkMultipleAddressCount"
+        notequal: "checkStatusOrReportOutage"
+        
+  againResetVariables:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "phoneNumber,accountNumber,addressResponse,selectedAccountType,activeStatusResponse"
+    transitions: {}
+           
+  checkSelectAccountOrPhoneCount:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "user.selectAccountOrPhoneVariable"
+      value: "1"
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "selectAccountOrPhone"
+  
+  selectAccountOrPhone: 
+    component: "System.List"
+    properties:
+      options: "${accountTypeEntity.type.enumValues}"
+      prompt: "I’m sorry, but I can't find an account associated with that phone number. Do you have another phone number or the account number available?"
+      variable: "selectedAccountType"
+    transitions:
+      next: "CheckSelectedAccountType"
+  
+  CheckSelectedAccountType:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "selectedAccountType"
+      variable: "accountTypeEntity"
+    transitions:
+      actions:
+        match: "setAccountOrPhoneVariable"
+        nomatch: "intent"     
+      
+  setAccountOrPhoneVariable:
+    component: "System.SetVariable"
+    properties:
+      variable: "selectAccountOrPhoneVariable"
+      value: "1"
+    transitions: {}
+    
+  copyAccountOrPhoneVariables:
+    component: "System.CopyVariables"
+    properties:
+      from: "selectAccountOrPhoneVariable"
+      to: "user.selectAccountOrPhoneVariable"
+    transitions:
+      next: "resetSelectedAccountVariables"   
+        
+  isAddressCorrect:
+    component: "System.List"
+    properties:
+      options: "Yes,No"
+      prompt: "${setAddress.value}. Is this correct?"
+      variable: "addressResponse"     
+    transitions:
+      next: "matchEntity_CheckAddressResponse"
+  
+  matchEntity_CheckAddressResponse:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "addressResponse"
+      variable: "YesNoVariable"
+    transitions:
+      actions:
+        match: "setVariableForAddressResponse"
+        nomatch: "intent" 
+      
+  setVariableForAddressResponse:
+    component: "System.SetVariable"
+    properties:
+      variable: "addressResponse"
+      value: "${YesNoVariable.value.yesno}"
+    transitions:
+      next: "checkAddressResponse"
+  
+  checkAddressResponse:
+    component: "System.Switch"
+    properties:
+      variable: "addressResponse"
+      values:
+      - "YES"
+      - "NO"
+    transitions:
+      actions:
+        YES: "checkStatusOrReportOutage"
+        NO: "resetVariables"
+    
+  resetVariables:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "phoneNumber,accountNumber,addressResponse,selectedAccountType,numberOfAccount"
+    transitions: {}
+      
+  checkAddressNotCorrectCount:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "user.addressNotCorrectCountVariable"
+      value: "1"
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "setAddressNotCorrectCountVariable"
+      
+  setAddressNotCorrectCountVariable:
+    component: "System.SetVariable"
+    properties:
+      variable: "addressNotCorrectCountVariable"
+      value: "1"
+    transitions: {}
+    
+  copyAddressNotCorrectUserVariables:
+    component: "System.CopyVariables"
+    properties:
+      from: "addressNotCorrectCountVariable"
+      to: "user.addressNotCorrectCountVariable"
+    transitions:
+      next: "addressNotCorrect"   
+           
+  addressNotCorrect:
+    component: "System.List"
+    properties:
+      options: "${accountTypeEntity.type.enumValues}"
+      prompt: " I am sorry. Can you please provide an alternate phone number or account number?" 
+      variable: "selectedAccountNumberType"
+    transitions:
+      next: "CheckSelectedAccountNumberType"
+  
+  CheckSelectedAccountNumberType:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "selectedAccountNumberType"
+      variable: "accountTypeEntity"
+    transitions:
+      actions:
+        match: "selectedAccount"
+        nomatch: "intent"     
+    
+  resetSelectedAccountVariables:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "phoneNumber,accountNumber,addressResponse"
+    transitions: {}
+      
+  selectedAccount:
+    component: "System.Switch"
+    properties:
+      variable: "accountTypeEntity"
+      values:
+      - "Phone Number"
+      - "Account Number"
+    transitions:
+      actions:
+        Phone Number: "linkedViaPhoneNumber"
+        Account Number: "linkedViaAccountNumber"
+  
+  linkedViaPhoneNumber:
+    component: "System.Text"
+    properties:
+      prompt: "Great. What is the primary phone number?"
+      variable: "phoneNumber"
+      maxPrompts: 2
+    transitions:
+      next: "againCheckPhoneNumberSetOrNotForOutage"
+      
+  againCheckPhoneNumberSetOrNotForOutage:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "phoneNumber"
+      value: null
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "printOutage"
+      
+  linkedViaAccountNumber:
+    component: "System.Text"
+    properties:
+      prompt: "Great. What is the account number?"
+      variable: "accountNumber"
+      maxPrompts: 2
+    transitions:
+      next: "againCheckAccountNumberSetOrNotForOutage"
+      
+  againCheckAccountNumberSetOrNotForOutage:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "accountNumber"
+      value: null
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "printOutage"
+       
+  checkStatusOrReportOutage:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "reportOutageVariable"
+      value: "true"
+    transitions:
+      actions:
+        equal: "resetReportOutageVariables"
+        notequal: "resetMultipleAddressVariable"
+        
+  resetMultipleAddressVariable:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "activeStatusResponse,reportOutageOrNot,outageType"
+    transitions: {} 
+          
+  checkOutageStatus:
+    component: "System.Switch"
+    properties:  
+      variable: "setStatus"
+      values:
+      - "ACTIVE"
+      - "NOT ACTIVE"
+      - "FUZZY"
+    transitions:
+      actions:
+        ACTIVE: "activeOutageStatus"
+        FUZZY: "activeOutageStatus"
+        NOT ACTIVE: "checkReportedOutage"       
+        
+  activeOutageStatus:
+    component: "System.List"
+    properties:
+      options: "Yes,No"
+      prompt: "${setOutageReported.value}  Is there anything else that I can help you with?"
+      variable: "activeStatusResponse"
+    transitions:
+      next: "CheckActiveStatusYesNo"
+      
+  checkActiveStatusResponse:
+    component: "System.Switch"
+    properties:
+      variable: "activeStatusResponse"
+      values:
+      - "YES"
+      - "NO"
+    transitions:
+      actions:
+        YES: "resetStartBot"
+        NO: "resetEnd" 
+    
+  resetStartBotVariables:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "typeOfFault,outageOptions,outageOptionVariable,phoneNumber,accountNumber,addressResponse,addressFound,setStatus,activeStatusResponse"
+    transitions:
+      next: "startBot"       
+      
+  activeStatusEnd:
+    component: "System.Output"
+    properties:
+      text: "Thank you. Please come back anytime. Have a nice day!"
+    transitions:
+      return: "activeStatusEnd"
+      
+    #------------------------report outage----------------------------  
+  
+      
+  resetAllReportOutageVariable:
+    component: "System.ResetVariables"
+    properties: 
+      variableList: "user.addressNotCorrectCountVariable,user.identifier,user.phoneNumber,user.noAddressFoundCount,user.addressResponseCount,user.checkAccountNumberCount,user.unresolvedVariable,multipleAddressCountVariable,user.selectAccountOrPhoneVariable,user.identifierCountVariable,user.multipleAddressCountVariable,identifier,numberEntity,accountTypeEntity,outageOptions,outageOptionVariable,phoneNumber,phoneNumberEntity,checkBalance_accountNumber,YesNoVariable,accountNumber,outageType,outageTypeEntity,outageStatus,selectionType,outageStatusMessage,setStatus,selectedAccountType,verifiedAddressResult,addressResponse,accountType,ifAddressExist,addressFound,setOutageReported,choices,accounts,setAddress,counter,outageReportProgress,anythingElseVariable,errorInMultipleAddress,reportOutageOrNot,reportOutageVariable,activeStatusResponse,numberOfAccount,accountsOptions,allResult,selectedAccountNumber,newUserAccount,selectedAccountOption,moreThanThreeAccount,maskedAddressFound,selectAccountOrPhoneVariable,unresolvedVariable,isMultipleAddressOrNot,addressNotCorrectCountVariable,checkBalance_MaskedAddress,checkBalance_AccountInfo,addressResponseCount,extraVariable,noAddressFoundCount,addressCorrectResponse,servicesDown,satisfiedRate,selectedAccountNumberType,faultType,typeOfFault,identifierCountVariable,accountNumberCountVariable,checkAccountNumberCount"
+    transitions: {}    
+  
+  reportOutage:
+    component: "System.Text"
+    properties:
+      prompt: "What's the primary phone number associated with your account?"
+      variable: "phoneNumber"
+      maxPrompts: 2
+    transitions:
+      next: "checkPhoneNumberSetOrNotForReport"
+      
+  checkPhoneNumberSetOrNotForReport:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "phoneNumber"
+      value: null
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "setReportOutageVariable" 
+            
+  setReportOutageVariable:
+    component: "System.SetVariable"
+    properties: 
+      variable: "reportOutageVariable"
+      value: "true"
+    transitions:
+      next: "printOutage"
+             
+  checkReportedOutage:
+    component: "System.List"
+    properties:
+      options: "Yes,No"
+      prompt: "Ok, thank you. We are not aware of an outage in your area. If you reported an outage within the past 15 minutes, it may not yet be reflected here. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, you can also report an outage. Would you like to report an outage?"
+      variable: "reportOutageOrNot"
+    transitions: 
+      next: "CheckReportOutageOrNot"
+  
+  CheckReportOutageOrNot:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "reportOutageOrNot"
+      variable: "YesNoVariable"
+    transitions:
+      actions:
+        match: "setVariableForReportOutageOrNot"
+        nomatch: "intent"
+      
+  setVariableForReportOutageOrNot:
+    component: "System.SetVariable"
+    properties:
+      variable: "reportOutageOrNot"
+      value: "${YesNoVariable.value.yesno}"
+    transitions:
+      next: "selectResponseForReport"
+  
+  selectResponseForReport:
+    component: "System.Switch"
+    properties:
+      variable: "reportOutageOrNot"
+      values:
+      - "YES"
+      - "NO"
+    transitions:
+      actions:
+        YES: "askOutageType"
+        NO: "resetEnd"
+      
+  askOutageType:
+    component: "System.List"
+    properties:
+      options: "${outageTypeEntity.type.enumValues}"
+      prompt: "Ok, let's get that reported. Is it a full outage or partial outage?"
+      variable: "outageType"
+    transitions:
+      next: "checkSelectedOutageType"
+        
+  resetReportOutageVariables:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "reportOutageVariable,outageType,anythingElseVariable,typeOfFault"
+    transitions: {}
+        
+  reportForGasOrElectric:
+    component: "System.List"
+    properties:
+      options: "gas,electric"
+      prompt: "Ok, let’s get this reported. Is this an electric outage or a gas emergency?"
+      variable: "typeOfFault"
+    transitions:
+      next: "matchSelectedFaultOptionEntity"
+  
+  matchSelectedFaultOptionEntity:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "typeOfFault"
+      variable: "faultType"
+    transitions:
+      actions:
+        match: "checkSelectedFaultOption"
+        nomatch: "resetReportOutageVariables" 
+      
+  checkSelectedFaultOption:
+    component: "System.Switch"
+    properties:
+      variable: "faultType"
+      values: 
+      - "ELECTRIC"
+      - "GAS"
+    transitions:
+      actions:
+        ELECTRIC: "directReportOutage"
+        GAS: "resetActiveStatusResponse"
+        
+  resetActiveStatusResponse:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "activeStatusResponse"
+    transitions: {} 
+        
+  reportGasOutage:
+    component: "System.List"
+    properties:
+      options: "Yes,No"
+      prompt: "For all gas emergencies, please contact BGE at 1-877-778-2222. If you smell natural gas, leave the area immediately, and then call BGE. This number is available 24 hours a day, 7 days a week. Is there anything else that I can help you with?"
+      variable: "activeStatusResponse"
+    transitions:
+      next: "checkActiveStatusResponse" 
+      
+  resetToSelectOutageTypeAgain:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "outageType"
+    transitions: {}     
+      
+  directReportOutage:
+    component: "System.List"
+    properties:
+      options: "${outageTypeEntity.type.enumValues}"
+      prompt: "Ok, let’s get this reported. Is it a full outage or partial?"
+      variable: "outageType"
+    transitions:
+      next: "checkSelectedOutageType"
+      
+  checkSelectedOutageType:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "outageType"
+      variable: "outageTypeEntity"
+    transitions:
+      actions:
+        match: "forMultipleOrSingle"
+        nomatch: "resetToSelectOutageTypeAgain"  
+      
+  forMultipleOrSingle:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "isMultipleAddressOrNot"
+      value: "true"
+    transitions:
+      actions:
+        equal: "printReportOutageForMultiple"
+        notequal: "printReportOutage"
+        
+  printReportOutageForMultiple:
+    component: "ReportOutage"
+    properties:
+      PhoneNumber: ""
+      AccountNumber: "${selectedAccountNumber}"
+      OutageType: "${outageType.value}"
+    transitions:
+      next: "resetAnythingElseVariable"
+    
+  printReportOutage:
+    component: "ReportOutage"
+    properties:
+      PhoneNumber: "${user.phoneNumber.value}"
+      AccountNumber: "${user.accountNumber.value}"
+      OutageType: "${outageType.value}"
+    transitions:
+      next: "resetAnythingElseVariable"     
+      
+  resetAnythingElseVariable:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "anythingElseVariable"
+    transitions: {} 
+      
+  anythingElse:
+    component: "System.List"
+    properties:
+      options: "Yes,No"
+      prompt: "${outageReportProgress.value} . Is there anything else that I can help you with?"
+      variable: "anythingElseVariable"
+    transitions:
+      next: "CheckAnythingElseVariable"
+  
+  CheckAnythingElseVariable:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "anythingElseVariable"
+      variable: "YesNoVariable"
+    transitions:
+      actions:
+        match: "setVariableForAnythingElseVariable"
+        nomatch: "intent"
+      
+  setVariableForAnythingElseVariable:
+    component: "System.SetVariable"
+    properties:
+      variable: "anythingElseVariable"
+      value: "${YesNoVariable.value.yesno}"
+    transitions:
+      next: "checkQuestionResponse"
+      
+  checkQuestionResponse:
+    component: "System.Switch"
+    properties:
+      variable: "anythingElseVariable"
+      values:
+      - "YES"
+      - "NO"
+    transitions:
+      actions:
+        YES: "resetStartBot"
+        NO: "resetEnd" 
+      
+      #------------------------------------------- Check Balance ----------------------------------------------
+     
+  checkBalance:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "user.addressNotCorrectCountVariable,user.identifier,user.phoneNumber,user.noAddressFoundCount,user.addressResponseCount,user.checkAccountNumberCount,user.unresolvedVariable,multipleAddressCountVariable,user.selectAccountOrPhoneVariable,user.identifierCountVariable,user.multipleAddressCountVariable,identifier,numberEntity,accountTypeEntity,outageOptions,outageOptionVariable,phoneNumber,phoneNumberEntity,checkBalance_accountNumber,YesNoVariable,accountNumber,outageType,outageTypeEntity,outageStatus,selectionType,outageStatusMessage,setStatus,selectedAccountType,verifiedAddressResult,addressResponse,accountType,ifAddressExist,addressFound,setOutageReported,choices,accounts,setAddress,counter,outageReportProgress,anythingElseVariable,errorInMultipleAddress,reportOutageOrNot,reportOutageVariable,activeStatusResponse,numberOfAccount,accountsOptions,allResult,selectedAccountNumber,newUserAccount,selectedAccountOption,moreThanThreeAccount,maskedAddressFound,selectAccountOrPhoneVariable,unresolvedVariable,isMultipleAddressOrNot,addressNotCorrectCountVariable,checkBalance_MaskedAddress,checkBalance_AccountInfo,addressResponseCount,extraVariable,noAddressFoundCount,addressCorrectResponse,servicesDown,satisfiedRate,selectedAccountNumberType,faultType,typeOfFault,identifierCountVariable,accountNumberCountVariable,checkAccountNumberCount"
+    transitions: {} 
+      
+  askPhoneNumber:
+    component: "System.Text"
+    properties:
+      prompt: "What is the primary phone number associated with your account?"
+      variable: "phoneNumber"
+      maxPrompts: 2
+    transitions:
+      next: "checkPhoneNumberSetOrNotForCheckBalance" 
+      
+  checkPhoneNumberSetOrNotForCheckBalance:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "phoneNumber"
+      value: null
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "askIdentifier" 
+      
+  #checkPhoneNumberSetOrNotForCheckBalance:
+    #component: "System.MatchEntity"
+    #properties:
+      #sourceVariable: "phoneNumber"
+      #variable: "phoneNumberEntity"
+    #transitions:
+      #actions:
+       # match: "checkIdentifierCount"
+       # nomatch: "checkBalance"
+      
+  checkIdentifierCount:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "user.identifierCountVariable"
+      value: "1"
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "setIdentifierCountVariable"
+      
+  setIdentifierCountVariable:
+    component: "System.SetVariable"
+    properties:
+      variable: "identifierCountVariable"
+      value: "1"
+    transitions: {}
+    
+  copyIdentifierVariables:
+    component: "System.CopyVariables"
+    properties:
+      from: "identifierCountVariable"
+      to: "user.identifierCountVariable"
+    transitions:
+      next: "resetIdentifier"
+      
+  resetIdentifier:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "identifier"
+    transitions: {} 
+    
+  askIdentifier:
+    component: "System.Text"
+    properties: 
+      prompt: "What are the last 4 Digits of Your Social Security Number, Business Tax ID, or BGE PIN?"
+      variable: "identifier"
+    transitions:
+      next: "checkIdentifierSetOrNotForCheckBalance"
+      
+  checkIdentifierSetOrNotForCheckBalance:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "identifier"
+      variable: "numberEntity"
+    transitions:
+      actions:
+        match: "checkBackendServices"
+        nomatch: "checkIdentifierCount"
+      
+  checkBackendServices:
+    component: "System.ConditionEquals"
+    properties: 
+      variable: "servicesDown"
+      value: "true"
+    transitions:
+      actions:
+        equal: "servicesAreDown"
+        notequal: "checkAccountBalance"
+      
+  checkAccountBalance:
+    component: "CheckBalance"
+    properties:
+      Identifier: "${identifier.value}"
+      PhoneNumber: "${phoneNumber.value.completeNumber}"
+    transitions:
+      next: "copyCheckBalanceVariables"
+      
+  copyCheckBalanceVariables:
+    component: "System.CopyVariables"
+    properties:
+      from: "identifier,phoneNumber"
+      to: "user.identifier,user.phoneNumber"
+    transitions: {}
+       
+  checkBalance_AddressFoundOrNot:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "addressFound"
+      value: "true"
+    transitions:
+      actions:
+        equal: "checkBalance_MultipleAddressFound"
+        notequal: "resetNoAddressFoundVariable"
+        
+  checkBalance_MultipleAddressFound:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "multipleAddressFound"
+      value: "true"
+    transitions:
+      actions:
+        equal: "checkBalance_ForMultipleAddress"
+        notequal: "checkBalance_AddressCorrectOrNot"
+      
+  checkAccountNumberCount:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "user.accountNumberCountVariable"
+      value: "1"
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "setAccountNumberCountVariable"
+      
+  setAccountNumberCountVariable:
+    component: "System.SetVariable"
+    properties:
+      variable: "accountNumberCountVariable"
+      value: "1"
+    transitions: {}
+    
+  copyAccountNumberVariables:
+    component: "System.CopyVariables"
+    properties:
+      from: "accountNumberCountVariable"
+      to: "user.accountNumberCountVariable"
+    transitions:
+      next: "resetAccountNumber"  
+         
+  resetAccountNumber:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "checkBalance_accountNumber"
+    transitions: {}   
+  
+  checkBalance_ForMultipleAddress:
+    component: "System.Text"
+    properties:
+      prompt: "You are associated with multiple accounts. Please enter your account number."
+      variable: "checkBalance_accountNumber"
+    transitions:
+      next: "checkAccountNumber" 
+  
+  checkAccountNumber:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "checkBalance_accountNumber"
+      variable: "numberEntity"
+    transitions:
+      actions:
+        match: "checkBalance_resetAddressFoundVariable"
+        nomatch: "checkAccountNumberCount"
+      
+  checkBalance_resetAddressFoundVariable:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "addressFound,addressResponse"
+    transitions: {} 
+ 
+  againCheckAccountBalance:
+    component: "CheckBalance"
+    properties:
+      Identifier: "${user.identifier.value}"
+      PhoneNumber: "${user.phoneNumber.value.phoneNumber}"
+      AccountNumber: "${checkBalance_accountNumber.value}"
+    transitions:
+      next: "AddressFoundOrNotForMultipleAcc" 
+      
+  AddressFoundOrNotForMultipleAcc:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "addressFound"
+      value: "true"
+    transitions:
+      actions:
+        equal: "checkBalance_AddressCorrectOrNot"
+        notequal: "resetNoAddressFoundVariable"
+        
+  checkBalance_AddressCorrectOrNot:
+    component: "System.List"
+    properties:
+      options: "Yes,No"
+      prompt: "${checkBalance_MaskedAddress}. Is this correct?"
+      variable: "addressCorrectResponse"
+    transitions:
+      next: "checkAddressCorrectResponse"
+  
+  checkAddressCorrectResponse:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "addressCorrectResponse"
+      variable: "YesNoVariable"
+    transitions:
+      actions:
+        match: "setVariableForAddressCorrectResponse"
+        nomatch: "intent"
+      
+  setVariableForAddressCorrectResponse:
+    component: "System.SetVariable"
+    properties:
+      variable: "addressCorrectResponse"
+      value: "${YesNoVariable.value.yesno}"
+    transitions:
+      next: "checkBalance_AddressResponse"
+      
+  checkBalance_AddressResponse:
+    component: "System.Switch"
+    properties:
+      variable: "addressCorrectResponse"
+      values: 
+      - "YES"
+      - "NO"
+    transitions:
+      actions:
+        YES: "checkBalance_AccountInfo"
+        NO: "checkBalance_AddressResponseCount"
+        
+  checkBalance_AccountInfo:
+    component: "System.Output"
+    properties:
+      text: "${checkBalance_AccountInfo}"
+    transitions:
+      return: "checkBalance_AccountInfo"
+    
+  checkBalance_AddressResponseCount:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "user.addressResponseCount"
+      value: "1"
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "checkBalance_setAddressResponseCount"
+        
+  checkBalance_setAddressResponseCount:
+    component: "System.SetVariable"
+    properties:
+      variable: "addressResponseCount"
+      value: "1"
+    transitions: {}
+    
+  copyAddressResponseCountVariables:
+    component: "System.CopyVariables"
+    properties:
+      from: "addressResponseCount"
+      to: "user.addressResponseCount"
+    transitions:
+      next: "checkBalance_resetVariables"
+      
+  checkBalance_resetVariables: 
+    component: "System.ResetVariables"
+    properties:
+      variableList: "phoneNumber,identifier,accountNumber,addressResponse,checkAccountNumberCount,user.checkAccountNumberCount,addressFound,addressResponseCount,noAddressFoundCount,servicesDown,addressCorrectResponse,identifierCountVariable"
+    transitions: {} 
+    
+  checkBalance_AddressNotCorrect:
+    component: "System.List"
+    properties:
+      options: "Yes,No"
+      prompt: "I’m sorry. Do you have another phone number or 4 Digits of Your Social Security Number, Business Tax ID, or BGE PIN?"
+      variable: "addressResponse"
+    transitions:
+      next: "checkAddressResponse_checkBalance"
+  
+  checkAddressResponse_checkBalance:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "addressResponse"
+      variable: "YesNoVariable"
+    transitions:
+      actions:
+        match: "setVariableForAddressResponse_checkBalance"
+        nomatch: "intent"
+      
+  setVariableForAddressResponse_checkBalance:
+    component: "System.SetVariable"
+    properties:
+      variable: "addressResponse"
+      value: "${YesNoVariable.value.yesno}"
+    transitions:
+      next: "checkAddressNotCorrectResponse"
+      
+  checkAddressNotCorrectResponse:
+    component: "System.Switch"
+    properties:
+      variable: "addressResponse"
+      values: 
+      - "YES"
+      - "NO"
+    transitions:
+      actions:
+        YES: "againEnterPhoneNumber"
+        NO: "resetEnd_checkBalance"
+      
+  resetNoAddressFoundVariable:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "phoneNumber,servicesDown,identifier,accountNumber,addressCorrectResponse,addressResponse,addressFound,addressResponseCount,noAddressFoundCount,checkAccountNumberCount,user.checkAccountNumberCount,identifierCountVariable"
+    transitions: {} 
+    
+  checkNoAddressFoundCount:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "user.noAddressFoundCount"
+      value: "1"
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "setNoAddressFoundCount"
+        
+  setNoAddressFoundCount:
+    component: "System.SetVariable"
+    properties:
+      variable: "noAddressFoundCount"
+      value: "1"
+    transitions: {}
+    
+  copyNoAddressCountVariables:
+    component: "System.CopyVariables"
+    properties:
+      from: "noAddressFoundCount"
+      to: "user.noAddressFoundCount"
+    transitions:
+      next: "checkBalance_noAccountFound"
+      
+  checkBalance_noAccountFound:
+    component: "System.List"
+    properties:
+      options: "Yes,No"
+      prompt: "I’m sorry, but information does not match with my records. Do you have another phone number or 4 Digits of Your Social Security Number, Business Tax ID, or BGE PIN?"
+      variable: "addressResponse"
+    transitions:
+      next: "checkNoAddressFoundResponse_checkBalance"
+  
+  checkNoAddressFoundResponse_checkBalance:
+    component: "System.MatchEntity"
+    properties:
+      sourceVariable: "addressResponse"
+      variable: "YesNoVariable"
+    transitions:
+      actions:
+        match: "setVariableForNoAddressFoundResponse_checkBalance"
+        nomatch: "intent"
+      
+  setVariableForNoAddressFoundResponse_checkBalance:
+    component: "System.SetVariable"
+    properties:
+      variable: "addressResponse"
+      value: "${YesNoVariable.value.yesno}"
+    transitions:
+      next: "checkNoAddressFoundResponse"
+      
+  checkNoAddressFoundResponse: 
+    component: "System.Switch"
+    properties:
+      variable: "addressResponse"
+      values:
+      - "YES"
+      - "NO"
+    transitions:
+      actions:
+        YES: "againEnterPhoneNumber"
+        NO: "resetEnd_checkBalance"
+   
+  againEnterPhoneNumber: 
+    component: "System.Text"
+    properties:
+      prompt: "What is the primary phone number?"
+      variable: "phoneNumber"
+      maxPrompts: 2
+    transitions:
+      next: "checkPhoneNumber_CheckBalance"
+      
+  checkPhoneNumber_CheckBalance:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "phoneNumber"
+      value: null
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "askIdentifier" 
+      
+  servicesAreDown:
+    component: "System.Output"
+    properties:
+      text: "I'm not able to complete your request right now. Please try again later."
+    transitions:
+      return: "servicesAreDown" 
+      
+  end:
+    component: "System.Output"
+    properties:
+      text: "Thank you. Please come back anytime. Have a nice day!"
+    transitions:
+      return: "end"
+      
+      
+      #------------------------------------------- End -------------------------------------------
+      
+  resetEnd:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "user.addressNotCorrectCountVariable,user.identifier,user.phoneNumber,user.noAddressFoundCount,user.addressResponseCount,user.checkAccountNumberCount,user.unresolvedVariable,multipleAddressCountVariable,user.selectAccountOrPhoneVariable,user.identifierCountVariable,user.multipleAddressCountVariable,identifier,numberEntity,accountTypeEntity,outageOptions,outageOptionVariable,phoneNumber,phoneNumberEntity,checkBalance_accountNumber,YesNoVariable,accountNumber,outageType,outageTypeEntity,outageStatus,selectionType,outageStatusMessage,setStatus,selectedAccountType,verifiedAddressResult,addressResponse,accountType,ifAddressExist,addressFound,setOutageReported,choices,accounts,setAddress,counter,outageReportProgress,anythingElseVariable,errorInMultipleAddress,reportOutageOrNot,reportOutageVariable,activeStatusResponse,numberOfAccount,accountsOptions,allResult,selectedAccountNumber,newUserAccount,selectedAccountOption,moreThanThreeAccount,maskedAddressFound,selectAccountOrPhoneVariable,unresolvedVariable,isMultipleAddressOrNot,addressNotCorrectCountVariable,checkBalance_MaskedAddress,checkBalance_AccountInfo,addressResponseCount,extraVariable,noAddressFoundCount,addressCorrectResponse,servicesDown,satisfiedRate,selectedAccountNumberType,faultType,typeOfFault,identifierCountVariable,accountNumberCountVariable,checkAccountNumberCount"
+    transitions: {}   
+    
+  rateSatisfaction:
+    component: "System.List"
+    properties:
+      options: "1,2,3,4,5"
+      prompt: "How satisfied were you with your experience today? Please rate on a scale from 1-5, with 5 being the most satisfied."
+      variable: "satisfiedRate"
+    transitions:
+      next: "checkSatisfactionRate"
+      
+  checkSatisfactionRate:
+    component: "System.Switch"
+    properties:
+      variable: "satisfiedRate"
+      values:
+      - "1"
+      - "2"
+      - "3"
+      - "4"
+      - "5"
+    transitions:
+      actions:
+        1: "sendSatisfactionRate"
+        2: "sendSatisfactionRate"
+        3: "sendSatisfactionRate"
+        4: "sendSatisfactionRate"
+        5: "sendSatisfactionRate"
+        
+  resetSatisfiedRate:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "satisfiedRate"
+    transitions: {} 
+        
+  wrongSatisfactionRate:
+    component: "System.List"
+    properties:
+      options: "1,2,3,4,5"
+      prompt: "I’m sorry, but I didn’t understand. Just to clarify, how satisfied were you with your experience today? Please rate on a scale from 1-5, with 5 being the most satisfied."
+      variable: "satisfiedRate"
+    transitions:
+      next: "sendSatisfactionRate"
+        
+  sendSatisfactionRate:
+    component: "CustomerSatisfaction"
+    properties:
+      SatisfactionRate: "${satisfiedRate.value}"
+      PhoneNumber: "${phoneNumber.value.completeNumber}"
+      AccountNumber: "${accountNumber.value}"
+    transitions:
+      next: "endGreetings"
+      
+  resetEnd_checkBalance:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "addressNotCorrectCountVariable,user.addressNotCorrectCountVariable,unresolvedVariable,user.unresolvedVariable,selectAccountOrPhoneVariable,user.selectAccountOrPhoneVariable"
+    transitions: {}   
+    
+  rateSatisfaction_checkBalance:
+    component: "System.List"
+    properties:
+      options: "1,2,3,4,5"
+      prompt: "How satisfied were you with your experience today? Please rate on a scale from 1-5, with 5 being the most satisfied."
+      variable: "satisfiedRate"
+    transitions:
+      next: "checkSatisfactionRate_checkBalance"
+      
+  checkSatisfactionRate_checkBalance:
+    component: "System.Switch"
+    properties:
+      variable: "satisfiedRate"
+      values:
+      - "1"
+      - "2"
+      - "3"
+      - "4"
+      - "5"
+    transitions:
+      actions:
+        1: "sendSatisfactionRate"
+        2: "sendSatisfactionRate"
+        3: "sendSatisfactionRate"
+        4: "sendSatisfactionRate"
+        5: "sendSatisfactionRate"
+        
+  resetSatisfiedRate_checkBalance:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "satisfiedRate"
+    transitions: {} 
+        
+  wrongSatisfactionRate_checkBalance:
+    component: "System.List"
+    properties:
+      options: "1,2,3,4,5"
+      prompt: "I’m sorry, but I didn’t understand. Just to clarify, how satisfied were you with your experience today? Please rate on a scale from 1-5, with 5 being the most satisfied."
+      variable: "satisfiedRate"
+    transitions:
+      next: "sendSatisfactionRate_checkBalance"
+        
+  sendSatisfactionRate_checkBalance:
+    component: "CustomerSatisfaction"
+    properties:
+      SatisfactionRate: "${satisfiedRate.value}"
+      PhoneNumber: "${phoneNumber.value.completeNumber}"
+      AccountNumber: "${checkBalance_accountNumber.value}"
+    transitions:
+      next: "endGreetings"
+      
+  endGreetings:
+    component: "System.Output"
+    properties:
+      text: "Thank you for your feedback. Have a nice day!"
+    transitions:
+      return: "endGreetings"
+      
+      
+      #------------------------------------------- Unresolve Intent -------------------------------------------
+      
+  checkUnresolvedCount:
+    component: "System.ConditionEquals"
+    properties:
+      variable: "user.unresolvedVariable"
+      value: "1"
+    transitions:
+      actions:
+        equal: "callCustCare"
+        notequal: "resetOutageOptionVariable"
+      
+  resetOutageOptionVariable:
+    component: "System.ResetVariables"
+    properties:
+      variableList: "outageOptionVariable"
+    transitions: {}
+      
+  unresolved:
+    component: "System.List"
+    properties:
+      options: "${outageOptions.type.enumValues}"
+      prompt: "I’m sorry, but I’m unavailable to assist you with this request. You can check Outage Status, Report an Outage or Check Account Balance. Please pick one option."
+      variable: "outageOptionVariable"
+    transitions:
+      next: "setUnresolvedVariable"
+      
+  setUnresolvedVariable:
+    component: "System.SetVariable"
+    properties:
+      variable: "unresolvedVariable"
+      value: "1"
+    transitions: {}
+    
+  copyUserVariables:
+    component: "System.CopyVariables"
+    properties:
+      from: "unresolvedVariable"
+      to: "user.unresolvedVariable"
+    transitions:
+      next: "matchEntityForSwitchOutageOptions"
+        
+        
+      #------------------------------------------- Sentimental Analysis ------------------------------------------
+      
+      
+  sentimentalAnalysis:
+    component: "System.Output"
+    properties:
+      text: "I understand your frustration and apologize for the inconvenience. Please reach us at 1-800-685-0123 so we can assist you further."
+    transitions:
+      return: "sentimentalAnalysis"
+      
+      
+      #------------------------------------------- Customer Care ------------------------------------------
+ 
+        
+  callCustCare:
+    component: "System.Output"
+    properties:
+      text: "I’m sorry, but I am unable to assist you at this time. Please visit us at bge.com or you can call us at 1-800-685-0123 for further support."
+    transitions:
+      return: "callCustCare"
+      
+      
+      #------------------------------------------- Pay Balance ------------------------------------------
+ 
+        
+  payBalance:
+    component: "System.Output"
+    properties:
+      text: "To pay your bill, please login to My Account at bge.com or call us at 1-800-685-0123. Is there anything I can help you with?"
+    transitions:
+      return: "payBalance"
