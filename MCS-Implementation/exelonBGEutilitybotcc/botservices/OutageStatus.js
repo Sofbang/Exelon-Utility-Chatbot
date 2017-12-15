@@ -52,11 +52,12 @@ module.exports = {
                             conversation.variable("errorInMultipleAddress","false");
                             console.log("after success in multiple address if condition :"+JSON.stringify(response));
                             conversation.variable("setStatus", response.data[0].status);
-                            if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
-                                conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("Do MMMM YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("Do MMMM YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
-                            }else{
-                                conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("MM, DD, YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
-                            }
+                            conversation.variable("setOutageReported", response.data[0].outageReported);                            
+                            // if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
+                            //     conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("Do MMMM YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("Do MMMM YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                            // }else{
+                            //     conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("MM, DD, YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                            // }
                             conversation.variable("selectedAccountNumber",selectedAccountNumber);
                             conversation.variable("setETR", response.data[0].ETR);
                             conversation.transition('setVariableValues');
@@ -129,12 +130,13 @@ module.exports = {
                         if (data[0].maskedAddress) {
                             conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
                             conversation.variable("setStatus", data[0].status);
-                            if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
-                                conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("Do MMMM YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("Do MMMM YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
-                            }
-                            else{
-                                conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
-                            }
+                            conversation.variable("setOutageReported", data[0].outageReported);
+                            // if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
+                            //     conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("Do MMMM YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("Do MMMM YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                            // }
+                            // else{
+                            //     conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
+                            // }
                             conversation.variable("maskedAddressFound", 'true');
                             conversation.variable("setETR", data[0].ETR);
                             conversation.transition('setVariableValues');
@@ -154,14 +156,30 @@ module.exports = {
                     }
                 }
                 else {
-                    logger.debug('getOutageStatus: outage status request failed!');
-                    conversation.variable("addressFound", "no");
-                    conversation.variable("noAddressFoundMessage", "I’m sorry, but I am unable to find an account associated with that phone number.\nDo you have another phone number or the account number available?");
-                    conversation.transition();
-                    done();
+                    if(response.meta.code == "FN-ACCT-NOTFOUND"){                    
+                        logger.debug('getOutageStatus: outage status request failed!');
+                        conversation.variable("addressFound", "no");
+                        conversation.variable("noAddressFoundMessage", "I’m sorry, but I am unable to find an account associated with that phone number.\nDo you have another phone number or the account number available?");
+                        conversation.transition();
+                        done();
+                    }else if(response.meta.code == "BWENGINE-100029"){
+                        logger.debug('getOutageStatus: outage status request failed!');
+                        conversation.variable("addressFound", "no");
+                        conversation.variable("noAddressFoundMessage", "Turn off the utility chatbot at that time");
+                        conversation.transition();
+                        done();
+                    }else{
+                        logger.debug('getOutageStatus: outage status request failed!');
+                        conversation.variable("addressFound", "no");
+                        conversation.variable("noAddressFoundMessage", "I’m sorry, but I am unable to find an account associated with that phone number.\nDo you have another phone number or the account number available?");
+                        conversation.transition();
+                        done();                        
+                    }
                 }
             }).catch(function (e) {
                 console.log(e);
+                conversation.variable("addressFound", "no");
+                conversation.variable("noAddressFoundMessage", "I'm not able to complete your request right now. Please try again later.");
                 conversation.transition();
                 done();
                 });

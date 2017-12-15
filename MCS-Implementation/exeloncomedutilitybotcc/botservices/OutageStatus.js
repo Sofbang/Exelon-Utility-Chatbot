@@ -52,22 +52,24 @@ module.exports = {
                             conversation.variable("errorInMultipleAddress","false");
                             console.log("after success in multiple address if condition :"+JSON.stringify(response));
                             conversation.variable("setStatus", response.data[0].status);
-                            if(response.data[0].ETR){
-                                console.log("response.data[0].ETR:::::: "+response.data[0].ETR);
-                                if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
-                                    conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("MMMM DD YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
-                                }else{
-                                    conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("MM, DD, YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
-                                }
-                            }else{
-                                if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
-                                    conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored;you can text STAT to 26633 or COMED to get your latest status.');
-                                    conversation.variable("setReportOutageReported",'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored. Would you like to report an outage?');
-                                }else{
-                                    conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored;you can text STAT to 26633 or COMED to get your latest status.');
-                                    conversation.variable("setReportOutageReported",'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored. Would you like to report an outage?');
-                                }                            
-                            }
+                            conversation.variable("setOutageReported",response.data[0].outageReported);
+                            conversation.variable("setReportOutageReported",response.data[0].outageReported);
+                            // if(response.data[0].ETR){
+                            //     console.log("response.data[0].ETR:::::: "+response.data[0].ETR);
+                            //     if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
+                            //         conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("MMMM DD YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
+                            //     }else{
+                            //         conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("MM, DD, YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
+                            //     }
+                            // }else{
+                            //     if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
+                            //         conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored;you can text STAT to 26633 or COMED to get your latest status.');
+                            //         conversation.variable("setReportOutageReported",'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored. Would you like to report an outage?');
+                            //     }else{
+                            //         conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored;you can text STAT to 26633 or COMED to get your latest status.');
+                            //         conversation.variable("setReportOutageReported",'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored. Would you like to report an outage?');
+                            //     }                            
+                            // }
                             conversation.variable("selectedAccountNumber",selectedAccountNumber);
                             conversation.variable("setETR", response.data[0].ETR);
                             conversation.transition('setVariableValues');
@@ -145,26 +147,28 @@ module.exports = {
                         if (data[0].maskedAddress) {
                             conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
                             conversation.variable("setStatus", data[0].status);
-                            if(data[0].ETR){
-                                if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
-                                    conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MMMM DD YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
-                                    conversation.variable("setReportOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MMMM DD YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633. Would you like to report an outage?');
-                                }else{
-                                    conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
-                                    conversation.variable("setReportOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633. Would you like to report an outage?');
-                                }
-                            }else{
-                                if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
-                                    conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored;you can text STAT to 26633 or COMED to get your latest status.');
-                                    conversation.variable("setReportOutageReported",'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored. Would you like to report an outage?');
-                                }else{
-                                    conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored;you can text STAT to 26633 or COMED to get your latest status.');
-                                    conversation.variable("setReportOutageReported",'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored. Would you like to report an outage?');
-                                }                             
-                            }
-                                conversation.variable("setETR", data[0].ETR);
-                                conversation.transition('setVariableValues');
-                                done();
+                            conversation.variable("setOutageReported",data[0].outageReported);
+                            conversation.variable("setReportOutageReported",data[0].outageReported);
+                            // if(data[0].ETR){
+                            //     if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
+                            //         conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MMMM DD YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
+                            //         conversation.variable("setReportOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MMMM DD YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633. Would you like to report an outage?');
+                            //     }else{
+                            //         conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
+                            //         conversation.variable("setReportOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("MM, DD, YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633. Would you like to report an outage?');
+                            //     }
+                            // }else{
+                            //     if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
+                            //         conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored;you can text STAT to 26633 or COMED to get your latest status.');
+                            //         conversation.variable("setReportOutageReported",'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MMMM DD YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored. Would you like to report an outage?');
+                            //     }else{
+                            //         conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored;you can text STAT to 26633 or COMED to get your latest status.');
+                            //         conversation.variable("setReportOutageReported",'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("MM/DD/YYYY") +' we indicate that 1 customer(s) are affected by a power outage in your area. The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you. We are currently in the process of estimating when service will be restored. Would you like to report an outage?');
+                            //     }                             
+                            // }
+                            conversation.variable("setETR", data[0].ETR);
+                            conversation.transition('setVariableValues');
+                            done();
                         }
                     }
                     else {
@@ -176,15 +180,34 @@ module.exports = {
 
                 }
                 else {
-                    logger.debug('getOutageStatus: outage status request failed!');
-                    conversation.variable("addressFound", "no");
-                    conversation.variable("noAddressFoundMessage", "I’m sorry, but I am unable to find an account associated with that phone number.\nDo you have another phone number or the account number available?");
-                    conversation.transition();
-                    done();
+                    if(response.meta.code == "FN-ACCT-NOTFOUND"){
+                        logger.debug('getOutageStatus: account not found');
+                        conversation.variable("addressFound", "no");
+                        conversation.variable("accountNotFound", "true");
+                        conversation.transition();
+                        done();                        
+                    }else if(response.meta.code == "BWENGINE-100029"){
+                        logger.debug('getOutageStatus: outage status request failed!');
+                        conversation.variable("addressFound", "no");
+                        conversation.variable("accountNotFound", "false");
+                        conversation.variable("noAddressFoundMessage", "Turn off the utility chatbot at that time");
+                        conversation.transition();
+                        done();
+                    }else{
+                        logger.debug('getOutageStatus: outage status request failed!');
+                        conversation.variable("addressFound", "no");
+                        conversation.variable("accountNotFound", "false");
+                        conversation.variable("noAddressFoundMessage", "I'm not able to complete your request right now. Please try again later.");
+                        conversation.transition();
+                        done();                        
+                    }
                 }
             })
             .catch(function (e) {
                 console.log(e);
+                conversation.variable("addressFound", "no");
+                conversation.variable("accountNotFound", "false");
+                conversation.variable("noAddressFoundMessage", "I'm not able to complete your request right now. Please try again later.");
                 conversation.transition();
                 done();
             });
