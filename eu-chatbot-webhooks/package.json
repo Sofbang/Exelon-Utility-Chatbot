@@ -1,0 +1,27 @@
+{
+  "name": "eu-chatbot-webhooks",
+  "version": "0.1.0",
+  "description": "Exelon Utility Chatbot - Webhooks",
+  "author": "Sofbang",
+  "license": "",
+  "repository": {},
+  "main": "index.js",
+  "dependencies": {
+    "alexa-app": "^2.4.0",
+    "body-parser": "^1.15.2",
+    "clj-fuzzy": "^0.4.1",
+    "core-js": "^2.5.3",
+    "express": "^4.14.0",
+    "its-set": "^1.2.1",
+    "log4js": "^1.1.1",
+    "ohm-js": "^0.14.0",
+    "pubsub-js": "^1.5.4",
+    "request": "^2.79.0",
+    "underscore": "^1.8.3",
+    "util": "^0.10.3",
+    "ws": "^3.3.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
