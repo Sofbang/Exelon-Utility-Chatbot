@@ -12,38 +12,31 @@ function randomIntInc(low, high) {
 }
 
 function init(config) {
-	
-	var speech;
-	var sessionId;
-	var ws;
+
     var app = express();
     app.use(express.static('implementation'));
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
     const webhookUtil = require('./webhookUtil');
     var appConfig = require('./botConfig').get(process.env.NODE_ENV);
-    app.use(bodyParser.urlencoded({extended: true}));
-    app.use(bodyParser.json());
     var logger = (config ? config.logger : null);
     if (!logger) {
-      const log4js = require('log4js');
-      logger = log4js.getLogger();
-      logger.setLevel('INFO');
-      log4js.replaceConsole(logger);
+        const log4js = require('log4js');
+        logger = log4js.getLogger();
+        logger.setLevel('INFO');
+        log4js.replaceConsole(logger);
     }
 
     //replace these settings to point to your webhook channel
-    var comed_metadata = appConfig.channels.COMED.alexa;
-    var bge_metadata = appConfig.channels.BGE.alexa;
+    var metadata = appConfig.channels.BGE.alexa;
 
-    if (bge_metadata.channelUrl && bge_metadata.channelSecretKey) {
-        logger.info("Alexa's Custom webhook for BGE is on");
-    }
-
-    if (comed_metadata.channelUrl && comed_metadata.channelSecretKey) {
-        logger.info("Alexa's Custom webhook for COMED is on");
+    if (metadata.channelUrl && metadata.channelSecretKey) {
+        logger.info('Alexa BGE - Using Channel:', metadata.channelUrl);
     }
 
     function convertRespToSpeech(resp) {
         var sentence = "";
+        //console.info("resp: " +resp);
         if (resp.text) {
             sentence = resp.text;
         }
@@ -51,7 +44,7 @@ function init(config) {
             if (resp.choices.length > 0) {
                 sentence += '  The following are your choices: ';
             }
-            _.each(resp.choices, function(choice) {
+            _.each(resp.choices, function (choice) {
                 sentence = sentence + choice + ', ';
             });
         }
@@ -61,17 +54,7 @@ function init(config) {
         return sentence;
     }
 
-    app.post('/webhhooks/:opco/messages', bodyParser.json(), function (req, res) {
-        var opco = req.params.opco;
-        var metadata;
-        if (opco.toUpperCase() == 'BGE') {
-            metadata = bge_metadata;
-        } else if (opco.toUpperCase() == 'COMED') {
-            metadata = comed_metadata;
-        } else {
-            return res.status(400).send('Invalid Opco');
-        }
-
+    app.post('/webhooks/bge/messages', bodyParser.json(), function (req, res) {
         //logger.info("Message from webhook channel", req.body);
         const userID = req.body.userId;
         if (!userID) {
@@ -86,7 +69,7 @@ function init(config) {
         }
     });
 
-    var handleCommandBot = function (alexa_req, alexa_res, metadata) {
+    var handleCommandBot = function (alexa_req, alexa_res) {
         var command = alexa_req.slot("command");
         var session = alexa_req.getSession();
         var userId = session.get("userId");
@@ -111,6 +94,11 @@ function init(config) {
             var commandResponse = function (msg, data) {
                 logger.info('Received callback message from webhook channel');
                 var resp = data;
+                console.log("test" + resp.text.includes("address"));
+                if (resp.text.includes("address")) {
+                    var re = /([0-9])/g;
+                    resp.text = resp.text.replace(re, '$& ');
+                }
                 logger.info('Parsed Message Body:', resp);
                 if (!respondedToAlexa) {
                     alexa_res.say(convertRespToSpeech(resp));
@@ -146,14 +134,21 @@ function init(config) {
             });
         }
         return false;
-    };
+    }
 
     var handleStopIntent = function (alexa_req, alexa_res) {
         alexa_res.shouldEndSession(true);
+    };
+
+    var handleLaunchEvent = function (alexa_req, alexa_res) {
+        var session = alexa_req.getSession();
+        session.set("startTime", Date.now());
+        alexa_res.say("Welcome to BGE. ");
     }
 
-    var handlePreEvent = function (alexa_req, alexa_res, alexa_type, metadata) {
+    var handlePreEvent = function (alexa_req, alexa_res, alexa_type) {
         logger.debug(alexa_req.data.session.application.applicationId);
+        logger.info(alexa_req.data.session.application.applicationId);
         // change the application id
         if (alexa_req.data.session.application.applicationId != metadata.amzn_appId) {
             logger.error("fail as application id is not valid");
@@ -161,35 +156,30 @@ function init(config) {
         }
         logger.info(JSON.stringify(alexa_req.data, null, 4));
         if (!metadata.channelUrl || !metadata.channelSecretKey) {
-            var message = "The singleBot cannot respond.  Please check the channel and secret key configuration.";
+            var message = "The BGE cannot respond.  Please check the channel and secret key configuration.";
             alexa_res.fail(message);
             logger.info(message);
         }
     }
 
-    // Alexa BGE Bot
-    var alexa_bge_app = new alexa.app("bgeapp");
-    alexa_bge_app.intent("CommandBot", {}, function (alexa_req, alexa_res) { handleCommandBot(alexa_req, alexa_res, bge_metadata); });
-    alexa_bge_app.intent("AMAZON.StopIntent", {}, handleStopIntent);
-    alexa_bge_app.launch(function(alexa_req, alexa_res) {
-        var session = alexa_req.getSession();
-        session.set("startTime", Date.now());
-        alexa_res.say("Welcome to BGE Bot. ");
-    });
-    alexa_bge_app.pre = function (alexa_req, alexa_res, alexa_type) { handlePreEvent(alexa_req, alexa_res, alexa_type, bge_metadata); };
-    alexa_bge_app.express(app, "/", true);
+    var alexa_app = new alexa.app("app");
+    alexa_app.intent("CommandBot", {}, handleCommandBot);
+    alexa_app.intent("AMAZON.StopIntent", {}, handleStopIntent);
+    alexa_app.launch(handleLaunchEvent);
+    alexa_app.pre = handlePreEvent;
+    alexa_app.express(app, "/", true);
 
-    // Alexa COMED Bot
-    var alexa_comed_app = new alexa.app("comedapp");
-    alexa_comed_app.intent("CommandBot", {}, function (alexa_req, alexa_res) { handleCommandBot(alexa_req, alexa_res, bge_metadata); });
-    alexa_comed_app.intent("AMAZON.StopIntent", {}, handleStopIntent);
-    alexa_comed_app.launch(function (alexa_req, alexa_res) {
-        var session = alexa_req.getSession();
-        session.set("startTime", Date.now());
-        alexa_res.say("Welcome to COMED Bot. ");
+    app.locals.endpoints = [];
+    app.locals.endpoints.push({
+        name: 'webhook',
+        method: 'POST',
+        endpoint: '/webhooks/bge/messages'
     });
-    alexa_comed_app.pre = function (alexa_req, alexa_res, alexa_type) { handlePreEvent(alexa_req, alexa_res, alexa_type, bge_metadata); };
-    alexa_comed_app.express(app, "/", true);
+    app.locals.endpoints.push({
+        name: 'alexa',
+        method: 'POST',
+        endpoint: '/app'
+    });
 
     // Following code handles bot for Google
     function handleEcho(req, res, botID) {
@@ -246,33 +236,6 @@ function init(config) {
     app.post('/bge/echo', function (req, res) {
         var botID = appConfig.channels.BGE.google.id;
         handleEcho(req, res, botID);
-    });
-
-    app.locals.endpoints = [];
-    app.locals.endpoints.push({
-      name: 'webhook',
-      method: 'POST',
-      endpoint: '/webhhooks/:opco/messages'
-    });
-    app.locals.endpoints.push({
-        name: 'alexa',
-        method: 'POST',
-        endpoint: '/comedapp'
-    });
-    app.locals.endpoints.push({
-        name: 'alexa',
-        method: 'POST',
-        endpoint: '/bgeapp'
-    });
-    app.locals.endpoints.push({
-      name: 'webhookGoogleComed',
-      method: 'POST',
-      endpoint: '/comed/echo'
-    });
-    app.locals.endpoints.push({
-      name: 'webhookGoogleBge',
-      method: 'POST',
-      endpoint: '/bge/echo'
     });
 
     return app;
