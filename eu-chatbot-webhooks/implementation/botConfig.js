@@ -8,26 +8,26 @@ var appConfig = {
         channels: {
             COMED: {
                 google: {
-                    id: '9B81EAA4-64C1-46B7-ACAC-9C047EAB7C35',
-                    name: 'ExelonCOMEDUtilityDev'
+                    id: '8501F9A5-E719-4716-BD0C-A397F1A0EAAE',
+                    name: 'ExelonCOMEDUtilityTest'
                 },
                 alexa: {
                     waitForMoreResponsesMs: 200,
                     amzn_appId: "amzn1.ask.skill.78de290d-b2ef-4003-89a5-ebaecbfacbf6",
-                    channelSecretKey: 'Vu8YgKZLaxj0QphhrBuqPILrAyJEq5ye',
-                    channelUrl: 'https://sfbdemo3.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/6B7DB2BA-CA8F-40FD-9B56-820F6A348EFB'
+                    channelSecretKey: 'g4aLDEy27eCfUYfxVfAN7mSMiQLMWTkE',
+                    channelUrl: 'https://sfbdemo3.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/F1B81354-F139-4909-AFF5-B9D77F55CEA0'
                 }
             },
             BGE: {
                 google: {
-                    id: '0790802F-43A9-47A4-9AE9-34C7611B78C6',
-                    name: 'ExelonBGEUtilityDev'
+                    id: '8C7AD0C9-437F-48F2-AC95-1955ACC9908D',
+                    name: 'ExelonBGEUtilityTest'
                 },
                 alexa: {
                     waitForMoreResponsesMs: 200,
                     amzn_appId: "amzn1.ask.skill.1a558578-efd6-4c3a-b094-40f5868b7334",
-                    channelSecretKey: 'ZtDAdqlXBXASsxK31CvVvnxfLvg3I2Cv',
-                    channelUrl: 'https://sfbdemo3.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/4FB0DD67-AB8E-48B6-B301-D2595D261390'
+                    channelSecretKey: 'Jv6Iyq02P582B6wpOgd2Z1tnl1a52Suc',
+                    channelUrl: 'https://sfbdemo3.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/54955993-8196-4FB9-9285-43B48783EE12'
                 }
             }
         }
@@ -38,7 +38,7 @@ var appConfig = {
         channels: {
             COMED: {
                 google: {
-                    id: '6B7DB2BA-CA8F-40FD-9B56-820F6A348EFB',
+                    id: '8501F9A5-E719-4716-BD0C-A397F1A0EAAE',
                     name: 'ExelonCOMEDUtilityTest'
                 },
                 alexa: {
@@ -50,7 +50,7 @@ var appConfig = {
             },
             BGE: {
                 google: {
-                    id: '77CCE6DA-2E05-4DED-87D9-25EE1167E29C',
+                    id: '54955993-8196-4FB9-9285-43B48783EE12',
                     name: 'ExelonBGEUtilityTest'
                 },
                 alexa: {
