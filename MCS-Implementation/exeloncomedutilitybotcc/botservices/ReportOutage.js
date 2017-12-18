@@ -43,17 +43,7 @@ module.exports = {
         .then(function (response) {
             console.log(response);
             if (response.success) {
-                console.log(response.data.etr);
-                if(response.data.etr){
-                    if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
-                        conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. I currently estimate your power will be restored by '+moment(response.data.etr).format("MMMM DD YYYY")+' at '+moment(response.data.etr).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
-                    }
-                    else{
-                        conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. I currently estimate your power will be restored by '+moment(response.data.etr).format("MM, DD, YYYY")+' at '+moment(response.data.etr).format("hh:mm a")+'. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
-                    }
-                }else{
-                    conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
-                }
+                conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. You can text STAT to COMED or 26633 to get your current outage status, or visit our outage map at: comed.com/map.');
             }
             else {
                 logger.debug('reportOutage: report outage failed!');
