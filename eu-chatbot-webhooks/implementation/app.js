@@ -61,7 +61,7 @@ function init(config) {
         return sentence;
     }
 
-    app.post('/singleBotWebhook/:opco/messages', bodyParser.json(), function (req, res) {
+    app.post('/webhhooks/:opco/messages', bodyParser.json(), function (req, res) {
         var opco = req.params.opco;
         var metadata;
         if (opco.toUpperCase() == 'BGE') {
@@ -168,7 +168,7 @@ function init(config) {
     }
 
     // Alexa BGE Bot
-    var alexa_bge_app = new alexa.app("app", "bge");
+    var alexa_bge_app = new alexa.app("bgeapp");
     alexa_bge_app.intent("CommandBot", {}, function (alexa_req, alexa_res) { handleCommandBot(alexa_req, alexa_res, bge_metadata); });
     alexa_bge_app.intent("AMAZON.StopIntent", {}, handleStopIntent);
     alexa_bge_app.launch(function(alexa_req, alexa_res) {
@@ -180,7 +180,7 @@ function init(config) {
     alexa_bge_app.express(app, "/", true);
 
     // Alexa COMED Bot
-    var alexa_comed_app = new alexa.app("app", "comed");
+    var alexa_comed_app = new alexa.app("comedapp");
     alexa_comed_app.intent("CommandBot", {}, function (alexa_req, alexa_res) { handleCommandBot(alexa_req, alexa_res, bge_metadata); });
     alexa_comed_app.intent("AMAZON.StopIntent", {}, handleStopIntent);
     alexa_comed_app.launch(function (alexa_req, alexa_res) {
@@ -252,17 +252,17 @@ function init(config) {
     app.locals.endpoints.push({
       name: 'webhook',
       method: 'POST',
-      endpoint: '/singleBotWebhook/:opco/messages'
+      endpoint: '/webhhooks/:opco/messages'
     });
     app.locals.endpoints.push({
         name: 'alexa',
         method: 'POST',
-        endpoint: '/app/comed'
+        endpoint: '/comedapp'
     });
     app.locals.endpoints.push({
         name: 'alexa',
         method: 'POST',
-        endpoint: '/app/bge'
+        endpoint: '/bgeapp'
     });
     app.locals.endpoints.push({
       name: 'webhookGoogleComed',

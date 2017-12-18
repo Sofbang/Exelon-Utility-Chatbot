@@ -13,9 +13,9 @@ var appConfig = {
                 },
                 alexa: {
                     waitForMoreResponsesMs: 200,
-                    amzn_appId: "amzn1.ask.skill.08d961b6-ab5b-4859-a1ad-b02df9b0f82c",
-                    channelSecretKey: 'iw2IkuMRId4f4YRfcL2obrk41pJ1fqQK',
-                    channelUrl: 'http://bots-connectors:8000/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/23349155-FCD6-4726-BE43-EB92F4FF140F'
+                    amzn_appId: "amzn1.ask.skill.78de290d-b2ef-4003-89a5-ebaecbfacbf6",
+                    channelSecretKey: 'Vu8YgKZLaxj0QphhrBuqPILrAyJEq5ye',
+                    channelUrl: 'https://sfbdemo3.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/6B7DB2BA-CA8F-40FD-9B56-820F6A348EFB'
                 }
             },
             BGE: {
@@ -25,9 +25,9 @@ var appConfig = {
                 },
                 alexa: {
                     waitForMoreResponsesMs: 200,
-                    amzn_appId: "amzn1.ask.skill.08d961b6-ab5b-4859-a1ad-b02df9b0f82c",
-                    channelSecretKey: 'iw2IkuMRId4f4YRfcL2obrk41pJ1fqQK',
-                    channelUrl: 'http://bots-connectors:8000/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/23349155-FCD6-4726-BE43-EB92F4FF140F'
+                    amzn_appId: "amzn1.ask.skill.1a558578-efd6-4c3a-b094-40f5868b7334",
+                    channelSecretKey: 'ZtDAdqlXBXASsxK31CvVvnxfLvg3I2Cv',
+                    channelUrl: 'https://sfbdemo3.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/4FB0DD67-AB8E-48B6-B301-D2595D261390'
                 }
             }
         }
