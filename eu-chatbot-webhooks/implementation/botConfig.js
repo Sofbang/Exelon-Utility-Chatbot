@@ -5,6 +5,7 @@ var appConfig = {
     dev: {
         port: Number(process.env.PORT || 8080),
         logLevel: 'INFO',
+        socketHost: 'sfbdemo2.ngrok.io',
         channels: {
             COMED: {
                 google: {
@@ -35,6 +36,7 @@ var appConfig = {
     stage: {
         port: Number(process.env.PORT || 8080),
         logLevel: 'INFO',
+        socketHost: 'euwebsocketapp-sofbangmobile.uscom-central-1.oraclecloud.com',
         channels: {
             COMED: {
                 google: {

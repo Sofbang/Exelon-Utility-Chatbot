@@ -61,7 +61,8 @@ function init(config) {
         sessionId = req.body.sessionId;
         console.log('google session ' + req.body.sessionId);
         speech = req.body.result && req.body.result.parameters && req.body.result.parameters.echoText ? req.body.result.parameters.echoText : "Hello";
-        ws = new WebSocket('wss://sfbdemo2.ngrok.io/chat/ws?user=' + sessionId);
+        var socketUrl = "wss://" + appConfig.socketHost + "/chat/ws?user=" + sessionId;
+        ws = new WebSocket(socketUrl);
         ws.addEventListener('open', function (event) {
 
             var message = {
