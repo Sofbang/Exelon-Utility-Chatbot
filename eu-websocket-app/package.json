@@ -1,0 +1,27 @@
+{
+  "name": "chat-server",
+  "version": "1.0.0",
+  "description": "Oracle Bots Chat Server",
+  "author": "Oracle Bots Team",
+  "license": "ISC",
+  "repository": {},
+  "main": "index.js",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "cors": "^2.8.1",
+    "express": "^4.14.0",
+    "log4js": "^1.1.1",
+    "morgan": "^1.7.0",
+    "mustache": "^2.3.0",
+    "request": "^2.79.0",
+    "type-is": "^1.6.14",
+    "underscore": "^1.8.3",
+    "util": "^0.10.3",
+    "uuid": "^3.0.1",
+    "ws": "^1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
