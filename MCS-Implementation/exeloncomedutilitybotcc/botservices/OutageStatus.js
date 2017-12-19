@@ -40,6 +40,7 @@ module.exports = {
                 var filteredUserAccounts = userAccounts.filter(function(userAccount){                
                     return (userAccount.data[0].maskedAddress).toLowerCase() == SelectedMaskedAddress.toLowerCase();
                 });
+                console.log("filteredUserAccounts length"+ filteredUserAccounts.length  + "filteredUserAccounts is :"+filteredUserAccounts);
                 var selectedAccountNumber;
                 if(filteredUserAccounts.length > 0){
                     selectedAccountNumber = filteredUserAccounts[0].data[0].accountNumber;
@@ -83,7 +84,7 @@ module.exports = {
                         }
                     });
                 }else{
-                        console.log("after error in multiple address else condition :"+JSON.stringify(response));
+                        console.log("in else condition when filteredUserAccounts is not match with the list item");
                         conversation.variable("errorInMultipleAddress","true");
                         conversation.variable("noAddressFoundMessage", "I’m sorry, but I am unable to find an account associated with that phone number.\nDo you have another phone number or the account number available?");
                         conversation.transition();
