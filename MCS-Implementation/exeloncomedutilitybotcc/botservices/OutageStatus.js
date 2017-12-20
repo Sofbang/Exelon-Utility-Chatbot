@@ -119,13 +119,15 @@ module.exports = {
                                     count++;
                                     console.log("address: " + address + " and count is: " + count);
                                 }else{
+                                    console.log("in else condition of outagestatus of comed");
                                     addressFound = "no";
                                 }
                             }
+                            conversation.variable("addressFound", addressFound);
+                            conversation.variable("noAddressFoundMessage", "I'm not able to complete your request right now. Please try again later.");
                             conversation.variable("numberOfAccount", 'multiple');
                             conversation.variable("accountsOptions", newMaskedAddress.toString());
                             conversation.variable("allResult", JSON.stringify(allResult));
-                            conversation.variable("addressFound", addressFound);
                             conversation.transition('setVariableValues');
                             done();
                         }).catch(function (err) {
