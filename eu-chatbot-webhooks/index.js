@@ -4,7 +4,7 @@ const express = require('express');
 var app = express();
 app.use(express.static('implementation'));
 
-var appConfig = require('./implementation/botConfig').get(process.env.NODE_ENV);
+var appConfig = require('./implementation/botConfig').get();
 var appjs = require('./implementation/app');
 
 //set paramters as appropriate

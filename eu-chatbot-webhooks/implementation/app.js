@@ -12,7 +12,7 @@ function init(config) {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     var webhookUtil = require('./webhookUtil');
-    var appConfig = require('./botConfig').get(process.env.NODE_ENV);
+    var appConfig = require('./botConfig').get();
     var logger = (config ? config.logger : null);
     if (!logger) {
         const log4js = require('log4js');
