@@ -35,7 +35,20 @@ function buildSignature(buf, secret) {
 }
 
 function messageToBot(channelUrl, channelSecretKey, userId, inMsg, callback) {
-  messageToBotWithProperties(channelUrl, channelSecretKey, userId, inMsg, null, callback);
+    messageToBotWithProperties(channelUrl, channelSecretKey, userId, inMsg, null, callback);
+}
+
+function trimIfHasNumber(message) {
+    try {
+        message = wordsToNumbers(message);
+        var hasNumber = /\d/;
+        if (hasNumber.test(message)) {
+            message = message.replace(/\s/g, '');
+        }
+    } catch (e) {
+        console.log(e);
+    }
+    return message;
 }
 
 /*
@@ -50,22 +63,16 @@ function messageToBot(channelUrl, channelSecretKey, userId, inMsg, callback) {
   }
 */
 function messageToBotWithProperties(channelUrl, channelSecretKey, userId, inMsg, additionalProperties, callback) {
-	 inMsg=wordsToNumbers(inMsg);
-	 var msg;
-	 var hasNumber = /\d/;
-	 console.log(inMsg);
-	if(hasNumber.test(inMsg))
-		{ 
-			inMsg=inMsg.replace(/\s/g, '');
-		}
-	 
-	 console.log(inMsg);
+
+    console.log("Message before trimming: " + inMsg);
+    inMsg = trimIfHasNumber(inMsg);
+    console.log("Message after trimming: " + inMsg);
     var outMsg = {
         userId: userId,
         text: inMsg
     };
-    if (additionalProperties){
-      _.extend(outMsg, additionalProperties);
+    if (additionalProperties) {
+        _.extend(outMsg, additionalProperties);
     }
     console.log("Send this message to bot:", outMsg);
     const body = Buffer.from(JSON.stringify(outMsg), 'utf8');
@@ -81,7 +88,7 @@ function messageToBotWithProperties(channelUrl, channelSecretKey, userId, inMsg,
         timeout: 60000,
         followAllRedirects: true,
         followOriginalHttpMethod: true,
-        callback: function(err, response, body) {
+        callback: function (err, response, body) {
             if (!err) {
                 callback(null);
             } else {
