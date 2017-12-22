@@ -27,10 +27,10 @@ module.exports = {
         var AccountNumber = conversation.properties().AccountNumber;
         var OutageType = conversation.properties().OutageType;
 
-        if (OutageType == 'full') {
+        if (OutageType.toLowerCase() == 'full') {
             OutageType = 'allOut';
         }
-        else if (OutageType == 'partial') {
+        else if (OutageType.toLowerCase() == 'partial') {
             OutageType = 'partOut';
         }
 
