@@ -5,6 +5,7 @@ var logger = log4js.getLogger();
 var Promise = require('bluebird');
 var moment = require('moment-timezone');
 var myTimeZone = "America/Toronto"
+var utils = require('./utils');
 
 var ExelonService = require('./ExelonService');
 
@@ -52,7 +53,8 @@ module.exports = {
                             conversation.variable("errorInMultipleAddress","false");
                             console.log("after success in multiple address if condition :"+JSON.stringify(response));
                             conversation.variable("setStatus", response.data[0].status);
-                            conversation.variable("setOutageReported", response.data[0].outageReported);                            
+                            var outageReported = utils.getMessageForBot(response.data[0].outageReported, response.data[0].ETR, 1);
+                            conversation.variable("setOutageReported", outageReported);                            
                             // if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
                             //     conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("Do MMMM YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(response.data[0].ETR).format("Do MMMM YYYY")+' at '+moment(response.data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
                             // }else{
@@ -130,7 +132,8 @@ module.exports = {
                         if (data[0].maskedAddress) {
                             conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
                             conversation.variable("setStatus", data[0].status);
-                            conversation.variable("setOutageReported", data[0].outageReported);
+                            var outageReported = utils.getMessageForBot(data[0].outageReported, data[0].ETR, 1);
+                            conversation.variable("setOutageReported", outageReported);                   
                             // if(conversation.channelType == "webhook" && conversation.channelId == "23349155-FCD6-4726-BE43-EB92F4FF140F"){
                             //     conversation.variable("setOutageReported", 'As of '+moment().tz(myTimeZone).format("hh:mm a")+' on '+moment().tz(myTimeZone).format("Do MMMM YYYY") +' I see that there is a power outage in your area. I currently estimate your power will be restored by '+moment(data[0].ETR).format("Do MMMM YYYY")+' at '+moment(data[0].ETR).format("hh:mm a")+'. You can also text STAT to MYBGE or 69243 for your current outage status.');
                             // }
