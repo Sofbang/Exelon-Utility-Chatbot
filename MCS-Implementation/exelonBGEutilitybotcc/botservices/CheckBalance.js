@@ -28,15 +28,16 @@ module.exports = {
         ExelonService.checkBalance(mobileSdk, AccountNumber, PhoneNumber, Identifier).then(function (response) {
             console.log("response :"+JSON.stringify(response));
             if(response.success){
-                    conversation.variable("servicesDown","false");
-                    conversation.variable("addressFound","true");
-                    conversation.variable("multipleAddressFound","false");
                     if(response.data.address){
+                        conversation.variable("servicesDown","false");
+                        conversation.variable("addressFound","true");
+                        conversation.variable("multipleAddressFound","false");
                         conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with "+ response.data.address);
+                        conversation.variable("checkBalance_AccountInfo", "You have $"+response.data.remainingBalanceDue+" due on "+moment(response.data.dueByDate).format("MMMM DD, YYYY")+". For a full breakdown of your bill, please login to My Account at bge.com or call us at 1-800-685-0123.");
                     }else{
-                        conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with 1617 PROS***");
+                        conversation.variable("servicesDown","false");
+                        conversation.variable("addressFound","false");
                     }
-                    conversation.variable("checkBalance_AccountInfo", "You have $"+response.data.remainingBalanceDue+" due on "+moment(response.data.dueByDate).format("MMMM DD, YYYY")+". For a full breakdown of your bill, please login to My Account at bge.com or call us at 1-800-685-0123.");
                     conversation.transition();
                     done(); 
             }else{
