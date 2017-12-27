@@ -8,20 +8,18 @@ var appConfig = {
     channels: {
         COMED: {
             google: {
-                id: process.env.GOOGLE_BGE || 'E83BDF42-702D-42EA-9D56-7E979D184695',
-                name: 'ExelonBGEUtilityTest'
+                id: process.env.GOOGLE_COMED || 'E83BDF42-702D-42EA-9D56-7E979D184695'
             },
             alexa: {
                 waitForMoreResponsesMs: process.env.WAIT_TIME || 200,
-                amzn_appId: process.env.ALEXA_BGE_APP_ID || "amzn1.ask.skill.ae00ef8d-e0ff-4c13-af86-07c520c289c4",
-                channelSecretKey: process.env.BGE_CHANNEL_SECRET || 'V1sCIK2cc7qDRocj3rUnPEtkLmuWMR7D',
-                channelUrl: process.env.BGE_CHANNEL_URL || 'https://sfbdemo2.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/1B8BD904-E775-4637-8DAA-E9CB27DC7CE7'
+                amzn_appId: process.env.ALEXA_COMED_APP_ID || "amzn1.ask.skill.ae00ef8d-e0ff-4c13-af86-07c520c289c4",
+                channelSecretKey: process.env.COMED_CHANNEL_SECRET || 'V1sCIK2cc7qDRocj3rUnPEtkLmuWMR7D',
+                channelUrl: process.env.COMED_CHANNEL_URL || 'https://sfbdemo2.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/1B8BD904-E775-4637-8DAA-E9CB27DC7CE7'
             }
         },
         BGE: {
             google: {
-                id: process.env.GOOGLE_BGE || '85E7C890-B6D4-4CE8-9452-C468F89E1E6D',
-                name: 'ExelonBGEUtilityTest'
+                id: process.env.GOOGLE_BGE || '85E7C890-B6D4-4CE8-9452-C468F89E1E6D'
             },
             alexa: {
                 waitForMoreResponsesMs: process.env.WAIT_TIME || 200,
