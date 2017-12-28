@@ -1,4 +1,8 @@
-﻿
+﻿const Joi = require('joi');
+const MessageModel = require('../lib/messageModel/MessageModel.js')(Joi);
+const messageModelUtil = require('../lib/messageModel/messageModelUtil.js');
+const botUtil = require('../lib/util/botUtil.js');
+
 function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
 
     var alexa = require("alexa-app");
@@ -9,32 +13,48 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
     if (metadata.channelUrl && metadata.channelSecretKey) {
         logger.info("Alexa " + opco + " - Using Channel: ", metadata.channelUrl);
     }
+    
+    // compile the list of actions, global actions and other menu options
+    function menuResponseMap(resp, card) {
+        var responseMap = {};
+        function addToMap(label, type, action) {
+            responseMap[label] = { type: type, action: action };
+        }
+        if (!card) {
+            if (resp.globalActions && resp.globalActions.length > 0) {
+                resp.globalActions.forEach(function (gAction) {
+                    addToMap(gAction.label, 'global', gAction);
+                });
+            }
+            if (resp.actions && resp.actions.length > 0) {
+                resp.actions.forEach(function (action) {
+                    addToMap(action.label, 'message', action);
+                });
+            }
+            if (resp.type === 'card' && resp.cards && resp.cards.length > 0) {
+                resp.cards.forEach(function (card) {
+                    //special menu option to navigate to card detail
+                    addToMap('Card ' + card.title, 'card', { type: 'custom', value: { type: 'card', value: card } });
+                });
+            }
+        } else {
+            if (card.actions && card.actions.length > 0) {
+                card.actions.forEach(function (action) {
+                    addToMap(action.label, 'message', action);
+                });
+            }
+            //special menu option to return to main message from the card
+            addToMap('Return', 'cardReturn', { type: 'custom', value: { type: 'messagePayload', value: resp } });
+        }
+        return responseMap;
+    }
 
     function randomIntInc(low, high) {
         return Math.floor(Math.random() * (high - low + 1) + low);
     }
 
-    function convertRespToSpeech(resp) {
-        var sentence = "";
-        //console.info("resp: " +resp);
-        if (resp.text) {
-            sentence = resp.text;
-        }
-        if (resp.choices) {
-            if (resp.choices.length > 0) {
-                sentence += '  The following are your choices: ';
-            }
-            _.each(resp.choices, function (choice) {
-                sentence = sentence + choice + ', ';
-            });
-        }
-        if (resp.attachment) {
-            sentence += "An attachment of type " + resp.attachment.type + " is returned."
-        }
-        return sentence;
-    }
-
     function handleCommandBot(alexa_req, alexa_res) {
+
         var command = alexa_req.slot("command");
         var session = alexa_req.getSession();
         var userId = session.get("userId");
@@ -46,27 +66,54 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
         if (metadata.channelUrl && metadata.channelSecretKey && userId && command) {
             const userIdTopic = userId;
             var respondedToAlexa = false;
+            var additionalProperties = {
+                "profile": {
+                    "clientType": "alexa"
+                }
+            };
             var sendToAlexa = function () {
                 if (!respondedToAlexa) {
                     respondedToAlexa = true;
-                    alexa_res.send();
                     logger.info('Prepare to send to Alexa');
+                    alexa_res.send();
                     PubSub.unsubscribe(userIdTopic);
                 } else {
                     logger.info("Already sent response");
                 }
-            }
+            };
+            // compose text response to alexa, and also save botMessages and botMenuResponseMap to alexa session so they can be used to control menu responses next
+            var navigableResponseToAlexa = function (resp) {
+                var respModel;
+                if (resp.messagePayload) {
+                    respModel = new MessageModel(resp.messagePayload);
+                } else {
+                    // handle 1.0 webhook format as well
+                    respModel = new MessageModel(resp);
+                }
+                var botMessages = session.get("botMessages");
+                if (!Array.isArray(botMessages)) {
+                    botMessages = [];
+                }
+                var botMenuResponseMap = session.get("botMenuResponseMap");
+                if (typeof botMenuResponseMap !== 'object') {
+                    botMenuResponseMap = {};
+                }
+                botMessages.push(respModel.messagePayload());
+                session.set("botMessages", botMessages);
+                session.set("botMenuResponseMap", Object.assign(botMenuResponseMap || {}, menuResponseMap(respModel.messagePayload())));
+                alexa_res.say(messageModelUtil.convertRespToText(respModel.messagePayload()));
+            };
             var commandResponse = function (msg, data) {
                 logger.info('Received callback message from webhook channel');
                 var resp = data;
-                console.log("test" + resp.text.includes("address"));
-                if (resp.text.includes("address")) {
+                console.log("test" + resp.messagePayload.text.includes("address"));
+                if (resp.messagePayload.text.includes("address")) {
                     var re = /([0-9])/g;
-                    resp.text = resp.text.replace(re, '$& ');
+                    resp.messagePayload.text = resp.messagePayload.text.replace(re, '$& ');
                 }
                 logger.info('Parsed Message Body:', resp);
                 if (!respondedToAlexa) {
-                    alexa_res.say(convertRespToSpeech(resp));
+                    navigableResponseToAlexa(resp);
                 } else {
                     logger.info("Already processed response");
                     return;
@@ -77,21 +124,99 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
                     }, metadata.waitForMoreResponsesMs);
                 }
             };
-            var token = PubSub.subscribe(userIdTopic, commandResponse);
-            var additionalProperties = {
-                "userProfile": {
-                    "clientType": "alexa"
+            var sendMessageToBot = function (messagePayload) {
+                return function () {
+                    var token = PubSub.subscribe(userIdTopic, commandResponse);
+                    webhookUtil.messageToBotWithProperties(metadata.channelUrl, metadata.channelSecretKey, userId, messagePayload, additionalProperties, function (err) {
+                        if (err) {
+                            logger.info("Failed sending message to Bot");
+                            alexa_res.say("Failed sending message to Bot.  Please review your bot configuration.");
+                            alexa_res.send();
+                            PubSub.unsubscribe(userIdTopic);
+                        }
+                    });
+                };
+            };
+            var handleMenuInput = function (input) {
+                var botMenuResponseMap = session.get("botMenuResponseMap");
+                if (typeof botMenuResponseMap !== 'object') {
+                    botMenuResponseMap = {};
+                }
+                var menuResponse = botUtil.approxTextMatch(input, _.keys(botMenuResponseMap), true, true, 7);
+                //if command is a menu action
+                if (menuResponse) {
+                    var menu = botMenuResponseMap[menuResponse.item];
+                    // if it is global action or message level action
+                    if (['global', 'message'].includes(menu.type)) {
+                        var action = menu.action;
+                        session.set("botMessages", []);
+                        session.set("botMenuResponseMap", {});
+                        if (action.type == 'postback') {
+                            var postbackMsg = MessageModel.postbackConversationMessage(action.postback);
+                            sendMessageToBot(postbackMsg)();
+                        } else if (action.type == 'location') {
+                            logger.info('Sending a predefined location to bot');
+                            sendMessageToBot(MessageModel.locationConversationMessage(37.2900055, -121.906558))();
+                        }
+                        // if it is navigating to card detail
+                    } else if (menu.type === 'card') {
+                        var selectedCard;
+                        if (menu.action && menu.action.type && menu.action.type === 'custom' && menu.action.value && menu.action.value.type === 'card') {
+                            selectedCard = _.clone(menu.action.value.value);
+                        }
+                        if (selectedCard) {
+                            var botMessages = session.get("botMessages");
+                            if (!Array.isArray(botMessages)) {
+                                botMessages = [];
+                            }
+                            var selectedMessage;
+                            if (botMessages.length === 1) {
+                                selectedMessage = botMessages[0];
+                            } else {
+                                selectedMessage = _.find(botMessages, function (botMessage) {
+                                    if (botMessage.type === 'card') {
+                                        return _.some(botMessage.cards, function (card) {
+                                            return (card.title === selectedCard.title);
+                                        });
+                                    } else {
+                                        return false;
+                                    }
+                                });
+                            }
+                            if (selectedMessage) {
+                                session.set("botMessages", [selectedMessage]);
+                                session.set("botMenuResponseMap", menuResponseMap(selectedMessage, selectedCard));
+                                _.defer(function () {
+                                    alexa_res.say(messageModelUtil.cardToText(selectedCard, 'Card'));
+                                    alexa_res.send();
+                                });
+                            }
+                        }
+                        // if it is navigating back from card detail
+                    } else if (menu.type === 'cardReturn') {
+                        var returnMessage;
+                        if (menu.action && menu.action.type && menu.action.type === 'custom' && menu.action.value && menu.action.value.type === 'messagePayload') {
+                            returnMessage = _.clone(menu.action.value.value);
+                        }
+                        if (returnMessage) {
+                            session.set("botMessages", [returnMessage]);
+                            session.set("botMenuResponseMap", menuResponseMap(returnMessage));
+                            _.defer(function () {
+                                alexa_res.say(messageModelUtil.convertRespToText(returnMessage));
+                                alexa_res.send();
+                            });
+                        }
+                    }
+                    return true;
+                } else {
+                    return false;
                 }
             };
-            webhookUtil.messageToBotWithProperties(metadata.channelUrl, metadata.channelSecretKey, userId, command, additionalProperties, function (err) {
-                //webhookUtil.messageToBot(metadata.channelUrl, metadata.channelSecretKey, userId, command, function(err) {
-                if (err) {
-                    logger.info("Failed sending message to Bot");
-                    alexa_res.say("Failed sending message to Bot.  Please review your bot configuration.");
-                    alexa_res.send();
-                    PubSub.unsubscribe(userIdTopic);
-                }
-            });
+            // if it is not a menu action
+            if (!handleMenuInput(command)) {
+                var commandMsg = MessageModel.textConversationMessage(command);
+                sendMessageToBot(commandMsg)();
+            }
         } else {
             _.defer(function () {
                 alexa_res.say("I don't understand. Could you please repeat what you want?");
@@ -113,7 +238,6 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
 
     function handlePreEvent(alexa_req, alexa_res, alexa_type) {
         logger.debug(alexa_req.data.session.application.applicationId);
-        logger.info(alexa_req.data.session.application.applicationId);
         // change the application id
         if (alexa_req.data.session.application.applicationId != metadata.amzn_appId) {
             logger.error("fail as application id is not valid");

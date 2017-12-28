@@ -8,10 +8,11 @@ PubSub.immediateExceptions = true;
 function init(config) {
 
     var app = express();
+    var alexaRouter = express.Router();
+    alexaRouter.use(bodyParser.json());
+    app.use('/alexa', alexaRouter);
     app.use(express.static('implementation'));
-    app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(bodyParser.json());
-    var webhookUtil = require('./webhookUtil');
+    var webhookUtil = require('../lib/webhook/webhookUtil.js');
     var appConfig = require('./botConfig').get();
     var logger = (config ? config.logger : null);
     if (!logger) {
@@ -21,15 +22,17 @@ function init(config) {
         log4js.replaceConsole(logger);
     }
 
-    app.post('/webhooks/:opco/messages', bodyParser.json(), function (req, res) {
+    app.post('/webhooks/:opco/messages', bodyParser.json({
+        verify: webhookUtil.bodyParserRawMessageVerify
+    }), function (req, res) {
         var opco = req.params.opco.toUpperCase();
         var metadata = appConfig.channels[opco].alexa;
-
+        logger.info("Message from webhook channel", req.body);
         const userID = req.body.userId;
         if (!userID) {
             return res.status(400).send('Missing User ID');
         }
-        if (webhookUtil.verifyMessageFromBot(req.get('X-Hub-Signature'), req.body, metadata.channelSecretKey)) {
+        if (webhookUtil.verifyMessageFromBot(req.get('X-Hub-Signature'), req.rawBody, req.encoding, metadata.channelSecretKey)) {
             res.sendStatus(200);
             logger.info("Publishing to", userID);
             PubSub.publish(userID, req.body);
@@ -39,10 +42,10 @@ function init(config) {
     });
 
     var alexa_bge_app = require('./eu_alexa').getAlexaApp(appConfig, "BGE", webhookUtil, PubSub, logger);
-    alexa_bge_app.express(app, "/", true);
+    alexa_bge_app.express(alexaRouter, "/", true);
 
     var alexa_comed_app = require('./eu_alexa').getAlexaApp(appConfig, "COMED", webhookUtil, PubSub, logger);
-    alexa_comed_app.express(app, "/", true);
+    alexa_comed_app.express(alexaRouter, "/", true);
 
     app.locals.endpoints = [];
     app.locals.endpoints.push({
