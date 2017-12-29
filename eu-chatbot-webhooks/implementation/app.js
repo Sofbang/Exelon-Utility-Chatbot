@@ -67,13 +67,18 @@ function init(config) {
         var socketUrl = "wss://" + appConfig.socketHost + "/chat/ws?user=" + sessionId;
         ws = new WebSocket(socketUrl);
         ws.addEventListener('open', function (event) {
-
+            
             var message = {
-                to: {
-                    type: 'bot',
-                    id: botID
+                "to": {
+                    "type": "bot",
+                    "id": botID
                 },
-                text: speech
+                "messagePayload": {
+                    "type": "text",
+                    "text": speech
+                },
+                "userProfile": { "clientType": "google" },
+                "profile": { "clientType": "google" }
             };
 
             console.log(JSON.stringify(message));
@@ -85,8 +90,9 @@ function init(config) {
                 var msg = JSON.parse(event.data);
                 console.log(JSON.stringify(msg));
                 ws.close();
-                if (msg.body.choices) {
-                    displayText = msg.body.text + msg.body.choices;
+                if (msg.body.messagePayload.actions) {
+                    var choices = msg.body.messagePayload.actions.map(function (action) { return action.label });
+                    displayText = msg.body.text + choices;
                 } else {
                     displayText = msg.body.text;
                 }
