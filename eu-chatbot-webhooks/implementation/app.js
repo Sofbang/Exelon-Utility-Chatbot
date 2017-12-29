@@ -94,7 +94,7 @@ function init(config) {
                     var choices = msg.body.messagePayload.actions.map(function (action) { return action.label });
                     displayText = msg.body.messagePayload.text + choices;
                 } else {
-                    displayText = msg.body.text;
+                    displayText = msg.body.messagePayload.text;
                 }
             } catch (e) {
                 displayText = "I'm not able to complete your request right now. Please try again later.";
