@@ -25,7 +25,6 @@ function init(config, httpServer) {
 
 	var app = express();
 	logger.setLevel(config.logLevel||'INFO');
-  log4js.replaceConsole(logger);
 
 	const root = config.root || './';
 
@@ -780,12 +779,12 @@ function init(config, httpServer) {
 
 	const WS_ERROR_UNSUPPORTED_FEATURE                = {code: 999, template: 'WebSocket[{{wsID}}] message from user {{userID}}: Unsupported feature: {{feature}}'};
 
-	app.locals.endpoints = [];
+	/*app.locals.endpoints = [];
 	app.locals.endpoints.push({
 		name: 'chat',
 		method: 'websocket',
 		endpoint: '/ws'
-	});
+	});*/
 	app.locals.ui = {
 		name: 'Admin UI',
 		endpoint: '/admin'

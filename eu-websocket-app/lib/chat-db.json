@@ -1,1 +1,0 @@
-{"users":[],"channels":[],"bots":[{"name":"testbot","description":"new","secretKey":"xfZZRUPdKda6fvI8d0tQLND7ylpN7psh","uri":"http://sfbdemo3.ngrok.io/connectors/v1/tenants/chatbot-tenant/listeners/webhook/channels/B69CEBD2-3F3B-407B-B24D-3F591E93B4E9","type":"webhook","tenantId":"chatbot-tenant","id":"B69CEBD2-3F3B-407B-B24D-3F591E93B4E9"}],"nextWebSocketID":2}
