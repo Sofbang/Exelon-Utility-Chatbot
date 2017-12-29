@@ -113,12 +113,16 @@ function init(config) {
         });
     }
 
-    app.post('/comed/echo', function (req, res) {
+    app.post('/comed/echo', bodyParser.json({
+        verify: webhookUtil.bodyParserRawMessageVerify
+    }), function (req, res) {
         var botID = appConfig.channels.COMED.google.id;
         handleEcho(req, res, botID);
     });
 
-    app.post('/bge/echo', function (req, res) {
+    app.post('/bge/echo', bodyParser.json({
+        verify: webhookUtil.bodyParserRawMessageVerify
+    }), function (req, res) {
         var botID = appConfig.channels.BGE.google.id;
         handleEcho(req, res, botID);
     });
