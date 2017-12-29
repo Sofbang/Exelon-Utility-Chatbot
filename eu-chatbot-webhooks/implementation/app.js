@@ -92,7 +92,7 @@ function init(config) {
                 ws.close();
                 if (msg.body.messagePayload.actions) {
                     var choices = msg.body.messagePayload.actions.map(function (action) { return action.label });
-                    displayText = msg.body.text + choices;
+                    displayText = msg.body.messagePayload.text + choices;
                 } else {
                     displayText = msg.body.text;
                 }
