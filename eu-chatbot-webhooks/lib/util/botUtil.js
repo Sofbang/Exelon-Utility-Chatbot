@@ -2,7 +2,9 @@
 
 const _ = require('underscore');
 const similar_text = require('locutus/php/strings/similar_text');
+const { wordsToNumbers } = require('words-to-numbers');
 
+function BotUtil() { }
 /**
  * utility function to perform approximate string matching.  This is useful in cases like voice integration where the voice recognition may not
  * produce perfect text input, i.e., what the user says may not be perfectly converted into text.  In such case, an approximate matching needs to
@@ -15,7 +17,7 @@ const similar_text = require('locutus/php/strings/similar_text');
  * @param {boolean} [removeSpace] - if true, the item and list are first stripped of space before matching.
  * @param {int} similarity - A number between 1 and 10, with higher numer meaning higher similarity.
  */
-function approxTextMatch(item, list, lowerCase, removeSpace, similarity) {
+BotUtil.prototype.approxTextMatch = function (item, list, lowerCase, removeSpace, similarity) {
     function preProcess(item){
       if (removeSpace){
         item = item.replace(/\s/g, '');
@@ -61,9 +63,26 @@ function approxTextMatch(item, list, lowerCase, removeSpace, similarity) {
 }
 
 /**
+ * utility function to trim the string body if it has number in it.
+ * @function module:botUtil.trimIfHasNumber
+ * @return {string} The string obtained after the conversion.
+ * @param {string} message - A string that needs to be trim if it has number.
+ */
+BotUtil.prototype.trimIfHasNumber = function (message) {
+    try {
+        message = wordsToNumbers(message);
+        var hasNumber = /\d/;
+        if (hasNumber.test(message)) {
+            message = message.replace(/\s/g, '');
+        }
+    } catch (e) {
+        console.log(e);
+    }
+    return message;
+}
+
+/**
  * The botUtil is a set of utility functions for bot integration.
  * @module botUtil
  */
-module.exports = {
-  approxTextMatch: approxTextMatch
-};
+module.exports = new BotUtil();

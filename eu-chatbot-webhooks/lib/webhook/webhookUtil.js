@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const request = require('request');
 const _ = require('underscore');
-const { wordsToNumbers } = require('words-to-numbers');
+const botUtil = require('../util/botUtil.js');
 
 /**
  * utility function to perform approximate string matching.  This is useful in cases like voice integration where the voice recognition may not
@@ -79,20 +79,6 @@ function messageToBot(channelUrl, channelSecretKey, userId, inMsg, callback) {
 }
 
 
-function trimIfHasNumber(message) {
-    try {
-        message = wordsToNumbers(message);
-        var hasNumber = /\d/;
-        if (hasNumber.test(message)) {
-            message = message.replace(/\s/g, '');
-        }
-    } catch (e) {
-        console.log(e);
-    }
-    return message;
-}
-
-
 /**
  * utility function to send message to bot webhook channel, generating the right message with signature.  This function also allows additional
  * properties to be sent along to the bot.  A common use case is to add a userProfile property.  
@@ -108,7 +94,7 @@ function trimIfHasNumber(message) {
 function messageToBotWithProperties(channelUrl, channelSecretKey, userId, inMsg, additionalProperties, callback) {
 if(inMsg.text){
 console.log('inMsg before conversion: ' + JSON.stringify(inMsg));
-inMsg.text = trimIfHasNumber(inMsg.text);
+    inMsg.text = botUtil.trimIfHasNumber(inMsg.text);
 console.log('inMsg after conversion: ' + JSON.stringify(inMsg));
 }
     var outMsg = {

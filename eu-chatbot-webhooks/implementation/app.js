@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const PubSub = require('pubsub-js');
 const WebSocket = require('ws');
+const botUtil = require('../lib/util/botUtil');
 
 PubSub.immediateExceptions = true;
 
@@ -66,8 +67,9 @@ function init(config) {
         speech = req.body.result && req.body.result.parameters && req.body.result.parameters.echoText ? req.body.result.parameters.echoText : "Hello";
         var socketUrl = "wss://" + appConfig.socketHost + "/chat/ws?user=" + sessionId;
         ws = new WebSocket(socketUrl);
+
         ws.addEventListener('open', function (event) {
-            
+            speech = botUtil.trimIfHasNumber(speech);
             var message = {
                 "to": {
                     "type": "bot",
