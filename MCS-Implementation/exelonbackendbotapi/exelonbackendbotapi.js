@@ -24,7 +24,7 @@ module.exports = function (service) {
             };
         }
         else {
-            if (AccountNumber != undefined && AccountNumber != "${accountNumber.value.number}") {
+            if (AccountNumber != undefined && AccountNumber != "${accountNumber.value}") {
                 pdata = {
                     "account_number": AccountNumber
                 };
@@ -59,7 +59,8 @@ module.exports = function (service) {
             headers: {
                 "Authorization": "Basic QTQ1MzU3Nl9FWEVMT05FVU1PQklMRUFQUFRFU1RfTU9CSUxFX0FOT05ZTU9VU19BUFBJRDpraG0wQTV5cmtzX3Rkeg==",
                 "Content-Type": "application/json",
-                "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667"
+                "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667",
+                "User-Agent": "ChatBot/1.0"
             },
             body: pdata
         }, handler);
@@ -76,7 +77,7 @@ module.exports = function (service) {
         console.log("opco: " + opco);
         var pdata = {}
 
-        if (AccountNumber != undefined && AccountNumber != "${accountNumber.value.number}") {
+        if (AccountNumber != undefined && AccountNumber != "${accountNumber.value}") {
             pdata = {
                 "account_number": AccountNumber,
                 "outage_issue": outageType
