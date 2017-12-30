@@ -1,0 +1,54 @@
+﻿[
+  {
+    "MessageToBeReplaced": "The power outage in your area has already been reported. A repair crew is on the way. We will have your service restored as quickly as possible.",
+    "ReplacedMessage": "The power outage in your area has already been reported. A repair crew is on the way. I will have your service restored as quickly as possible."
+  },
+  {
+    "MessageToBeReplaced": "The power outage in your area has already been reported. A repair crew is on site. We will have your service restored as quickly as possible.",
+    "ReplacedMessage": "The power outage in your area has already been reported. A repair crew is on site. I will have your service restored as quickly as possible."
+  },
+  {
+    "MessageToBeReplaced": "The power outage in your area has already been reported. We anticipate having your service restored by {estRestore}.",
+    "ReplacedMessage": "The power outage in your area has already been reported. I anticipate having your service restored by {estRestore}.",
+    "parameters": [ "estRestore" ]
+  },
+  {
+    "MessageToBeReplaced": "The power outage in your area has already been reported. We are aware of the power outage in your area. We will have your service restored as quickly as possible.",
+    "ReplacedMessage": "The power outage in your area has already been reported. I am aware of the power outage in your area. I will have your service restored as quickly as possible."
+  },
+  {
+    "MessageToBeReplaced": "The power outage in your area has already been reported. We anticipate having all service restored on or before {estRestore}.",
+    "ReplacedMessage": "The power outage in your area has already been reported. I anticipate having all service restored on or before {estRestore}.",
+    "parameters": [ "estRestore" ]
+  },
+  {
+    "MessageToBeReplaced": "The power outage in your area has already been reported. A repair crew is on the way. We anticipate having your service restored by {estRestore}.",
+    "ReplacedMessage": "The power outage in your area has already been reported. A repair crew is on the way. I anticipate having your service restored by {estRestore}.",
+    "parameters": [ "estRestore" ]
+  },
+  {
+    "MessageToBeReplaced": "Our records show your power is on. If not, please use the form below to report a power outage. Note: If you reported an outage within the past fifteen minutes it may not yet be reflected on this site.",
+    "ReplacedMessage": "My records show your power is on. If not, please use the form below to report a power outage. Note: If you reported an outage within the past fifteen minutes it may not yet be reflected on this site."
+  },
+  {
+    "MessageToBeReplaced": "Our records show that your power is on. If this is incorrect, please call 877.778.2222 to report a power outage.",
+    "ReplacedMessage": "My records show that your power is on. If this is incorrect, please call 877.778.2222 to report a power outage."
+  },
+  {
+    "MessageToBeReplaced": "Currently unable to process your request. Please call 877.778.2222 to report an outage.",
+    "ReplacedMessage": "Currently unable to process your request. Please call 877.778.2222 to report an outage."
+  },
+  {
+    "MessageToBeReplaced": "Outage information is not currently available for this location.  Please call us at 1.877.778.2222 to report a power outage.",
+    "ReplacedMessage": "Outage information is not currently available for this location.  Please call us at 1.877.778.2222 to report a power outage."
+  },
+  {
+    "MessageToBeReplaced": "We are unable to process your request at this time. Please call us at 877.778.2222.",
+    "ReplacedMessage": "I am unable to process your request at this time. Please call us at 877.778.2222."
+  },
+  {
+    "MessageToBeReplaced": "The power outage in your area has already been reported. A repair crew is on site. We anticipate having your service restored by {estRestore}.",
+    "ReplacedMessage": "The power outage in your area has already been reported. A repair crew is on site. I anticipate having your service restored by {estRestore}.",
+    "parameters": [ "estRestore" ]
+  }
+]

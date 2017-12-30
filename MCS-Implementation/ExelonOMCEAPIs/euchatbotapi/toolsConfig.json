@@ -1,0 +1,43 @@
+
+{
+    "apiName":"euchatbotapi",
+    "apiVersion":"1.1",
+    "apiId":"d9d0590a-366c-4c22-ac03-b887d68cf481",
+    "baseUrl":"https://8D1A069C6EDC47FEB93ABF3C3E542408.uscom-central-1.oraclecloud.com:443",
+    "tokenEndpoint":"https://idcs-fce88a53879a43eb9ff782e4a0cd0513.identity.oraclecloud.com/oauth2/v1/token",
+    "backend":{
+        "backendId":"<YOUR_BACKEND_ID>",
+        "authorization":{
+            "anonymousKey":"<BACKEND_ANONYMOUS_KEY>",
+            "clientId":"<BACKEND_CLIENT_ID>",
+            "clientSecret":"<BACKEND_CLIENT_SECRET>"
+        }
+    },
+    "tools":{
+        "deployment":{
+            "tempDirectory":"c:\\tmp\\mcs-deploy"
+        },
+        "authorization":{
+            "clientId":"<OMCE_TM_APP_CLIENT_ID>",
+            "clientSecret":"<OMCE_TM_APP_CLIENT_SECRET>"
+        }
+    },
+    "container":{
+        "oracleMobileApiName":"OracleMobileAPI",
+        "port":4000
+    },
+    "tests":{
+        "getOutage":{
+            "method":"GET",
+            "resource":"/outage"
+        },
+        "getOutageQuery":{
+            "method":"GET",
+            "resource":"/outage/query"
+        },
+        "getBillLookup":{
+            "method":"GET",
+            "resource":"/bill/lookup"
+        }
+    }
+}
