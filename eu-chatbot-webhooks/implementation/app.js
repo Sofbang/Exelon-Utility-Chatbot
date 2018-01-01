@@ -90,7 +90,6 @@ function init(config) {
             var displayText;
             try {
                 var msg = JSON.parse(event.data);
-                console.log(JSON.stringify(msg));
                 ws.close();
                 if (msg.body.messagePayload.actions) {
                     var choices = msg.body.messagePayload.actions.map(function (action) { return action.label });
@@ -104,6 +103,8 @@ function init(config) {
                     var re = /([0-9])/g;
                     speech = speech.replace(re, '$& ');
                 }
+                console.log("displayText: " + JSON.stringify(displayText));
+                console.log("speech: " + JSON.stringify(speech));
             } catch (e) {
                 displayText = "I'm not able to complete your request right now. Please try again later.";
             } finally {
