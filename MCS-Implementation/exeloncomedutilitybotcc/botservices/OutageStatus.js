@@ -115,6 +115,7 @@ module.exports = {
                                 promiseArr.push(getOutageStatus);
                             }
                             Promise.all(promiseArr).then(function(allResult) {
+                                var clientType = conversation._request.message.payload.profile.clientType;
                                 if (clientType && (clientType.toLowerCase() == "google" || clientType.toLowerCase() == "alexa")) {
                                     count = 1;
                                     var addressFound = "yes";
