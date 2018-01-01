@@ -1,0 +1,51 @@
+﻿[
+  {
+    "MessageToBeReplaced": "The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you.",
+    "ReplacedMessage": "The cause of your outage is under investigation. I apologize for any inconvenience it may have caused you."
+  },
+  {
+    "MessageToBeReplaced": "As of {now} we indicate that {qyCustAffected} customer(s) are affected by a power outage in your area.",
+    "ReplacedMessage": "As of {now} my records indicate that {qyCustAffected} customer(s) are affected by a power outage in your area.",
+    "parameters": [ "now", "qyCustAffected" ]
+  },
+  {
+    "MessageToBeReplaced": "We are currently in the process of estimating when service will be restored.",
+    "ReplacedMessage": "I am currently in the process of estimating when service will be restored."
+  },
+  {
+    "MessageToBeReplaced": "We are unable to retrieve your outage status at this time. If you are without service and your home has circuit breakers, turn your circuit breakers off then on again. If your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage",
+    "ReplacedMessage": "I am unable to retrieve your outage status at this time. If you are without service and your home has circuit breakers, turn your circuit breakers off then on again. If your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage"
+  },
+  {
+    "MessageToBeReplaced": "We are not aware of an outage in your area. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage. Note: If you reported an outage within the past 15 minutes, it may not yet be reflected on this site",
+    "ReplacedMessage": "I am not aware of an outage in your area. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage. Note: If you reported an outage within the past 15 minutes, it may not yet be reflected on this site"
+  },
+  {
+    "MessageToBeReplaced": "Our records indicate that all outages in your area have been restored, there may be an isolated outage at your address. Please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage.",
+    "ReplacedMessage": "My records indicate that all outages in your area have been restored, there may be an isolated outage at your address. Please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage."
+  },
+  {
+    "MessageToBeReplaced": "Our records indicate that you have been cut out for non-payment. If you wish to restore your power, click on the Make a payment link.",
+    "ReplacedMessage": "My records indicate that your service has been paused for non-payment. If you wish to restore your power, please visit comed.com/pay"
+  },
+  {
+    "MessageToBeReplaced": "We are not aware of an outage in your area. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage. Note: If you reported an outage within the past 15 minutes, it may not yet be reflected on this site.",
+    "ReplacedMessage": "I am not aware of an outage in your area. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage. Note: If you reported an outage within the past 15 minutes, it may not yet be reflected on this site."
+  },
+  {
+    "MessageToBeReplaced": "Our records indicate that all outages in your area have been restored, there may be an isolated outage at your address. Please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage.",
+    "ReplacedMessage": "My records indicate that all outages in your area have been restored, there may be an isolated outage at your address. Please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage."
+  },
+  {
+    "MessageToBeReplaced": "Our field crews have investigated your outage and have determined that additional resources are necessary and have been sent to restore power.",
+    "ReplacedMessage": "Our field crews have investigated your outage and have determined that additional resources are necessary. These resources have been sent and our crews are working as quickly and safely as possible to restore power."
+  },
+  {
+    "MessageToBeReplaced": "We are unable to retrieve your outage status at this time. If you are without service and your home has circuit breakers, turn your circuit breakers off then on again. If your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage.",
+    "ReplacedMessage": "I am unable to retrieve your outage status at this time. If you are without service and your home has circuit breakers, turn your circuit breakers off then on again. If your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage."
+  },
+  {
+    "MessageToBeReplaced": "The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you.",
+    "ReplacedMessage": "The cause of your outage is under investigation. I apologize for any inconvenience."
+  }
+]

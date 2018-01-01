@@ -3,8 +3,7 @@
 var log4js = require('log4js');
 var logger = log4js.getLogger();
 var Promise = require('bluebird');
-var moment = require('moment-timezone');
-var myTimeZone = "America/Chicago"
+var utils = require('./utils');
 
 var ExelonService = require('./ExelonService');
 
@@ -74,8 +73,9 @@ module.exports = {
                             conversation.variable("errorInMultipleAddress", "false");
                             console.log("after success in multiple address if condition :" + JSON.stringify(response));
                             conversation.variable("setStatus", response.data[0].status);
-                            conversation.variable("setOutageReported", response.data[0].outageReported);
-                            conversation.variable("setReportOutageReported", response.data[0].outageReported);
+                            var outageReported = utils.getMessageForBot(response.data[0].outageReported, response.data[0].ETR, 1);
+                            conversation.variable("setOutageReported", outageReported);
+                            conversation.variable("setReportOutageReported", outageReported);
                             conversation.variable("selectedAccountNumber", selectedAccountNumber);
                             conversation.variable("setETR", response.data[0].ETR);
                             conversation.transition('setVariableValues');
@@ -180,8 +180,9 @@ module.exports = {
                             if (data[0].maskedAddress) {
                                 conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
                                 conversation.variable("setStatus", data[0].status);
-                                conversation.variable("setOutageReported", data[0].outageReported);
-                                conversation.variable("setReportOutageReported", data[0].outageReported);
+                                var outageReported = utils.getMessageForBot(data[0].outageReported, data[0].ETR, 1);
+                                conversation.variable("setOutageReported", outageReported);
+                                conversation.variable("setReportOutageReported", outageReported);
                                 conversation.variable("setETR", data[0].ETR);
                                 conversation.transition('setVariableValues');
                                 done();

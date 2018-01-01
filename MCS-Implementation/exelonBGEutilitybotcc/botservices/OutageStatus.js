@@ -3,8 +3,6 @@
 var log4js = require('log4js');
 var logger = log4js.getLogger();
 var Promise = require('bluebird');
-var moment = require('moment-timezone');
-var myTimeZone = "America/Toronto"
 var utils = require('./utils');
 
 var ExelonService = require('./ExelonService');
