@@ -98,11 +98,17 @@ function init(config) {
                 } else {
                     displayText = msg.body.messagePayload.text;
                 }
+                var speech = displayText;
+                console.log("Includes 'address': " + msg.body.messagePayload.text.includes("address"));
+                if (speech.includes("address")) {
+                    var re = /([0-9])/g;
+                    speech = speech.replace(re, '$& ');
+                }
             } catch (e) {
                 displayText = "I'm not able to complete your request right now. Please try again later.";
             } finally {
                 return res.json({
-                    speech: displayText,
+                    speech: speech,
                     displayText: displayText,
                     source: 'google-webhook'
                 });
