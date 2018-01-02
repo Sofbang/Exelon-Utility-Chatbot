@@ -64,13 +64,13 @@ function init(config) {
     function handleEcho(req, res, botID) {
         sessionId = req.body.sessionId;
         console.log('Body received: ' + JSON.stringify(req.body));
-        speech = req.body.result.parameters.echoText;
-        if (speech && speech != ""){
+        var incomingSpeech = req.body.result.parameters.echoText;
+        if (incomingSpeech && incomingSpeech != ""){
             var socketUrl = "wss://" + appConfig.socketHost + "/chat/ws?user=" + sessionId;
             ws = new WebSocket(socketUrl);
 
             ws.addEventListener('open', function (event) {
-                speech = botUtil.trimIfHasNumber(speech);
+                incomingSpeech = botUtil.trimIfHasNumber(incomingSpeech);
                 var message = {
                     "to": {
                         "type": "bot",
@@ -78,7 +78,7 @@ function init(config) {
                     },
                     "messagePayload": {
                         "type": "text",
-                        "text": speech
+                        "text": incomingSpeech
                     },
                     "userProfile": { "clientType": "google" },
                     "profile": { "clientType": "google" }
@@ -89,6 +89,7 @@ function init(config) {
             });
             ws.addEventListener('message', function (event) {
                 var displayText;
+                var outgoingSpeech;
                 try {
                     var msg = JSON.parse(event.data);
                     ws.close();
@@ -98,19 +99,19 @@ function init(config) {
                     } else {
                         displayText = msg.body.messagePayload.text;
                     }
-                    var speech = displayText;
-                    console.log("Includes 'address': " + msg.body.messagePayload.text.includes("address"));
-                    if (speech.includes("address")) {
+                    outgoingSpeech = displayText;
+                    console.log("Includes 'address': " + outgoingSpeech.includes("address"));
+                    if (outgoingSpeech.includes("address")) {
                         var re = /([0-9])/g;
-                        speech = speech.replace(re, '$& ');
+                        outgoingSpeech = outgoingSpeech.replace(re, '$& ');
                     }
                     console.log("displayText: " + JSON.stringify(displayText));
-                    console.log("speech: " + JSON.stringify(speech));
+                    console.log("outgoingSpeech: " + JSON.stringify(outgoingSpeech));
                 } catch (e) {
                     displayText = "I'm not able to complete your request right now. Please try again later.";
                 } finally {
                     return res.json({
-                        speech: speech,
+                        speech: outgoingSpeech,
                         displayText: displayText,
                         source: 'google-webhook'
                     });
@@ -123,8 +124,6 @@ function init(config) {
             });
         } else {
             return res.json({
-                speech: speech,
-                displayText: displayText,
                 source: 'google-webhook'
             });
         }
