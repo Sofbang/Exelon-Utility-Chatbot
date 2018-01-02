@@ -63,63 +63,71 @@ function init(config) {
     // Following code handles bot for Google
     function handleEcho(req, res, botID) {
         sessionId = req.body.sessionId;
-        console.log('google session ' + req.body.sessionId);
-        speech = req.body.result && req.body.result.parameters && req.body.result.parameters.echoText ? req.body.result.parameters.echoText : "Hello";
-        var socketUrl = "wss://" + appConfig.socketHost + "/chat/ws?user=" + sessionId;
-        ws = new WebSocket(socketUrl);
+        console.log('Body received: ' + JSON.stringify(req.body));
+        speech = req.body.result.parameters.echoText;
+        if (speech && speech != ""){
+            var socketUrl = "wss://" + appConfig.socketHost + "/chat/ws?user=" + sessionId;
+            ws = new WebSocket(socketUrl);
 
-        ws.addEventListener('open', function (event) {
-            speech = botUtil.trimIfHasNumber(speech);
-            var message = {
-                "to": {
-                    "type": "bot",
-                    "id": botID
-                },
-                "messagePayload": {
-                    "type": "text",
-                    "text": speech
-                },
-                "userProfile": { "clientType": "google" },
-                "profile": { "clientType": "google" }
-            };
+            ws.addEventListener('open', function (event) {
+                speech = botUtil.trimIfHasNumber(speech);
+                var message = {
+                    "to": {
+                        "type": "bot",
+                        "id": botID
+                    },
+                    "messagePayload": {
+                        "type": "text",
+                        "text": speech
+                    },
+                    "userProfile": { "clientType": "google" },
+                    "profile": { "clientType": "google" }
+                };
 
-            console.log(JSON.stringify(message));
-            ws.send(JSON.stringify(message));
-        });
-        ws.addEventListener('message', function (event) {
-            var displayText;
-            try {
-                var msg = JSON.parse(event.data);
-                ws.close();
-                if (msg.body.messagePayload.actions) {
-                    var choices = msg.body.messagePayload.actions.map(function (action) { return action.label });
-                    displayText = msg.body.messagePayload.text + choices;
-                } else {
-                    displayText = msg.body.messagePayload.text;
+                console.log(JSON.stringify(message));
+                ws.send(JSON.stringify(message));
+            });
+            ws.addEventListener('message', function (event) {
+                var displayText;
+                try {
+                    var msg = JSON.parse(event.data);
+                    ws.close();
+                    if (msg.body.messagePayload.actions) {
+                        var choices = msg.body.messagePayload.actions.map(function (action) { return action.label });
+                        displayText = msg.body.messagePayload.text + ' ' + choices;
+                    } else {
+                        displayText = msg.body.messagePayload.text;
+                    }
+                    var speech = displayText;
+                    console.log("Includes 'address': " + msg.body.messagePayload.text.includes("address"));
+                    if (speech.includes("address")) {
+                        var re = /([0-9])/g;
+                        speech = speech.replace(re, '$& ');
+                    }
+                    console.log("displayText: " + JSON.stringify(displayText));
+                    console.log("speech: " + JSON.stringify(speech));
+                } catch (e) {
+                    displayText = "I'm not able to complete your request right now. Please try again later.";
+                } finally {
+                    return res.json({
+                        speech: speech,
+                        displayText: displayText,
+                        source: 'google-webhook'
+                    });
                 }
-                var speech = displayText;
-                console.log("Includes 'address': " + msg.body.messagePayload.text.includes("address"));
-                if (speech.includes("address")) {
-                    var re = /([0-9])/g;
-                    speech = speech.replace(re, '$& ');
-                }
-                console.log("displayText: " + JSON.stringify(displayText));
-                console.log("speech: " + JSON.stringify(speech));
-            } catch (e) {
-                displayText = "I'm not able to complete your request right now. Please try again later.";
-            } finally {
-                return res.json({
-                    speech: speech,
-                    displayText: displayText,
-                    source: 'google-webhook'
-                });
-            }
-        });
-        ws.addEventListener('close', function (event) {
-            ws = null;
-        });
-        ws.addEventListener('error', function (event) {
-        });
+            });
+            ws.addEventListener('close', function (event) {
+                ws = null;
+            });
+            ws.addEventListener('error', function (event) {
+            });
+        } else {
+            return res.json({
+                speech: speech,
+                displayText: displayText,
+                source: 'google-webhook'
+            });
+        }
     }
 
     app.post('/comed/echo', bodyParser.json({
