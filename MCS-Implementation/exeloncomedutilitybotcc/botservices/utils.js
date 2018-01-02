@@ -1,6 +1,6 @@
 ﻿var MESSAGES = require('./Messages.json');
 var moment = require('moment-timezone');
-var USTimeZone = "America/Toronto";
+var USTimeZone = "America/Chicago";
 
 module.exports = {
 
