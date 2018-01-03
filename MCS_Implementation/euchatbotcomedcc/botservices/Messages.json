@@ -4,10 +4,6 @@
     "ReplacedMessage": "I am currently in the process of estimating when service will be restored."
   },
   {
-    "MessageToBeReplaced": "We are not aware of an outage in your area. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage. Note: If you reported an outage within the past 15 minutes, it may not yet be reflected on this site",
-    "ReplacedMessage": "I am not aware of an outage in your area. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage. Note: If you reported an outage within the past 15 minutes, it may not yet be reflected on this site"
-  },
-  {
     "MessageToBeReplaced": "Our records indicate that all outages in your area have been restored, there may be an isolated outage at your address. Please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage.",
     "ReplacedMessage": "My records indicate that all outages in your area have been restored, there may be an isolated outage at your address. Please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage."
   },
@@ -17,7 +13,7 @@
   },
   {
     "MessageToBeReplaced": "We are not aware of an outage in your area. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage. Note: If you reported an outage within the past 15 minutes, it may not yet be reflected on this site.",
-    "ReplacedMessage": "I am not aware of an outage in your area. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage. Note: If you reported an outage within the past 15 minutes, it may not yet be reflected on this site."
+    "ReplacedMessage": "I am not aware of an outage in your area. If you reported an outage within the past 15 minutes, it may not yet be reflected here. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, you can also report an outage."
   },
   {
     "MessageToBeReplaced": "Our records indicate that all outages in your area have been restored, there may be an isolated outage at your address. Please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage.",
