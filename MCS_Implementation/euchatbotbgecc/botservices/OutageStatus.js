@@ -193,32 +193,42 @@ module.exports = {
                             done();
                         }
                     } else {
-                        if (response.meta.code == "FN-ACCT-NOTFOUND") {
-                            logger.debug('getOutageStatus: outage status request failed!');
-                            conversation.variable("addressFound", "no");
-                            conversation.variable("accountNotFound", "true");
-                            conversation.variable("noAddressFoundMessage", "I’m sorry, but I am unable to find an account associated with that phone number. \nDo you have another phone number or the account number available?");
-                            conversation.transition();
-                            done();
-                        } else if (response.meta.code == "BWENGINE-100029") {
-                            logger.debug('getOutageStatus: outage status request failed!');
-                            conversation.variable("addressFound", "no");
-                            conversation.variable("accountNotFound", "false");
-                            conversation.variable("noAddressFoundMessage", "Turn off the utility chatbot at that time");
-                            conversation.transition();
-                            done();
-                        } else {
-                            logger.debug('getOutageStatus: outage status request failed!');
-                            conversation.variable("addressFound", "no");
-                            conversation.variable("accountNotFound", "false");
-                            conversation.variable("noAddressFoundMessage", "I’m sorry, but I am unable to find an account associated with that phone number.\nDo you have another phone number or the account number available?");
+                            var cause = response.meta ? response.meta : response.error;
+                            var ERROR_CODE = cause ? cause.code : "";
+                            var log;
+                            var addressFound;
+                            var accountNotFound;
+                            console.log("ERROR_CODE: " + ERROR_CODE);
+                            switch (ERROR_CODE) {
+                            case "FN-ACCT-NOTFOUND":
+                                log = "account not found";
+                                addressFound = "no";
+                                accountNotFound = "true";
+                                break;
+                            case "BWENGINE-100029":
+                            case "ETIMEDOUT":
+                                log = "outage status request failed!";
+                                addressFound = "no";
+                                accountNotFound = "false";
+                                conversation.variable("noAddressFoundMessage", "Turn off the utility chatbot at this time");
+                                break;
+                            default:
+                                log = "getOutageStatus: outage status request failed!";
+                                addressFound = "no";
+                                accountNotFound = "false";
+                                conversation.variable("noAddressFoundMessage", "I'm not able to complete your request right now. Please try again later.");
+                                break;
+                            }
+                            logger.debug('getOutageStatus: ' + log);
+                            conversation.variable("addressFound", addressFound);
+                            conversation.variable("accountNotFound", accountNotFound);
                             conversation.transition();
                             done();
                         }
-                    }
                 }).catch(function(e) {
                     console.log(e);
                     conversation.variable("addressFound", "no");
+                    conversation.variable("accountNotFound", "false");
                     conversation.variable("noAddressFoundMessage", "I'm not able to complete your request right now. Please try again later.");
                     conversation.transition();
                     done();

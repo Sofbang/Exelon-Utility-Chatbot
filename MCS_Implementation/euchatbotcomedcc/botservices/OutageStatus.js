@@ -212,7 +212,7 @@ module.exports = {
                                 log = "outage status request failed!";
                                 addressFound = "no";
                                 accountNotFound = "false";
-                                conversation.variable("noAddressFoundMessage", "Turn off the utility chatbot at that time");
+                                conversation.variable("noAddressFoundMessage", "Turn off the utility chatbot at this time");
                                 break;
                             default:
                                 log = "getOutageStatus: outage status request failed!";
