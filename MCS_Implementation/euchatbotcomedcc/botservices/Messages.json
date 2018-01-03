@@ -1,20 +1,13 @@
 ﻿[
-  {
-    "MessageToBeReplaced": "The cause of your outage is under investigation. We apologize for any inconvenience it may have caused you.",
-    "ReplacedMessage": "The cause of your outage is under investigation. I apologize for any inconvenience it may have caused you."
-  },
-  {
-    "MessageToBeReplaced": "As of {now} we indicate that {qyCustAffected} customer(s) are affected by a power outage in your area.",
-    "ReplacedMessage": "As of {now} my records indicate that {qyCustAffected} customer(s) are affected by a power outage in your area.",
-    "parameters": [ "now", "qyCustAffected" ]
-  },
+  // Following message is replaced inside the code.
+  //{
+  //  "MessageToBeReplaced": "As of {now} we indicate that {qyCustAffected} customer(s) are affected by a power outage in your area.",
+  //  "ReplacedMessage": "As of {now} my records indicate that {qyCustAffected} customer(s) are affected by a power outage in your area.",
+  //  "parameters": [ "now", "qyCustAffected" ]
+  //},
   {
     "MessageToBeReplaced": "We are currently in the process of estimating when service will be restored.",
     "ReplacedMessage": "I am currently in the process of estimating when service will be restored."
-  },
-  {
-    "MessageToBeReplaced": "We are unable to retrieve your outage status at this time. If you are without service and your home has circuit breakers, turn your circuit breakers off then on again. If your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage",
-    "ReplacedMessage": "I am unable to retrieve your outage status at this time. If you are without service and your home has circuit breakers, turn your circuit breakers off then on again. If your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage"
   },
   {
     "MessageToBeReplaced": "We are not aware of an outage in your area. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, please report an outage. Note: If you reported an outage within the past 15 minutes, it may not yet be reflected on this site",
