@@ -73,7 +73,7 @@ module.exports = {
                             conversation.variable("errorInMultipleAddress", "false");
                             console.log("after success in multiple address if condition :" + JSON.stringify(response));
                             conversation.variable("setStatus", response.data[0].status);
-                            var outageReported = utils.getMessageForBot(response.data[0].outageReported, response.data[0].ETR, 1);
+                            var outageReported = utils.getMessageForBot(response.data[0].outageReported, response.data[0].ETR);
                             conversation.variable("setOutageReported", outageReported);
                             conversation.variable("setReportOutageReported", outageReported);
                             conversation.variable("selectedAccountNumber", selectedAccountNumber);
@@ -180,7 +180,7 @@ module.exports = {
                             if (data[0].maskedAddress) {
                                 conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
                                 conversation.variable("setStatus", data[0].status);
-                                var outageReported = utils.getMessageForBot(data[0].outageReported, data[0].ETR, 1);
+                                var outageReported = utils.getMessageForBot(data[0].outageReported, data[0].ETR);
                                 conversation.variable("setOutageReported", outageReported);
                                 conversation.variable("setReportOutageReported", outageReported);
                                 conversation.variable("setETR", data[0].ETR);

@@ -1,10 +1,4 @@
 ﻿[
-  // Following message is replaced inside the code.
-  //{
-  //  "MessageToBeReplaced": "As of {now} we indicate that {qyCustAffected} customer(s) are affected by a power outage in your area.",
-  //  "ReplacedMessage": "As of {now} my records indicate that {qyCustAffected} customer(s) are affected by a power outage in your area.",
-  //  "parameters": [ "now", "qyCustAffected" ]
-  //},
   {
     "MessageToBeReplaced": "We are currently in the process of estimating when service will be restored.",
     "ReplacedMessage": "I am currently in the process of estimating when service will be restored."
