@@ -4,25 +4,19 @@ var USTimeZone = "America/Toronto";
 
 module.exports = {
 
-    getMessageForBot: function (msg, estRestore, qyCustAffected) {
+    getMessageForBot: function (msg, estRestore) {
         for (var k in MESSAGES) {
-            var MessageTemplate = MESSAGES[k].MessageToBeReplaced;
-            var parameters = MESSAGES[k].parameters;
-            var MessageToBeReplaced = MessageTemplate;
+            var MessageToBeReplaced = MESSAGES[k].MessageToBeReplaced;
             var ReplacedMessage = MESSAGES[k].ReplacedMessage;
+            var parameters = MESSAGES[k].parameters;
             if (parameters) {
                 var now = moment().tz(USTimeZone).format("hh:mm A") + ' on ' + moment().tz(USTimeZone).format("MM/DD/YYYY");
                 MessageToBeReplaced = MessageToBeReplaced.replace("{estRestore}", moment(estRestore).tz(USTimeZone).format("MM/DD/YYYY hh:mm A"));
-                MessageToBeReplaced = MessageToBeReplaced.replace("{qyCustAffected}", qyCustAffected);
-                MessageToBeReplaced = MessageToBeReplaced.replace("{now}", now);
 
                 ReplacedMessage = ReplacedMessage.replace("{estRestore}", moment(estRestore).tz(USTimeZone).format("MM/DD/YYYY") + ' at ' + moment(estRestore).tz(USTimeZone).format("hh:mm A"));
-                ReplacedMessage = ReplacedMessage.replace("{qyCustAffected}", qyCustAffected);
-                ReplacedMessage = ReplacedMessage.replace("{now}", now);
             }
-            var replacementIndex = msg.indexOf(MessageToBeReplaced);
-            if (replacementIndex != -1) {
-                msg = ReplacedMessage;
+            msg = msg.replace(MessageToBeReplaced, ReplacedMessage);
+            if (msg == ReplacedMessage) {
                 break;
             }
         }

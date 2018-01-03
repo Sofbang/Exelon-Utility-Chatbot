@@ -28,19 +28,11 @@
   },
   {
     "MessageToBeReplaced": "Our records show your power is on. If not, please use the form below to report a power outage. Note: If you reported an outage within the past fifteen minutes it may not yet be reflected on this site.",
-    "ReplacedMessage": "My records show your power is on. If not, please use the form below to report a power outage. Note: If you reported an outage within the past fifteen minutes it may not yet be reflected on this site."
+    "ReplacedMessage": "I am not aware of an outage in your area. If you reported an outage within the past 15 minutes, it may not yet be reflected here. If you are without service, please check your circuit breakers, or if your home has a fuse box, check your fuses to ensure they are in good working condition. If this does not resolve the issue, you can also report an outage."
   },
   {
     "MessageToBeReplaced": "Our records show that your power is on. If this is incorrect, please call 877.778.2222 to report a power outage.",
     "ReplacedMessage": "My records show that your power is on. If this is incorrect, please call 877.778.2222 to report a power outage."
-  },
-  {
-    "MessageToBeReplaced": "Currently unable to process your request. Please call 877.778.2222 to report an outage.",
-    "ReplacedMessage": "Currently unable to process your request. Please call 877.778.2222 to report an outage."
-  },
-  {
-    "MessageToBeReplaced": "Outage information is not currently available for this location.  Please call us at 1.877.778.2222 to report a power outage.",
-    "ReplacedMessage": "Outage information is not currently available for this location.  Please call us at 1.877.778.2222 to report a power outage."
   },
   {
     "MessageToBeReplaced": "We are unable to process your request at this time. Please call us at 877.778.2222.",
