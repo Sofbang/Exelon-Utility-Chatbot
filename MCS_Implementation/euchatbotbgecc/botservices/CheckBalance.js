@@ -48,14 +48,43 @@ module.exports = {
                             conversation.transition();
                             done(); 
                 } else {
-                    conversation.variable("servicesDown","false");
-                    conversation.variable("addressFound","false");
-                    conversation.transition();
-                    done();                     
+                        var cause = response.meta ? response.meta : response.error;
+                        var ERROR_CODE = cause ? cause.code : "";
+                        var log;
+                        var addressFound;
+                        var servicesDown;
+                        console.log("ERROR_CODE: " + ERROR_CODE);
+                        switch (ERROR_CODE) {
+                            case "FN-ACCT-NOTFOUND":
+                            case "TC-ACCT-CLOSED":
+                                log = "account not found";
+                                addressFound = "false";
+                                servicesDown = "false";
+                                break;
+                            case "BWENGINE-100029":
+                            case "ETIMEDOUT":
+                                log = "check balance request failed!";
+                                addressFound = "false";
+                                servicesDown = "true";
+                                conversation.variable("servicesDownMessage", "Turn off the utility chatbot at this time. ");
+                                break;
+                            default:
+                                log = "getCheckBalance: check balance request failed!";
+                                addressFound = "false";
+                                servicesDown = "true";
+                                conversation.variable("servicesDownMessage", "I'm not able to complete your request right now. Please try again later.");
+                                break;
+                        }
+                        logger.debug('getCheckBalance: ' + log);
+                        conversation.variable("servicesDown", servicesDown);
+                        conversation.variable("addressFound", addressFound);
+                        conversation.transition();
+                        done();            
                 }
             }
         }).catch(function(err){
                     conversation.variable("servicesDown","true");
+                    conversation.variable("servicesDownMessage", "I'm not able to complete your request right now. Please try again later.");
                     conversation.transition();
                     done(); 
                     console.log("error not handled at checkBalance service :"+ err);
