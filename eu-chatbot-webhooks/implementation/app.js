@@ -67,7 +67,7 @@ function init(config) {
         var incomingSpeech = req.body.result.parameters.echoText;
         if (incomingSpeech && incomingSpeech != ""){
             var socketUrl = "wss://" + appConfig.socketHost + "/chat/ws?user=" + sessionId;
-            ws = new WebSocket(socketUrl);
+            var ws = new WebSocket(socketUrl);
 
             ws.addEventListener('open', function (event) {
                 incomingSpeech = botUtil.trimIfHasNumber(incomingSpeech);
@@ -108,6 +108,7 @@ function init(config) {
                     console.log("displayText: " + JSON.stringify(displayText));
                     console.log("outgoingSpeech: " + JSON.stringify(outgoingSpeech));
                 } catch (e) {
+                    console.log("error: " + JSON.stringify(e));
                     displayText = "I'm not able to complete your request right now. Please try again later.";
                 } finally {
                     return res.json({
