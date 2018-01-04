@@ -119,10 +119,10 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
                 }
                 logger.info('Parsed Message Body:', resp);
                 if (!respondedToAlexa) {
-                    navigableResponseToAlexa(resp);
-                    if (resp.messagePayload.text.includes("feedback")) {
+                    if (resp.messagePayload.text.includes("Have a nice day!")) {
                         alexa_res.shouldEndSession(true);
                     }
+                    navigableResponseToAlexa(resp);
                 } else {
                     logger.info("Already processed response");
                     return;
