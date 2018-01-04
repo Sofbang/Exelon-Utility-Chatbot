@@ -111,6 +111,12 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
                     var re = /([0-9])/g;
                     resp.messagePayload.text = resp.messagePayload.text.replace(re, '$& ');
                 }
+                if (resp.messagePayload.text.includes("bge.com")) {
+                    resp.messagePayload.text = resp.messagePayload.text.replace("bge.com", 'b g e.com');
+                }
+                if (resp.messagePayload.text.includes("comed.com")) {
+                    resp.messagePayload.text = resp.messagePayload.text.replace("comed.com", 'com ed.com');
+                }
                 logger.info('Parsed Message Body:', resp);
                 if (!respondedToAlexa) {
                     navigableResponseToAlexa(resp);
@@ -236,7 +242,7 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
     function handleLaunchEvent(alexa_req, alexa_res) {
         var session = alexa_req.getSession();
         session.set("startTime", Date.now());
-        var welcomeText = "How may I help you today ? You can Check Outage Status, Report an Outage or Check Account Balance. Please pick one option.";
+        var welcomeText = "How may I help you today? You can Check Outage Status, Report an Outage or Check Account Balance. Please pick one option.";
         alexa_res.say("Welcome to " + opco + ". " + welcomeText);
         alexa_res.shouldEndSession(false);
     }
