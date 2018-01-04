@@ -65,7 +65,8 @@ function init(config) {
         sessionId = req.body.sessionId;
         console.log('Body received: ' + JSON.stringify(req.body));
         var incomingSpeech = req.body.result.parameters.echoText;
-        if (incomingSpeech && incomingSpeech != ""){
+        incomingSpeech = incomingSpeech && incomingSpeech != "" ? incomingSpeech : "hello";
+        //if (incomingSpeech && incomingSpeech != ""){
             var socketUrl = "wss://" + appConfig.socketHost + "/chat/ws?user=" + sessionId;
             var ws = new WebSocket(socketUrl);
 
@@ -123,11 +124,11 @@ function init(config) {
             });
             ws.addEventListener('error', function (event) {
             });
-        } else {
-            return res.json({
-                source: 'google-webhook'
-            });
-        }
+        //} else {
+        //    return res.json({
+        //        source: 'google-webhook'
+        //    });
+        //}
     }
 
     app.post('/comed/echo', bodyParser.json({
