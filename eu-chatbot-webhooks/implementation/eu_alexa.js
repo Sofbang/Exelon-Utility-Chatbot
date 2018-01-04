@@ -114,6 +114,9 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
                 logger.info('Parsed Message Body:', resp);
                 if (!respondedToAlexa) {
                     navigableResponseToAlexa(resp);
+                    if (resp.messagePayload.text.includes("feedback")) {
+                        alexa_res.shouldEndSession(true);
+                    }
                 } else {
                     logger.info("Already processed response");
                     return;
@@ -233,7 +236,9 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
     function handleLaunchEvent(alexa_req, alexa_res) {
         var session = alexa_req.getSession();
         session.set("startTime", Date.now());
-        alexa_res.say("Welcome to " + opco + ".");
+        var welcomeText = "How may I help you today ? You can Check Outage Status, Report an Outage or Check Account Balance. Please pick one option.";
+        alexa_res.say("Welcome to " + opco + ". " + welcomeText);
+        alexa_res.shouldEndSession(false);
     }
 
     function handlePreEvent(alexa_req, alexa_res, alexa_type) {
