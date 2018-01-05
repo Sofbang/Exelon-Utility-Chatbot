@@ -1,61 +1,123 @@
 "use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var log4js = require('log4js');
-var logger = log4js.getLogger();
-
-var moment = require('moment-timezone');
 var Promise = require('bluebird');
-var opco;
+var opco = 'COMED';
+var request = require("request");
+require("../node_modules/request-debug")(request);
 
 module.exports = {
-    getOutageStatus: function getOutageStatus(mobileSdk, accountNumber, PhoneNumber, newAccountNumber) {
-        opco = 'comed';
-        return mobileSdk.custom.euchatbotapi.get('outage/query?PhoneNumber=' + PhoneNumber + '&AccountNumber=' + accountNumber + '&newAccountNumber=' + newAccountNumber + '&opco=' + opco, null, null).then(
-            function (result) {
-                var response = JSON.parse(result.result);
-                console.log('response:::::: ' + JSON.stringify(response));
-                logger.debug('GET OutageStatus Success: ' + JSON.stringify(response));
-                return response;
-            }, function (error) {
-                if (error.error) {
-                    error = JSON.parse(error.error);
+    getOutageStatus: function getOutageStatus(mobileSdk, AccountNumber, PhoneNumber, newAccountNumber) {
+        return new Promise(function (resolve, reject) {
+            var pdata = {};
+            AccountNumber = AccountNumber && AccountNumber != "${accountNumber.value}" ? AccountNumber : newAccountNumber;
+            console.log("AccountNumber in getOutageStatus: " + AccountNumber);
+            if (AccountNumber && AccountNumber != "undefined") {
+                pdata["account_number"] = AccountNumber;
+            } else {
+                pdata["phone"] = PhoneNumber;
+            }
+
+            console.log("pdata = " + JSON.stringify(pdata));
+
+            var handler = function (error, response, body) {
+                if (error) {
+                    console.log("Request error: " + JSON.stringify(error));
+                    resolve(error);
+                } else {
+                    console.log("Request success: " + JSON.stringify(body));
+                    resolve(body);
                 }
-                console.log('error:::::: ' + JSON.stringify(error));
-                logger.debug('GET OutageStatus Error: ' + JSON.stringify(error));
-                return error;
-            });
+            };
+
+            request({
+                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon/' + opco + '/outage/query',
+                method: "POST",
+                json: true,
+                timeout: 200000,
+                headers: {
+                    "Authorization": "Basic QTQ1MzU3Nl9FWEVMT05FVU1PQklMRUFQUFRFU1RfTU9CSUxFX0FOT05ZTU9VU19BUFBJRDpraG0wQTV5cmtzX3Rkeg==",
+                    "Content-Type": "application/json",
+                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667",
+                    "User-Agent": "ChatBot/1.0"
+                },
+                body: pdata
+            }, handler);
+        });
     },
-    reportOutage: function reportOutage(mobileSdk, accountNumber, PhoneNumber, OutageType) {
-        opco = 'comed';
-        console.log("getoutageStatus11 in report outage :" + accountNumber);
-        return mobileSdk.custom.euchatbotapi.get('outage?PhoneNumber=' + PhoneNumber + '&AccountNumber=' + accountNumber + '&OutageType=' + OutageType + '&opco=' + opco, null, null).then(
-            function (result) {
-                var response = JSON.parse(result.result);
-                console.log('GET Report Outage Success: ' + JSON.stringify(response));
-                logger.debug('GET Report Outage Success: ' + JSON.stringify(response));
-                return response;
-            }, function (error) {
-                var error = JSON.parse(error.error);
-                console.log('GET Report Outage Error: ' + JSON.stringify(error));
-                logger.debug('GET Report Outage Error: ' + JSON.stringify(error));
-                return error;
-            });
+    reportOutage: function reportOutage(mobileSdk, AccountNumber, PhoneNumber, outageType) {
+        return new Promise(function (resolve, reject) {
+
+            console.log("PhoneNumber: " + PhoneNumber);
+            console.log("account_number: " + AccountNumber);
+            console.log("opco: " + opco);
+            var pdata = {
+                "outage_issue": outageType
+            };
+
+            if (AccountNumber != undefined && AccountNumber != "${accountNumber.value}") {
+                pdata["account_number"] = AccountNumber;
+            } else {
+                pdata["phone"] = PhoneNumber;
+            }
+
+            console.log("pdata lower= " + JSON.stringify(pdata));
+            var handler = function (error, response, body) {
+                if (error) {
+                    console.log("Request error: " + JSON.stringify(error));
+                    resolve(error);
+                } else {
+                    console.log("Request success: " + JSON.stringify(body));
+                    resolve(body);
+                }
+            };
+
+            request({
+                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon/' + opco + '/outage',
+                method: "POST",
+                json: true,
+                timeout: 200000,
+                headers: {
+                    "Authorization": "Basic QTQ1MzU3Nl9FWEVMT05FVU1PQklMRUFQUFRFU1RfTU9CSUxFX0FOT05ZTU9VU19BUFBJRDpraG0wQTV5cmtzX3Rkeg==",
+                    "Content-Type": "application/json",
+                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667"
+                },
+                body: pdata
+            }, handler);
+        });
     },
     checkBalance: function checkBalance(mobileSdk, AccountNumber, PhoneNumber, Identifier) {
-        opco = 'COMED';
-        return mobileSdk.custom.euchatbotapi.get('bill/lookup?PhoneNumber=' + PhoneNumber + '&AccountNumber=' + AccountNumber + '&Identifier=' + Identifier + '&opco=' + opco, null, null).then(
-            function (result) {
-                var response = JSON.parse(result.result);
-                console.log('GET Check balance Success: ' + JSON.stringify(response));
-                logger.debug('GET Check balance Success: ' + JSON.stringify(response));
-                return response;
-            }, function (error) {
-                var error = JSON.parse(error.error);
-                console.log('GET Check balance Error: ' + JSON.stringify(error));
-                logger.debug('GET Check balance Error: ' + JSON.stringify(error));
-                return error;
-            });
+        return new Promise(function (resolve, reject) {
+            console.log("PhoneNumber: " + PhoneNumber + "AccountNumber: " + AccountNumber + "Identifier: " + Identifier + "opco: " + opco);
+            var pdata = {
+                "phone": PhoneNumber,
+                "identifier": Identifier
+            };
+            if (AccountNumber != "undefined" && AccountNumber != "${accountNumber.value.number}") {
+                pdata["account_num"] = AccountNumber;
+            }
+            console.log("pdata = " + JSON.stringify(pdata));
+            var handler = function (error, response, body) {
+                if (error) {
+                    console.log("Request error: " + JSON.stringify(error));
+                    resolve(error);
+                } else {
+                    console.log("Request success: " + JSON.stringify(body));
+                    resolve(body);
+                }
+            };
+
+            request({
+                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anonbots/' + opco + '/bill/lookup',
+                method: "POST",
+                json: true,
+                timeout: 200000,
+                headers: {
+                    "Authorization": "Basic QTQ1MzU3Nl9FWEVMT05FVU1PQklMRUFQUFRFU1RfTU9CSUxFX0FOT05ZTU9VU19BUFBJRDpraG0wQTV5cmtzX3Rkeg==",
+                    "Content-Type": "application/json",
+                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667"
+                },
+                body: pdata
+            }, handler);
+        });
     }
 };
