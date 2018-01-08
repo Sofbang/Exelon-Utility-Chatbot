@@ -55,7 +55,14 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
 
     function handleCommandBot(alexa_req, alexa_res) {
 
-        var command = alexa_req.slot("command");
+        var command = "";
+        console.log("slot value" + alexa_req.data.request.type);
+        if (alexa_req.data.request.type == 'LaunchRequest') {
+            console.log("I am in "); 
+            command = "hello";
+        } else {
+            command = alexa_req.slot("command");
+        }
         var session = alexa_req.getSession();
         var userId = session.get("userId");
         if (!userId) {
@@ -243,7 +250,7 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
         var session = alexa_req.getSession();
         session.set("startTime", Date.now());
         var welcomeText = "How may I help you today? You can Check Outage Status, Report an Outage or Check Account Balance. Please pick one option.";
-        alexa_res.say("Welcome to " + opco + ". " + welcomeText);
+        alexa_res.say("Welcome to " + (opco.toUppercase() == "COMED" ? "COM ED" : opco) + ". " + welcomeText);
         alexa_res.shouldEndSession(false);
     }
 
@@ -265,7 +272,7 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
     var alexa_app = new alexa.app("app/" + opco.toLowerCase());
     alexa_app.intent("CommandBot", {}, handleCommandBot);
     alexa_app.intent("AMAZON.StopIntent", {}, handleStopIntent);
-    alexa_app.launch(handleLaunchEvent);
+    alexa_app.launch(handleCommandBot);
     alexa_app.pre = handlePreEvent;
 
     return alexa_app;
