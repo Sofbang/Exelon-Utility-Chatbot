@@ -118,11 +118,13 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
                     var re = /([0-9])/g;
                     resp.messagePayload.text = resp.messagePayload.text.replace(re, '$& ');
                 }
-                if (resp.messagePayload.text.includes("bge")) {
+                if (resp.messagePayload.text.toLowerCase().includes("bge")) {
                     resp.messagePayload.text = resp.messagePayload.text.replace("bge", 'b g e');
+                    resp.messagePayload.text = resp.messagePayload.text.replace("BGE", 'B G E');
                 }
-                if (resp.messagePayload.text.includes("comed")) {
+                if (resp.messagePayload.text.toLowerCase().includes("comed")) {
                     resp.messagePayload.text = resp.messagePayload.text.replace("comed", 'com ed');
+                    resp.messagePayload.text = resp.messagePayload.text.replace("COMED", 'COM ED');
                 }
                 logger.info('Parsed Message Body:', resp);
                 if (!respondedToAlexa) {
