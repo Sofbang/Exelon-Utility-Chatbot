@@ -66,7 +66,6 @@ function init(config) {
         console.log('Body received: ' + JSON.stringify(req.body));
         var incomingSpeech = req.body.result.parameters.echoText;
         incomingSpeech = incomingSpeech && incomingSpeech != "" ? incomingSpeech : "hello";
-        //if (incomingSpeech && incomingSpeech != ""){
             var socketUrl = "wss://" + appConfig.socketHost + "/chat/ws?user=" + sessionId;
             var ws = new WebSocket(socketUrl);
 
@@ -91,6 +90,7 @@ function init(config) {
             ws.addEventListener('message', function (event) {
                 var displayText;
                 var outgoingSpeech;
+                var expect_user_response = true;
                 try {
                     var msg = JSON.parse(event.data);
                     ws.close();
@@ -106,6 +106,9 @@ function init(config) {
                         var re = /([0-9])/g;
                         outgoingSpeech = outgoingSpeech.replace(re, '$& ');
                     }
+                    if (outgoingSpeech.includes("Have a nice day!")) {
+                        expect_user_response = false;
+                    }
                     console.log("displayText: " + JSON.stringify(displayText));
                     console.log("outgoingSpeech: " + JSON.stringify(outgoingSpeech));
                 } catch (e) {
@@ -115,7 +118,12 @@ function init(config) {
                     return res.json({
                         speech: outgoingSpeech,
                         displayText: displayText,
-                        source: 'google-webhook'
+                        source: 'google-webhook',
+                        data: {
+                            "google": {
+                                "expect_user_response": expect_user_response
+                            }
+                        }
                     });
                 }
             });
@@ -124,11 +132,6 @@ function init(config) {
             });
             ws.addEventListener('error', function (event) {
             });
-        //} else {
-        //    return res.json({
-        //        source: 'google-webhook'
-        //    });
-        //}
     }
 
     app.post('/comed/echo', bodyParser.json({

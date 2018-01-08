@@ -118,11 +118,11 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
                     var re = /([0-9])/g;
                     resp.messagePayload.text = resp.messagePayload.text.replace(re, '$& ');
                 }
-                if (resp.messagePayload.text.includes("bge.com")) {
-                    resp.messagePayload.text = resp.messagePayload.text.replace("bge.com", 'b g e.com');
+                if (resp.messagePayload.text.includes("bge")) {
+                    resp.messagePayload.text = resp.messagePayload.text.replace("bge", 'b g e');
                 }
-                if (resp.messagePayload.text.includes("comed.com")) {
-                    resp.messagePayload.text = resp.messagePayload.text.replace("comed.com", 'com ed.com');
+                if (resp.messagePayload.text.includes("comed")) {
+                    resp.messagePayload.text = resp.messagePayload.text.replace("comed", 'com ed');
                 }
                 logger.info('Parsed Message Body:', resp);
                 if (!respondedToAlexa) {
