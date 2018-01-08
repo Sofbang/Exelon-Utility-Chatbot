@@ -45,11 +45,12 @@ module.exports = {
             var mobileSdk = conversation.oracleMobile;
             var newAccountNumber;
             var newMaskedAddress = [];
+            var isWebhook = conversation._request.message.channelConversation.type == "webhook";
+            var clientType = isWebhook ? conversation._request.message.payload.profile.clientType : false;
             if (SelectedMaskedAddress && MultipleAccountInfo) {
                 console.log("in if loop selectedMaskedAddress is : " + SelectedMaskedAddress + " and all info is :{" + JSON.parse(MultipleAccountInfo) + "}");
                 var userAccounts = JSON.parse(MultipleAccountInfo);
                 var filteredUserAccounts = [];
-                var clientType = conversation._request.message.payload.profile.clientType;
                 console.log("conversation : " + conversation);
                 if (clientType && (clientType.toLowerCase() == "google" || clientType.toLowerCase() == "alexa")) {
                     console.log("in if condition of client type google/alexa");
@@ -114,8 +115,7 @@ module.exports = {
                                 getOutageStatus = ExelonService.getOutageStatus(mobileSdk, AccountNumber, PhoneNumber, newAccountNumber);
                                 promiseArr.push(getOutageStatus);
                             }
-                            Promise.all(promiseArr).then(function(allResult) {
-                                var clientType = conversation._request.message.payload.profile.clientType;
+                            Promise.all(promiseArr).then(function (allResult) {
                                 if (clientType && (clientType.toLowerCase() == "google" || clientType.toLowerCase() == "alexa")) {
                                     count = 1;
                                     var addressFound = "yes";

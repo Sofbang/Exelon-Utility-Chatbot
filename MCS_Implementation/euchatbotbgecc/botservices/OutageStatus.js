@@ -47,11 +47,12 @@ module.exports = {
             var mobileSdk = conversation.oracleMobile;
             var newAccountNumber;
             var newMaskedAddress = [];
+            var isWebhook = conversation._request.message.channelConversation.type == "webhook";
+            var clientType = isWebhook ? conversation._request.message.payload.profile.clientType : false;
             if (SelectedMaskedAddress && MultipleAccountInfo) {
                 console.log("in if loop selectedMaskedAddress is : " + SelectedMaskedAddress + " and all info is :" + JSON.stringify(MultipleAccountInfo));
                 var userAccounts = JSON.parse(MultipleAccountInfo);
                 var filteredUserAccounts = [];
-                var clientType = conversation._request.message.payload.profile.clientType;
                 if (clientType && (clientType.toLowerCase() == "google" || clientType.toLowerCase() == "alexa")) {
                     console.log("in if condition of client type google/alexa");
                     if (!isNaN(SelectedMaskedAddress) && parseInt(SelectedMaskedAddress) <= userAccounts.length && parseInt(SelectedMaskedAddress) > 0) {
@@ -116,7 +117,6 @@ module.exports = {
                                 promiseArr.push(getOutageStatus);
                             }
                             Promise.all(promiseArr).then(function(allResult) {
-                                var clientType = conversation._request.message.payload.profile.clientType;
                                 console.log("clientType: " + clientType);
                                 if (clientType && (clientType.toLowerCase() == "google" || clientType.toLowerCase() == "alexa")) {
                                     count = 1;
