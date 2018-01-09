@@ -118,6 +118,9 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
                     var re = /([0-9])/g;
                     resp.messagePayload.text = resp.messagePayload.text.replace(re, '$& ');
                 }
+                if (!resp.messagePayload.text.includes("multiple addresses")) {
+                    delete resp.messagePayload.actions;
+                }
                 if (resp.messagePayload.text.toLowerCase().includes("bge")) {
                     resp.messagePayload.text = resp.messagePayload.text.replace("bge", 'b g e');
                     resp.messagePayload.text = resp.messagePayload.text.replace("BGE", 'B G E');
