@@ -94,11 +94,10 @@ function init(config) {
                 try {
                     var msg = JSON.parse(event.data);
                     ws.close();
-                    if (msg.body.messagePayload.actions) {
+                    displayText = msg.body.messagePayload.text;
+                    if (msg.body.messagePayload.actions && displayText.toLowerCase().includes("multiple addresses")) {
                         var choices = msg.body.messagePayload.actions.map(function (action) { return action.label });
-                        displayText = msg.body.messagePayload.text + ' ' + choices;
-                    } else {
-                        displayText = msg.body.messagePayload.text;
+                        displayText = displayText + ' ' + choices;
                     }
                     outgoingSpeech = displayText;
                     console.log("Includes 'address': " + outgoingSpeech.includes("address"));
