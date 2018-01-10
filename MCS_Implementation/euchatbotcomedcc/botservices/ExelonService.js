@@ -35,7 +35,7 @@ module.exports = {
                 json: true,
                 timeout: 200000,
                 headers: {
-                    "Authorization": "Basic QTQ1MzU3Nl9FWEVMT05FVU1PQklMRUFQUFRFU1RfTU9CSUxFX0FOT05ZTU9VU19BUFBJRDpraG0wQTV5cmtzX3Rkeg==",
+                    "Authorization": "Basic YW5vbl90c3Q6NkclUXViQGxaQm1vZ09xJFc4Qlg=",
                     "Content-Type": "application/json",
                     "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667",
                     "User-Agent": "ChatBot/1.0"
@@ -77,7 +77,7 @@ module.exports = {
                 json: true,
                 timeout: 200000,
                 headers: {
-                    "Authorization": "Basic QTQ1MzU3Nl9FWEVMT05FVU1PQklMRUFQUFRFU1RfTU9CSUxFX0FOT05ZTU9VU19BUFBJRDpraG0wQTV5cmtzX3Rkeg==",
+                    "Authorization": "Basic YW5vbl90c3Q6NkclUXViQGxaQm1vZ09xJFc4Qlg=",
                     "Content-Type": "application/json",
                     "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667"
                 },
@@ -112,7 +112,7 @@ module.exports = {
                 json: true,
                 timeout: 200000,
                 headers: {
-                    "Authorization": "Basic QTQ1MzU3Nl9FWEVMT05FVU1PQklMRUFQUFRFU1RfTU9CSUxFX0FOT05ZTU9VU19BUFBJRDpraG0wQTV5cmtzX3Rkeg==",
+                    "Authorization": "Basic YW5vbl90c3Q6NkclUXViQGxaQm1vZ09xJFc4Qlg=",
                     "Content-Type": "application/json",
                     "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667"
                 },
