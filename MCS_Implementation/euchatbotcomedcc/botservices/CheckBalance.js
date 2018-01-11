@@ -41,11 +41,18 @@ module.exports = {
                 console.log("ERROR_CODE: " + ERROR_CODE);
                 switch (ERROR_CODE) {
                     case "FN-ACCT-NOTFOUND":
+                        addressFound = "false";
+                        servicesDown = "false";
+                        break;
                     case "TC-ACCT-CLOSED":
                         addressFound = "false";
                         servicesDown = "false";
                         break;
                     case "BWENGINE-100029":
+                        addressFound = "false";
+                        servicesDown = "true";
+                        conversation.variable("servicesDownMessage", "Turn off the utility chatbot at this time. ");
+                        break;
                     case "ETIMEDOUT":
                         addressFound = "false";
                         servicesDown = "true";

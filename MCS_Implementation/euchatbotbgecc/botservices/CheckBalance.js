@@ -56,12 +56,21 @@ module.exports = {
                         console.log("ERROR_CODE: " + ERROR_CODE);
                         switch (ERROR_CODE) {
                             case "FN-ACCT-NOTFOUND":
+                                log = "account not found";
+                                addressFound = "false";
+                                servicesDown = "false";
+                                break;
                             case "TC-ACCT-CLOSED":
                                 log = "account not found";
                                 addressFound = "false";
                                 servicesDown = "false";
                                 break;
                             case "BWENGINE-100029":
+                                log = "check balance request failed!";
+                                addressFound = "false";
+                                servicesDown = "true";
+                                conversation.variable("servicesDownMessage", "Turn off the utility chatbot at this time. ");
+                                break;
                             case "ETIMEDOUT":
                                 log = "check balance request failed!";
                                 addressFound = "false";

@@ -200,24 +200,29 @@ module.exports = {
                             var accountNotFound;
                             console.log("ERROR_CODE: " + ERROR_CODE);
                             switch (ERROR_CODE) {
-                            case "FN-ACCT-NOTFOUND":
-                                log = "account not found";
-                                addressFound = "no";
-                                accountNotFound = "true";
-                                break;
-                            case "BWENGINE-100029":
-                            case "ETIMEDOUT":
-                                log = "outage status request failed!";
-                                addressFound = "no";
-                                accountNotFound = "false";
-                                conversation.variable("noAddressFoundMessage", "Turn off the utility chatbot at this time. ");
-                                break;
-                            default:
-                                log = "getOutageStatus: outage status request failed!";
-                                addressFound = "no";
-                                accountNotFound = "false";
-                                conversation.variable("noAddressFoundMessage", "I'm not able to complete your request right now. Please try again later.");
-                                break;
+                                case "FN-ACCT-NOTFOUND":
+                                    log = "account not found";
+                                    addressFound = "no";
+                                    accountNotFound = "true";
+                                    break;
+                                case "BWENGINE-100029":
+                                    log = "outage status request failed!";
+                                    addressFound = "no";
+                                    accountNotFound = "false";
+                                    conversation.variable("noAddressFoundMessage", "Turn off the utility chatbot at this time.");
+                                    break;
+                                case "ETIMEDOUT":
+                                    log = "outage status request failed!";
+                                    addressFound = "no";
+                                    accountNotFound = "false";
+                                    conversation.variable("noAddressFoundMessage", "Turn off the utility chatbot at this time.");
+                                    break;
+                                default:
+                                    log = "getOutageStatus: outage status request failed!";
+                                    addressFound = "no";
+                                    accountNotFound = "false";
+                                    conversation.variable("noAddressFoundMessage", "I'm not able to complete your request right now. Please try again later.");
+                                    break;
                             }
                             logger.debug('getOutageStatus: ' + log);
                             conversation.variable("addressFound", addressFound);
