@@ -4,11 +4,9 @@ var log4js = require('log4js');
 var logger = log4js.getLogger();
 var Promise = require('bluebird');
 var utils = require('./utils');
-
 var ExelonService = require('./ExelonService');
 
 module.exports = {
-
     metadata: function metadata() {
         return {
             "name": "OutageStatus",
@@ -51,7 +49,7 @@ module.exports = {
                 console.log("in if loop selectedMaskedAddress is : " + SelectedMaskedAddress + " and all info is :{" + JSON.parse(MultipleAccountInfo) + "}");
                 var userAccounts = JSON.parse(MultipleAccountInfo);
                 var filteredUserAccounts = [];
-                console.log("conversation : " + conversation);
+                console.log("conversation : " + JSON.stringify(conversation));
                 if (clientType && (clientType.toLowerCase() == "google" || clientType.toLowerCase() == "alexa")) {
                     console.log("in if condition of client type google/alexa");
                     if (!isNaN(SelectedMaskedAddress) && parseInt(SelectedMaskedAddress) <= userAccounts.length && parseInt(SelectedMaskedAddress) > 0) {
@@ -116,9 +114,9 @@ module.exports = {
                                 promiseArr.push(getOutageStatus);
                             }
                             Promise.all(promiseArr).then(function (allResult) {
+                                var addressFound = "yes";
                                 if (clientType && (clientType.toLowerCase() == "google" || clientType.toLowerCase() == "alexa")) {
                                     count = 1;
-                                    var addressFound = "yes";
                                     for (var i in allResult) {
                                         var res = allResult[i];
                                         if (res.success) {
@@ -133,7 +131,6 @@ module.exports = {
                                         }
                                     }
                                 } else {
-                                    var addressFound = "yes";
                                     for (var i in allResult) {
                                         console.log("allResult " + i + " :" + JSON.stringify(allResult[i]));
                                         var res = allResult[i];
@@ -208,11 +205,7 @@ module.exports = {
                                 accountNotFound = "true";
                                 break;
                             case "BWENGINE-100029":
-                                log = "outage status request failed!";
-                                addressFound = "no";
-                                accountNotFound = "false";
-                                conversation.variable("noAddressFoundMessage", "Turn off the utility chatbot at this time.");
-                                break;
+                            case "FAILURE":
                             case "ETIMEDOUT":
                                 log = "outage status request failed!";
                                 addressFound = "no";
@@ -229,20 +222,20 @@ module.exports = {
                         logger.debug('getOutageStatus: ' + log);
                         conversation.variable("addressFound", addressFound);
                         conversation.variable("accountNotFound", accountNotFound);
-                        conversation.transition();
+                        conversation.transition('setVariableValues');
                         done();
                     }
                 }).catch(function(e) {
-                    console.log(e);
+                    console.log('in failure catch: '+e);
                     conversation.variable("addressFound", "no");
                     conversation.variable("accountNotFound", "false");
                     conversation.variable("noAddressFoundMessage", "I'm not able to complete your request right now. Please try again later.");
-                    conversation.transition();
+                    conversation.transition('setVariableValues');
                     done();
                 });
             }
         } catch (e) {
-            console.log(e);
+            console.log("error in last catch : "+e);
         }
     }
 };

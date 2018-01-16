@@ -43,7 +43,7 @@ module.exports = {
         .then(function (response) {
             console.log(response);
             if (response.success) {
-                conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. You can text STAT to COMED or 26633 to get your current outage status, or visit our outage map at: comed.com/map.');
+                conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
             }
             else {
                 logger.debug('reportOutage: report outage failed!');
