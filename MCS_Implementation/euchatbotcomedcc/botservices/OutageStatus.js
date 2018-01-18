@@ -57,7 +57,8 @@ module.exports = {
                     }
                 } else {
                     filteredUserAccounts = userAccounts.filter(function(userAccount) {
-                        return (userAccount.data[0].maskedAddress).toLowerCase() == SelectedMaskedAddress.toLowerCase();
+                        console.log("when selecting masked address from facebook or chatbot")
+                        return userAccount.data && (userAccount.data[0].maskedAddress).toLowerCase() == SelectedMaskedAddress.toLowerCase();
                     });
                 }
                 var selectedAccountNumber;
@@ -114,20 +115,22 @@ module.exports = {
                                 promiseArr.push(getOutageStatus);
                             }
                             Promise.all(promiseArr).then(function (allResult) {
-                                var addressFound = "yes";
+                                var addressFound = "no";
                                 if (clientType && (clientType.toLowerCase() == "google" || clientType.toLowerCase() == "alexa")) {
                                     count = 1;
                                     for (var i in allResult) {
+                                        console.log("allResult " + i + " :" + JSON.stringify(allResult[i]));
                                         var res = allResult[i];
                                         if (res.success) {
+                                            addressFound = "yes";
                                             var address = "Address " + count + ". " + res.data[0].maskedAddress;
                                             newMaskedAddress.push(address);
                                             numberOfAddress.push(count);
                                             console.log("numberOfAddress :"+numberOfAddress);
                                             count++;
-                                            console.log("address: " + address + " and count is: " + count);
+                                            console.log("if channel type is alexa/google then address: " + address + " and count is: " + count);
                                         } else {
-                                            addressFound = "no";
+                                            console.log("no info found ,getting this info from backend : "+ res);
                                         }
                                     }
                                 } else {
@@ -135,12 +138,13 @@ module.exports = {
                                         console.log("allResult " + i + " :" + JSON.stringify(allResult[i]));
                                         var res = allResult[i];
                                         if (res.success) {
+                                            addressFound = "yes";
                                             var address = res.data[0].maskedAddress;
                                             newMaskedAddress.push(address);
                                             count++;
-                                            console.log("address: " + address + " and count is: " + count);
+                                            console.log("if channel type is webhook then address: " + address + " and count is: " + count);
                                         } else {
-                                            addressFound = "no";
+                                            console.log("no info found ,getting this info from backend : "+ res);
                                         }
                                     }
                                 }
