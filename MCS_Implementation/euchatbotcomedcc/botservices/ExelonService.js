@@ -79,7 +79,8 @@ module.exports = {
                 headers: {
                     "Authorization": "Basic YW5vbl90c3Q6NkclUXViQGxaQm1vZ09xJFc4Qlg=",
                     "Content-Type": "application/json",
-                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667"
+                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667",
+                    "User-Agent": "ChatBot/1.0"
                 },
                 body: pdata
             }, handler);
@@ -114,7 +115,8 @@ module.exports = {
                 headers: {
                     "Authorization": "Basic YW5vbl90c3Q6NkclUXViQGxaQm1vZ09xJFc4Qlg=",
                     "Content-Type": "application/json",
-                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667"
+                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667",
+                    "User-Agent": "ChatBot/1.0"
                 },
                 body: pdata
             }, handler);
