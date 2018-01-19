@@ -74,8 +74,8 @@ module.exports = {
                             console.log("after success in multiple address if condition :" + JSON.stringify(response));
                             conversation.variable("setStatus", response.data[0].status);
                             var outageReported = utils.getMessageForBot(response.data[0].outageReported, response.data[0].ETR);
-                            conversation.variable("setOutageReported", outageReported);
-                            conversation.variable("setReportOutageReported", outageReported);
+                            conversation.variable("setOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
+                            conversation.variable("setReportOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
                             conversation.variable("selectedAccountNumber", selectedAccountNumber);
                             conversation.variable("setETR", response.data[0].ETR);
                             conversation.transition('setVariableValues');
@@ -182,8 +182,8 @@ module.exports = {
                                 conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
                                 conversation.variable("setStatus", data[0].status);
                                 var outageReported = utils.getMessageForBot(data[0].outageReported, data[0].ETR);
-                                conversation.variable("setOutageReported", outageReported);
-                                conversation.variable("setReportOutageReported", outageReported);
+                                conversation.variable("setOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
+                                conversation.variable("setReportOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
                                 conversation.variable("setETR", data[0].ETR);
                                 conversation.transition('setVariableValues');
                                 done();

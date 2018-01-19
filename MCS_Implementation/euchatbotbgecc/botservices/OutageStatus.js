@@ -74,7 +74,7 @@ module.exports = {
                             console.log("after success in multiple address if condition :" + JSON.stringify(response));
                             conversation.variable("setStatus", response.data[0].status);
                             var outageReported = utils.getMessageForBot(response.data[0].outageReported, response.data[0].ETR);
-                            conversation.variable("setOutageReported", outageReported);
+                            conversation.variable("setOutageReported", outageReported + " You can also text STAT to MYBGE or 69243 for your current outage status.");
                             conversation.variable("selectedAccountNumber", selectedAccountNumber);
                             conversation.variable("setETR", response.data[0].ETR);
                             conversation.transition('setVariableValues');
@@ -181,7 +181,7 @@ module.exports = {
                                 conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
                                 conversation.variable("setStatus", data[0].status);
                                 var outageReported = utils.getMessageForBot(data[0].outageReported, data[0].ETR);
-                                conversation.variable("setOutageReported", outageReported);
+                                conversation.variable("setOutageReported", outageReported + " You can also text STAT to MYBGE or 69243 for your current outage status.");
                                 conversation.variable("maskedAddressFound", 'true');
                                 conversation.variable("setETR", data[0].ETR);
                                 conversation.transition('setVariableValues');
