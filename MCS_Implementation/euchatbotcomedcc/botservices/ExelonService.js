@@ -30,7 +30,7 @@ module.exports = {
             };
 
             request({
-                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon/' + opco + '/outage/query',
+                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon_v2/' + opco + '/outage/query',
                 method: "POST",
                 json: true,
                 timeout: 200000,
@@ -72,7 +72,7 @@ module.exports = {
             };
 
             request({
-                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon/' + opco + '/outage',
+                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon_v2/' + opco + '/outage',
                 method: "POST",
                 json: true,
                 timeout: 200000,
