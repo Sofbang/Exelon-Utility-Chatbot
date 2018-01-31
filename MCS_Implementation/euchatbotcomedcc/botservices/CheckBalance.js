@@ -7,7 +7,7 @@ var moment = require('moment');
 
 module.exports = {
 
-	metadata: function metadata() {
+    metadata: function metadata() {
         return {
             "name": "CheckBalance",
             "properties": {
@@ -20,11 +20,13 @@ module.exports = {
     },
 
     invoke: function invoke(conversation, done) {
-    	var PhoneNumber = conversation.properties().PhoneNumber;
-    	var AccountNumber = conversation.properties().AccountNumber;
+        var PhoneNumber = conversation.properties().PhoneNumber;
+        var AccountNumber = conversation.properties().AccountNumber;
         var Identifier = conversation.properties().Identifier;
         var mobileSdk = conversation.oracleMobile;
-        console.log("Account Number is : "+AccountNumber+" Phone Number is : "+PhoneNumber+" and Identifier is : "+Identifier);
+        var isWebhook = conversation._request.message.channelConversation.type == "webhook";
+        var clientType = isWebhook ? conversation._request.message.payload.profile.clientType : false;
+        console.log("Account Number is : " + AccountNumber + " Phone Number is : " + PhoneNumber + " and Identifier is : " + Identifier);
         ExelonService.checkBalance(mobileSdk, AccountNumber, PhoneNumber, Identifier).then(function (response) {
             console.log("response :" + JSON.stringify(response));
             var addressFound;
@@ -33,7 +35,11 @@ module.exports = {
                 servicesDown = "false";
                 addressFound = "true";
                 conversation.variable("multipleAddressFound", "false");
-                conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with " + response.data.address);
+                if (clientType && (clientType.toLowerCase() == "google" || clientType.toLowerCase() == "alexa")) {
+                    conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with " + ((response.data.address).replace(/\*/g, '')));
+                } else {
+                    conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with " + response.data.address);
+                }
                 conversation.variable("checkBalance_AccountInfo", "You have $" + response.data.remainingBalanceDue + " due on " + moment(response.data.dueByDate).format("MMMM DD, YYYY") + ". For a full breakdown of your bill, please login to My Account at comed.com or call us at 1-800-EDISON-1.");
             } else {
                 var cause = response.meta ? response.meta : (response.error ? response.error : response.code);

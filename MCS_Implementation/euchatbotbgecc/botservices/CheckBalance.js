@@ -7,7 +7,7 @@ var moment = require('moment');
 
 module.exports = {
 
-	metadata: function metadata() {
+    metadata: function metadata() {
         return {
             "name": "CheckBalance",
             "properties": {
@@ -24,79 +24,73 @@ module.exports = {
         var AccountNumber = conversation.properties().AccountNumber;
         var Identifier = conversation.properties().Identifier;
         var mobileSdk = conversation.oracleMobile;
-        console.log("Account Number is : "+AccountNumber+" Phone Number is : "+PhoneNumber+" and Identifier is : "+Identifier);
+        var isWebhook = conversation._request.message.channelConversation.type == "webhook";
+        var clientType = isWebhook ? conversation._request.message.payload.profile.clientType : false;
+        console.log("Account Number is : " + AccountNumber + " Phone Number is : " + PhoneNumber + " and Identifier is : " + Identifier);
         ExelonService.checkBalance(mobileSdk, AccountNumber, PhoneNumber, Identifier).then(function (response) {
-            console.log("response :"+JSON.stringify(response));
-            if(response.success){
-                    if(response.data.address){
-                        conversation.variable("servicesDown","false");
-                        conversation.variable("addressFound","true");
-                        conversation.variable("multipleAddressFound","false");
-                        conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with "+ response.data.address);
-                        conversation.variable("checkBalance_AccountInfo", "You have $"+response.data.remainingBalanceDue+" due on "+moment(response.data.dueByDate).format("MMMM DD, YYYY")+". For a full breakdown of your bill, please login to My Account at bge.com or call us at 1-800-685-0123.");
-                    }else{
-                        conversation.variable("servicesDown","false");
-                        conversation.variable("addressFound","false");
+            console.log("response :" + JSON.stringify(response));
+            var addressFound;
+            var servicesDown;
+            if (response.success) {
+                if (response.data.address) {
+                    servicesDown = "false";
+                    addressFound = "true";
+                    conversation.variable("multipleAddressFound", "false");
+                    if (clientType && (clientType.toLowerCase() == "google" || clientType.toLowerCase() == "alexa")) {
+                        conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with " + ((response.data.address).replace(/\*/g, '')));
+                    } else {
+                        conversation.variable("checkBalance_MaskedAddress", "My records indicate that the address associated with this account begins with " + response.data.address);
                     }
-                    conversation.transition();
-                    done(); 
-            }else{
-                if(response.meta.code == "FN-MULTIPLE-ACCOUNTS"){
-                            conversation.variable("servicesDown","false");
-                            conversation.variable("addressFound","true");
-                            conversation.variable("multipleAddressFound","true");
-                            conversation.transition();
-                            done(); 
+                    conversation.variable("checkBalance_AccountInfo", "You have $" + response.data.remainingBalanceDue + " due on " + moment(response.data.dueByDate).format("MMMM DD, YYYY") + ". For a full breakdown of your bill, please login to My Account at bge.com or call us at 1-800-685-0123.");
                 } else {
-                        var cause = response.meta ? response.meta : response.error;
-                        var ERROR_CODE = cause ? cause.code : "";
-                        var log;
-                        var addressFound;
-                        var servicesDown;
-                        console.log("ERROR_CODE: " + ERROR_CODE);
-                        switch (ERROR_CODE) {
-                            case "FN-ACCT-NOTFOUND":
-                                log = "account not found";
-                                addressFound = "false";
-                                servicesDown = "false";
-                                break;
-                            case "TC-ACCT-CLOSED":
-                                log = "account not found";
-                                addressFound = "false";
-                                servicesDown = "false";
-                                break;
-                            case "BWENGINE-100029":
-                                log = "check balance request failed!";
-                                addressFound = "false";
-                                servicesDown = "true";
-                                conversation.variable("servicesDownMessage", "Turn off the utility chatbot at this time. ");
-                                break;
-                            case "ETIMEDOUT":
-                                log = "check balance request failed!";
-                                addressFound = "false";
-                                servicesDown = "true";
-                                conversation.variable("servicesDownMessage", "Turn off the utility chatbot at this time. ");
-                                break;
-                            default:
-                                log = "getCheckBalance: check balance request failed!";
-                                addressFound = "false";
-                                servicesDown = "true";
-                                conversation.variable("servicesDownMessage", "I'm not able to complete your request right now. Please try again later.");
-                                break;
-                        }
-                        logger.debug('getCheckBalance: ' + log);
-                        conversation.variable("servicesDown", servicesDown);
-                        conversation.variable("addressFound", addressFound);
-                        conversation.transition();
-                        done();            
+                    servicesDown = "false";
+                    addressFound = "false";
+                }
+            } else {
+                var cause = response.meta ? response.meta : (response.error ? response.error : response.code);
+                var ERROR_CODE = cause ? (cause.code ? cause.code : cause) : "";
+                console.log("ERROR_CODE: " + ERROR_CODE);
+                switch (ERROR_CODE) {
+                    case "FN-MULTIPLE-ACCOUNTS":
+                        addressFound = "true";
+                        servicesDown = "false";
+                        conversation.variable("multipleAddressFound", "true");
+                        break;
+                    case "FN-ACCT-NOTFOUND":
+                        addressFound = "false";
+                        servicesDown = "false";
+                        break;
+                    case "TC-ACCT-CLOSED":
+                        addressFound = "false";
+                        servicesDown = "false";
+                        break;
+                    case "BWENGINE-100029":
+                        addressFound = "false";
+                        servicesDown = "true";
+                        conversation.variable("servicesDownMessage", "Turn off the utility chatbot at this time. ");
+                        break;
+                    case "ETIMEDOUT":
+                        addressFound = "false";
+                        servicesDown = "true";
+                        conversation.variable("servicesDownMessage", "Turn off the utility chatbot at this time. ");
+                        break;
+                    default:
+                        addressFound = "false";
+                        servicesDown = "true";
+                        conversation.variable("servicesDownMessage", "I'm not able to complete your request right now. Please try again later.");
+                        break;
                 }
             }
-        }).catch(function(err){
-                    conversation.variable("servicesDown","true");
-                    conversation.variable("servicesDownMessage", "I'm not able to complete your request right now. Please try again later.");
-                    conversation.transition();
-                    done(); 
-                    console.log("error not handled at checkBalance service :"+ err);
+            conversation.variable("servicesDown", servicesDown);
+            conversation.variable("addressFound", addressFound);
+            conversation.transition();
+            done();
+        }).catch(function (err) {
+            conversation.variable("servicesDown", "true");
+            conversation.variable("servicesDownMessage", "I'm not able to complete your request right now. Please try again later.");
+            conversation.transition();
+            done();
+            console.log("error not handled at checkBalance service :" + err);
         });
     }
 
