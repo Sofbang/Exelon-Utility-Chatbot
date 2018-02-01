@@ -62,7 +62,7 @@ function init(config) {
 
     // Following code handles bot for Google
     function handleEcho(req, res, botID) {
-        sessionId = req.body.sessionId;
+        var sessionId = req.body.sessionId;
         console.log('Body received: ' + JSON.stringify(req.body));
         var incomingSpeech = req.body.result.parameters.echoText;
         incomingSpeech = incomingSpeech && incomingSpeech != "" ? incomingSpeech : "hello";
