@@ -51,15 +51,10 @@ module.exports = {
             console.log("account_number: " + AccountNumber);
             console.log("opco: " + opco);
             var pdata = {
-                "outage_issue": outageType
+                "outage_issue": outageType,
+                "account_number": AccountNumber,
+                "phone": PhoneNumber
             };
-
-            if (AccountNumber != undefined && AccountNumber != "${accountNumber.value}") {
-                pdata["account_number"] = AccountNumber;
-            } else {
-                pdata["phone"] = PhoneNumber;
-            }
-
             console.log("pdata lower= " + JSON.stringify(pdata));
             var handler = function (error, response, body) {
                 if (error) {

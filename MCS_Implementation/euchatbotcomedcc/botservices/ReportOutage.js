@@ -40,23 +40,23 @@ module.exports = {
         var mobileSdk = conversation.oracleMobile;
         var reportOutage = ExelonService.reportOutage(mobileSdk, AccountNumber, PhoneNumber, OutageType);
         reportOutage
-        .then(function (response) {
-            console.log(response);
-            if (response.success) {
-                conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
-            }
-            else {
-                logger.debug('reportOutage: report outage failed!');
+            .then(function (response) {
+                console.log(response);
+                if (response.success) {
+                    conversation.variable("outageReportProgress", 'Thank you. Your outage has been reported. You can also find the outage map at: comed.com/map or text STAT to COMED or 26633.');
+                }
+                else {
+                    logger.debug('reportOutage: report outage failed!');
+                    conversation.variable("outageReportProgress", "I'm not able to complete your request right now. Please try again later.");
+                }
+                conversation.transition();
+                done();
+            })
+            .catch(function (e) {
+                console.log("error in catch" + e);
                 conversation.variable("outageReportProgress", "I'm not able to complete your request right now. Please try again later.");
-            }
-            conversation.transition();
-            done();
-        })
-    .catch(function (e) {
-        console.log("error in catch" +e);
-        conversation.variable("outageReportProgress", "I'm not able to complete your request right now. Please try again later.");
-        conversation.transition();
-        done();
-    });
+                conversation.transition();
+                done();
+            });
     }
 };

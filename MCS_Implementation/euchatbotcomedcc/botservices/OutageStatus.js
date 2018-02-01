@@ -56,7 +56,7 @@ module.exports = {
                         filteredUserAccounts.push(userAccounts[parseInt(SelectedMaskedAddress) - 1]);
                     }
                 } else {
-                    filteredUserAccounts = userAccounts.filter(function(userAccount) {
+                    filteredUserAccounts = userAccounts.filter(function (userAccount) {
                         console.log("when selecting masked address from facebook or chatbot")
                         return userAccount.data && (userAccount.data[0].maskedAddress).toLowerCase() == SelectedMaskedAddress.toLowerCase();
                     });
@@ -68,7 +68,7 @@ module.exports = {
                     AccountNumber = selectedAccountNumber;
                     console.log("AccountNumber ::::::::" + AccountNumber);
                     var getOutageStatus = ExelonService.getOutageStatus(mobileSdk, selectedAccountNumber, PhoneNumber, newAccountNumber);
-                    getOutageStatus.then(function(response) {
+                    getOutageStatus.then(function (response) {
                         if (response.success) {
                             conversation.variable("errorInMultipleAddress", "false");
                             console.log("after success in multiple address if condition :" + JSON.stringify(response));
@@ -77,6 +77,7 @@ module.exports = {
                             conversation.variable("setOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
                             conversation.variable("setReportOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
                             conversation.variable("selectedAccountNumber", selectedAccountNumber);
+                            conversation.variable("selectedPhoneNumber", response.data[0].contactHomeNumber);
                             conversation.variable("setETR", response.data[0].ETR);
                             conversation.transition('setVariableValues');
                             done();
@@ -87,6 +88,12 @@ module.exports = {
                             conversation.transition();
                             done();
                         }
+                    }).catch(function (err) {
+                        console.log("err : " + err);
+                        conversation.variable("errorInMultipleAddress", "true");
+                        conversation.variable("noAddressFoundMessage", "I’m sorry, but I am unable to find an account associated with that phone number.\nDo you have another phone number or the account number available?");
+                        conversation.transition();
+                        done();
                     });
                 } else {
                     console.log("in else condition when filteredUserAccounts is not match with the list item");
@@ -126,11 +133,11 @@ module.exports = {
                                             var address = "Address " + count + ". " + res.data[0].maskedAddress;
                                             newMaskedAddress.push(address);
                                             numberOfAddress.push(count);
-                                            console.log("numberOfAddress :"+numberOfAddress);
+                                            console.log("numberOfAddress :" + numberOfAddress);
                                             count++;
                                             console.log("if channel type is alexa/google then address: " + address + " and count is: " + count);
                                         } else {
-                                            console.log("no info found ,getting this info from backend : "+ res);
+                                            console.log("no info found ,getting this info from backend : " + res);
                                         }
                                     }
                                 } else {
@@ -144,7 +151,7 @@ module.exports = {
                                             count++;
                                             console.log("if channel type is webhook then address: " + address + " and count is: " + count);
                                         } else {
-                                            console.log("no info found ,getting this info from backend : "+ res);
+                                            console.log("no info found ,getting this info from backend : " + res);
                                         }
                                     }
                                 }
@@ -154,7 +161,7 @@ module.exports = {
                                 conversation.variable("accountsOptions", newMaskedAddress.toString());
                                 if (clientType && clientType.toLowerCase() == "alexa") {
                                     conversation.variable("multipleAccountMessage", "My records indicate that there are multiple addresses associated with the phone number provided. Please select the correct address. Your choices are :" + numberOfAddress + ". ");
-                                } else if(clientType && clientType.toLowerCase() == "google"){
+                                } else if (clientType && clientType.toLowerCase() == "google") {
                                     conversation.variable("multipleAccountMessage", "My records indicate that there are multiple addresses associated with the phone number provided. Your choices are :" + numberOfAddress + ". Please select the correct address from the following options. ");
                                 } else {
                                     conversation.variable("multipleAccountMessage", "My records indicate that there are multiple addresses associated with the phone number provided. Please select the correct address:");
@@ -162,7 +169,7 @@ module.exports = {
                                 conversation.variable("allResult", JSON.stringify(allResult));
                                 conversation.transition('setVariableValues');
                                 done();
-                            }).catch(function(err) {
+                            }).catch(function (err) {
                                 console.log("err : " + err);
                                 conversation.variable("addressFound", "no");
                                 logger.debug('getOutageStatus: outage status request failed!');
@@ -174,8 +181,20 @@ module.exports = {
                             conversation.variable("numberOfAccount", 'single');
                             logger.debug('getOutageStatus: outage status retrieved!');
                             console.info('getOutageStatus: outage status retrieved!' + JSON.stringify(response));
-                            conversation.variable("user.phoneNumber", PhoneNumber);
-                            conversation.variable("user.accountNumber", AccountNumber);
+                            if (PhoneNumber != undefined && PhoneNumber != "${phoneNumber.value.completeNumber}") {
+                                console.log("when phone number is found and value is :" + PhoneNumber);
+                                conversation.variable("user.phoneNumber", PhoneNumber);
+                            } else {
+                                console.log("when phone number is not found and value is :" + data[0].contactHomeNumber);
+                                conversation.variable("user.phoneNumber", data[0].contactHomeNumber);
+                            }
+                            if (AccountNumber != undefined && AccountNumber != "${accountNumber.value}") {
+                                console.log("when account number is found and value is :" + AccountNumber);
+                                conversation.variable("user.accountNumber", AccountNumber);
+                            } else {
+                                console.log("when account number is not found and value is :" + data[0].accountNumber);
+                                conversation.variable("user.accountNumber", data[0].accountNumber);
+                            }
                             var accountAddressArr = [];
                             console.info('data.maskedAddress' + data[0].maskedAddress);
                             if (data[0].maskedAddress) {
@@ -229,8 +248,8 @@ module.exports = {
                         conversation.transition('setVariableValues');
                         done();
                     }
-                }).catch(function(e) {
-                    console.log('in failure catch: '+e);
+                }).catch(function (e) {
+                    console.log('in failure catch: ' + e);
                     conversation.variable("addressFound", "no");
                     conversation.variable("accountNotFound", "false");
                     conversation.variable("noAddressFoundMessage", "I'm not able to complete your request right now. Please try again later.");
@@ -239,7 +258,7 @@ module.exports = {
                 });
             }
         } catch (e) {
-            console.log("error in last catch : "+e);
+            console.log("error in last catch : " + e);
         }
     }
 };
