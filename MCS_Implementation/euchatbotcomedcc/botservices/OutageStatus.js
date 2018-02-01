@@ -70,8 +70,8 @@ module.exports = {
                     var getOutageStatus = ExelonService.getOutageStatus(mobileSdk, selectedAccountNumber, PhoneNumber, newAccountNumber);
                     getOutageStatus.then(function (response) {
                         if (response.success) {
-                            conversation.variable("errorInMultipleAddress", "false");
                             console.log("after success in multiple address if condition :" + JSON.stringify(response));
+                            conversation.variable("errorInMultipleAddress", "false");
                             conversation.variable("setStatus", response.data[0].status);
                             var outageReported = utils.getMessageForBot(response.data[0].outageReported, response.data[0].ETR);
                             conversation.variable("setOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
@@ -177,8 +177,7 @@ module.exports = {
                                 done();
                             });
                         } else if (data.length == 1) {
-                            conversation.variable("addressFound", "yes");
-                            conversation.variable("numberOfAccount", 'single');
+                            var accountAddressArr = [];
                             logger.debug('getOutageStatus: outage status retrieved!');
                             console.info('getOutageStatus: outage status retrieved!' + JSON.stringify(response));
                             if (PhoneNumber != undefined && PhoneNumber != "${phoneNumber.value.completeNumber}") {
@@ -195,18 +194,17 @@ module.exports = {
                                 console.log("when account number is not found and value is :" + data[0].accountNumber);
                                 conversation.variable("user.accountNumber", data[0].accountNumber);
                             }
-                            var accountAddressArr = [];
                             console.info('data.maskedAddress' + data[0].maskedAddress);
-                            if (data[0].maskedAddress) {
-                                conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
-                                conversation.variable("setStatus", data[0].status);
-                                var outageReported = utils.getMessageForBot(data[0].outageReported, data[0].ETR);
-                                conversation.variable("setOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
-                                conversation.variable("setReportOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
-                                conversation.variable("setETR", data[0].ETR);
-                                conversation.transition('setVariableValues');
-                                done();
-                            }
+                            conversation.variable("addressFound", "yes");
+                            conversation.variable("numberOfAccount", 'single');
+                            conversation.variable("setAddress", 'My records indicate that the address associated with this account begins with ' + data[0].maskedAddress);
+                            conversation.variable("setStatus", data[0].status);
+                            var outageReported = utils.getMessageForBot(data[0].outageReported, data[0].ETR);
+                            conversation.variable("setOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
+                            conversation.variable("setReportOutageReported", outageReported + " You can text STAT to 26633 or COMED to get your latest status.");
+                            conversation.variable("setETR", data[0].ETR);
+                            conversation.transition('setVariableValues');
+                            done();
                         } else {
                             conversation.variable("addressFound", "yes");
                             conversation.variable("moreThanThreeAccount", "true");

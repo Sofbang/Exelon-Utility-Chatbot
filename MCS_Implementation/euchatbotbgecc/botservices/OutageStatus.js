@@ -209,7 +209,6 @@ module.exports = {
                                 conversation.variable("maskedAddressFound", 'false');
                                 conversation.transition();
                                 done();
-
                             }
                         } else {
                             conversation.variable("addressFound", "yes");
