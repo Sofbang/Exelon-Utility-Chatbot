@@ -4,6 +4,11 @@ var Promise = require('bluebird');
 var opco = 'COMED';
 var request = require("request");
 require("../node_modules/request-debug")(request);
+const mcsConfig = require('../config').get();
+var BASE_URL = mcsConfig.baseUrl;
+var AUTH_TOKEN = mcsConfig.authToken;
+var BACKEND_ID = mcsConfig.backendId;
+var USER_AGENT = mcsConfig.userAgent;
 
 module.exports = {
     getOutageStatus: function getOutageStatus(mobileSdk, AccountNumber, PhoneNumber, newAccountNumber) {
@@ -30,15 +35,15 @@ module.exports = {
             };
 
             request({
-                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon_v2/' + opco + '/outage/query',
+                url: BASE_URL + '/mobile/custom/anon_v2/' + opco + '/outage/query',
                 method: "POST",
                 json: true,
                 timeout: 200000,
                 headers: {
-                    "Authorization": "Basic YW5vbl90c3Q6NkclUXViQGxaQm1vZ09xJFc4Qlg=",
+                    "Authorization": "Basic " + AUTH_TOKEN,
                     "Content-Type": "application/json",
-                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667",
-                    "User-Agent": "ChatBot/1.0"
+                    "oracle-mobile-backend-id": BACKEND_ID,
+                    "User-Agent": USER_AGENT
                 },
                 body: pdata
             }, handler);
@@ -67,15 +72,15 @@ module.exports = {
             };
 
             request({
-                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anon_v2/' + opco + '/outage',
+                url: BASE_URL + '/mobile/custom/anon_v2/' + opco + '/outage',
                 method: "POST",
                 json: true,
                 timeout: 200000,
                 headers: {
-                    "Authorization": "Basic YW5vbl90c3Q6NkclUXViQGxaQm1vZ09xJFc4Qlg=",
+                    "Authorization": "Basic " + AUTH_TOKEN,
                     "Content-Type": "application/json",
-                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667",
-                    "User-Agent": "ChatBot/1.0"
+                    "oracle-mobile-backend-id": BACKEND_ID,
+                    "User-Agent": USER_AGENT
                 },
                 body: pdata
             }, handler);
@@ -103,15 +108,15 @@ module.exports = {
             };
 
             request({
-                url: 'https://exeloneumobileapptest-a453576.mobileenv.us2.oraclecloud.com/mobile/custom/anonbots/' + opco + '/bill/lookup',
+                url: BASE_URL + '/mobile/custom/anonbots/' + opco + '/bill/lookup',
                 method: "POST",
                 json: true,
                 timeout: 200000,
                 headers: {
-                    "Authorization": "Basic YW5vbl90c3Q6NkclUXViQGxaQm1vZ09xJFc4Qlg=",
+                    "Authorization": "Basic " + AUTH_TOKEN,
                     "Content-Type": "application/json",
-                    "oracle-mobile-backend-id": "7ebd1165-aae4-452f-8f7b-6c6cbdd93667",
-                    "User-Agent": "ChatBot/1.0"
+                    "oracle-mobile-backend-id": BACKEND_ID,
+                    "User-Agent": USER_AGENT
                 },
                 body: pdata
             }, handler);

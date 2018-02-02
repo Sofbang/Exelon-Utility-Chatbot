@@ -1,6 +1,6 @@
 {
   "name": "euchatbotbgecc",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "Custom components used by Exelon BGE Chatbot",
   "main": "euchatbotbgecc.js",
   "dependencies": {
