@@ -75,7 +75,7 @@ BotUtil.prototype.trimIfHasNumber = function (message) {
         if (hasNumber.test(message)) {
             var re = /(\d)\s+(?=\d)/g;
             console.log("inside has number" + message);
-            message = message.replace(/oh/g, '0').replace(re, '$1');
+            message = message.replace(/to/g, '2').replace(/oh/g, '0').replace(re, '$1');
             console.log("inside has number after regex" + message);
         }
     } catch (e) {
