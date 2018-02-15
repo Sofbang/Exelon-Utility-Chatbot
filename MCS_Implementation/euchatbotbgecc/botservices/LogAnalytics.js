@@ -5,19 +5,22 @@ module.exports = {
         return {
             "name": "LogAnalytics",
             "properties": {
+				  "logAnalytics": { "type": "string", "required": false }
             },
-            "supportedActions": [
-                "setVariableValues"
-            ]
+            "supportedActions": []
         };
     },
 
     invoke: function invoke(conversation, done) {
+		var logAnalytics=  conversation.properties().logAnalytics;
+		console.log("logAnalytics :" + logAnalytics);
+		 conversation.transition();
         var isWebhook = conversation._request.message.channelConversation.type == "webhook";
         var clientType = isWebhook ? conversation._request.message.payload.profile.clientType : "facebook";
         var properties = { "ChannelName": clientType.toLowerCase() };
         this.postEvent(conversation.oracleMobile.analytics, "ChannelActivity", properties)
             .then(function (result) {
+			    console.log("LogAnalytics: success posting analytics: " + JSON.stringify(result));
                 done();
             }, function (error) {
                 console.warn('LogAnalytics: error posting analytics.', error.statusCode, error.error);

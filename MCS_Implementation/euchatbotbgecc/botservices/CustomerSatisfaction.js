@@ -27,19 +27,19 @@ module.exports = {
         console.log("PhoneNumber :" + PhoneNumber + "+ AccountNumber :" + AccountNumber + "SatisfactionRate :" + SatisfactionRate);
         conversation.transition();
 
-        //var isWebhook = conversation._request.message.channelConversation.type == "webhook";
-        //var clientType = isWebhook ? conversation._request.message.payload.profile.clientType : "facebook";
+        var isWebhook = conversation._request.message.channelConversation.type == "webhook";
+        var clientType = isWebhook ? conversation._request.message.payload.profile.clientType : "facebook";
 
-        //var properties = {
-        //    "SatisfactionRate": SatisfactionRate.toString(),
-        //    "ChannelName": clientType.toLowerCase()
-        //};
-        //Analytics.postEvent(conversation.oracleMobile.analytics, "CustomerSurvey", properties)
-        //    .then(function (result) {
+        var properties = {
+           "Satisfaction": SatisfactionRate.toString()
+        };
+        Analytics.postEvent(conversation.oracleMobile.analytics, "CustomerSurvey", properties)
+           .then(function (result) {
+			   console.log("LogAnalytics: success posting analytics: " + JSON.stringify(result));
                 done();
-            //}, function (error) {
-            //    console.warn('LogAnalytics: error posting analytics.', error.statusCode, error.error);
-            //    done();
-            //}); 
+            }, function (error) {
+               console.warn('LogAnalytics: error posting analytics.', error.statusCode, error.error);
+               done();
+            }); 
     }
 }
