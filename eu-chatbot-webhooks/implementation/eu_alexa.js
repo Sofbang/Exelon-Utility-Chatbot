@@ -114,7 +114,7 @@ function getAlexaApp(appConfig, opco, webhookUtil, PubSub, logger) {
                 logger.info('Received callback message from webhook channel');
                 var resp = data;
                 console.log("test" + resp.messagePayload.text.includes("address"));
-                if (resp.messagePayload.text.includes("address")) {
+                if (resp.messagePayload.text.includes("address")|| resp.messagePayload.text.includes("text")) {
                     var re = /([0-9])/g;
                     resp.messagePayload.text = resp.messagePayload.text.replace(re, '$& ');
                 }
